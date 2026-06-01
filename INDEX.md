@@ -10,6 +10,7 @@
 - state.md — 현재 상태 (작게)
 - pitfalls.md — 재시도 금지 함정 (작업 전 필독)
 - roadmap.md — 백로그 / 우선순위
+- plan.md — 구현 청사진 (아키텍처 + 단계별 계획)
 - logs/YYYY-MM/*.md — 작업 로그 (append-only, 1작업단위 1건)
 - decisions/NNNN-*.md — ADR (append-only)
 
