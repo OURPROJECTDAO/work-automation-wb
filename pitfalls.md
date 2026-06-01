@@ -30,4 +30,9 @@
 - 대시보드 차트: matplotlib는 한글 폰트 미설치 시 □□□. Plotly/Altair(브라우저 폰트) 권장.
 - 정렬: VBA xlPinYin vs Python 코드포인트 정렬 차이 가능 → 골든 파일 대조로 확인.
 
-_갱신: 2026-06-01 (한글 URL 인코딩 함정 + PAT 범위 갱신)
+## 마켓플레이스 입력 파일 (.xls)
+- 스마트스토어/쿠팡/G마켓 등이 내보내는 .xls 파일은 실제로 HTML 테이블. xlrd나 openpyxl로 열리지 않음.
+- 읽기: raw.decode('utf-8').replace('\ufeff','').replace('<feff>','') 후 pd.read_html(io.StringIO(html), header=0)[0].
+- 송장번호는 숫자로 파싱될 수 있음 → astype(str).str.replace('.0$','') 처리 필요.
+
+_갱신: 2026-06-01 (마켓플레이스 HTML-xls 함정 추가)
