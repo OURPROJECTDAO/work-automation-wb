@@ -34,5 +34,23 @@
 - 스마트스토어/쿠팡/G마켓 등이 내보내는 .xls 파일은 실제로 HTML 테이블. xlrd나 openpyxl로 열리지 않음.
 - 읽기: raw.decode('utf-8').replace('\ufeff','').replace('<feff>','') 후 pd.read_html(io.StringIO(html), header=0)[0].
 - 송장번호는 숫자로 파싱될 수 있음 → astype(str).str.replace('.0$','') 처리 필요.
+- dosan_list.csv가 크면(10551행) curl 명령줄이 "Argument list too long" 오류 → Python urllib으로 업로드.
 
-_갱신: 2026-06-01 (마켓플레이스 HTML-xls 함정 추가)
+## VBA FasterCopyRows 버그 (재현 필수)
+- ListSheet.Range("B1:B" & LastRowList) — B1(헤더='주소')부터 읽음.
+- '주소' 자체가 키워드로 포함 → '(상세주소 없음)', '김승주소아과' 등 매칭됨.
+- 도서산간아님 예외 로직 없음 (VBA에 미구현, 해당 시트는 데이터만 있고 미사용).
+- Python 재현: ds_kw = ['주소'] + [normalize_kr(k) for k in ds['주소'].tolist() if k.strip()]
+
+## 상품명 줄바꿈 인코딩
+- 골든 xlsm: ,_x000D_\n (OOXML CRLF 인코딩) — pd.read_excel로 읽으면 리터럴 문자열.
+- HTML-xls 원본: ', ' (컴마+공백) — 같은 데이터, 표현 형식만 다름.
+- 테스트 비교 시 골든 정규화 필요: df['상품명'].str.replace(',_x000D_\n', ', ', regex=False)
+
+## 합포확인 정렬
+- VBA SortColumnBDescending: xlPinYin 정렬 (C열=주소 내림차순).
+- Python sort_values('주소', ascending=False)와 그룹 내 행 순서 차이 발생.
+- 테스트 시 check_like=True 단독으로는 부족 (index 기준 비교됨).
+  → 송장번호 기준 정렬 후 assert_frame_equal 사용.
+
+_갱신: 2026-06-01 (Phase 1 완료 — VBA 버그·OOXML·합포확인 정렬 항목 추가)_
