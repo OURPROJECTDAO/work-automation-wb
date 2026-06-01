@@ -3,18 +3,20 @@
 
 ## 운영 중
 - KB 기억 시스템: GitHub OURPROJECTDAO/work-automation-wb (main, 고정 파일명).
+- 코드 저장소: GitHub OURPROJECTDAO/work-automation-app (main). PAT 양쪽 허용.
 - 엑셀 작업물 저장: Google Drive 업무자동화-KB/templates·inputs·outputs.
-  - 정리 완료: templates·inputs·outputs만 남기고 구 KB 폴더 삭제(사용자 수동). 2026-06-01.
   - templates/ 첫 파일: 오픈마켓합포도서산간확인V7(작업전).xlsm.
 
 ## 진행 중
-- 자동화 시스템 설계 확정(decisions/0002). 구현 착수 전.
+- Phase 0 완료: 코드 repo 스캐폴딩(core·app·tests·reference 구조). 2026-06-01.
 
 ## 막힌 것 / 이슈
 - 없음.
 
 ## 다음 한 수
-- 새 코드 repo(work-automation-app) 생성 + PAT 권한 2개 repo 확장.
-- 이어서 템플릿 1종 Python 재구현(골든 파일 대조).
+- Phase 1: 첫 템플릿 Python 재구현.
+  1. reference/ csv 추출 (도서산간/필터링/미배송 xlsm에서 분리).
+  2. openmarket_merge.py Step 클래스 구현 (8단계).
+  3. 골든 파일(VBA 출력 결과물) 배치 → 테스트 통과.
 
-_갱신: 2026-06-01_
+_갱신: 2026-06-01 (Phase 0 완료)_
