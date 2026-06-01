@@ -2,18 +2,19 @@
 > 상세 = logs/ · 백로그 = roadmap.md · 함정 = pitfalls.md · 결정 = decisions/
 
 ## 운영 중
-- KB 기억 시스템: GitHub OURPROJECTDAO/work-automation-wb (main, 고정 파일명). 방금 Drive에서 이관.
-- 엑셀 작업물 저장: Google Drive 업무자동화-KB/templates·inputs·outputs (유지).
-- 실제 업무 파이프라인(엑셀 템플릿 10종 + VBA 정제): 아직 미등록. 다음 단계에서 1종씩.
+- KB 기억 시스템: GitHub OURPROJECTDAO/work-automation-wb (main, 고정 파일명).
+- 엑셀 작업물 저장: Google Drive 업무자동화-KB/templates·inputs·outputs.
+  - 정리 완료: templates·inputs·outputs만 남기고 구 KB 폴더 삭제(사용자 수동). 2026-06-01.
+  - templates/ 첫 파일: 오픈마켓합포도서산간확인V7(작업전).xlsm.
 
 ## 진행 중
-- KB 저장소 GitHub 이관 완료 + in-place 갱신(GET sha→PUT) 검증 완료.
+- 자동화 시스템 설계 확정(decisions/0002). 구현 착수 전.
 
 ## 막힌 것 / 이슈
 - 없음.
 
 ## 다음 한 수
-- 템플릿 1종을 Drive templates/ 에 올려 라운드트립 실측: VBA 추출 / 정제→결과 엑셀 / 왕복.
-- 그 결과로 "VBA 유지 vs Python 이관" 노선 확정.
+- 새 코드 repo(work-automation-app) 생성 + PAT 권한 2개 repo 확장.
+- 이어서 템플릿 1종 Python 재구현(골든 파일 대조).
 
-_갱신: 2026-05-31 (in-place 갱신 검증)_
+_갱신: 2026-06-01_
