@@ -1,27 +1,22 @@
 # 로드맵 / 백로그
 
 ## 완료
-- KB 기억 시스템 구축: Drive 테스트 → 캐치업 지연 발견 → GitHub 이관. 2026-05-31. (decisions/0001)
-- 자동화 시스템 아키텍처 확정: Streamlit + Python 코어 + Community Cloud(무료), 코드 repo 분리. 2026-06-01. (decisions/0002)
+- KB 기억 시스템 구축. 2026-05-31. (decisions/0001)
+- 아키텍처 확정: Streamlit + Python + Community Cloud. 2026-06-01. (decisions/0002)
 - **Phase 1 완료**: 오픈마켓합포도서산간확인V7 Python 재구현 + pytest PASSED. 2026-06-01.
-  - 참조 데이터(도서산간/필터링/미배송) csv 추출 → reference/
-  - openmarket_merge.py 8단계 구현 (VBA 버그 재현 포함)
-  - 합포확인 그룹별 배경색 적용 (ColorIndex 36↔35)
-  - 골든 대조 테스트 5시트 전부 PASS
+- **Phase 2 코드 완료**: Streamlit 앱 3페이지 작성. 2026-06-01.
 
 ## 다음 (우선순위)
-1. ~~새 코드 repo(work-automation-app) 생성 + PAT 권한 2개 repo로 확장.~~ ✅
-2. ~~템플릿 1종(오픈마켓합포도서산간확인V7) 워크플로우를 Python으로 재구현.~~ ✅
-3. **Phase 2 — Streamlit 앱 + Community Cloud 배포.**
-   - 파일처리 페이지: 입력 파일 업로드 → 워크플로우 선택 → 실행 → 결과 다운로드.
-   - 기준 데이터 관리 페이지: 도서산간/필터링/미배송 리스트를 웹에서 직접 수정
-     (Excel 업로드로 교체 또는 행 추가/삭제).
-   - Community Cloud 배포 + 뷰어 허용명단 설정.
-4. 나머지 템플릿 1종씩 이관.
-5. 대시보드 페이지(매출/현황 등 데이터 뷰).
+1. ~~Phase 1~~ ✅
+2. ~~Phase 2 코드~~ ✅ → **Community Cloud 배포** (사용자 직접 설정)
+   - streamlit.io/cloud → work-automation-app 연결, Main file: app/streamlit_app.py
+   - Secrets: GITHUB_PAT 입력
+3. 배포 후 실사용 검증 + 필요 시 UI 개선.
+4. 나머지 템플릿 1종씩 이관 (Phase 3).
+5. 대시보드 페이지 (Phase 4).
 
 ## 나중
-- 입력 자동 수집(스마트스토어/쿠팡/ESM API or 크롤링).
-- 동료 접근(뷰어 허용명단 확대) / 리소스·통제 필요시 Railway 이전.
+- 입력 자동 수집(API/크롤링).
+- 동료 접근 확대 / Railway 이전.
 
-_갱신: 2026-06-01 (Phase 2에 기준 데이터 관리 UI 추가)_
+_갱신: 2026-06-01 (Phase 2 코드 완료, 배포 대기)_
