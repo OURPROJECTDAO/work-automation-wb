@@ -9,17 +9,19 @@
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
-- Phase 1: openmarket_merge.py 8단계 구현 + pytest PASSED + 합포확인 색상. 2026-06-01.
+- Phase 1: openmarket_merge.py 8단계 구현 + pytest PASSED. 2026-06-01.
 - Phase 2: Streamlit 앱 3페이지 + Community Cloud 배포. 2026-06-01.
-- Phase 3 (진행 중): 온누리양식_발주서 1종 완료. 2026-06-01.
-  - core/workflows/onnuri_order.py 구현 + 골든 15/15 통과.
-  - reference/sku_list.csv 추가 (109 SKU).
-  - app/pages/1_파일처리.py import 추가.
+- Phase 3 (진행 중): 2종 완료.
+  - 온누리양식_발주서: onnuri_order.py + 골든 15/15. 2026-06-01.
+  - 발주서출력업무: logistics_order.py + UI 전체. 2026-06-02.
+    Phase1(GATE A) + Phase2(GATE B) + 연동데이터관리 + 기준데이터관리 탭.
 
 ## 막힌 것 / 이슈
-- 없음.
+- product_master.csv 최초 업로드 필요 (연동데이터관리에서 사용자 수동).
+- pytest 골든 대조 테스트 미작성.
 
 ## 다음 한 수
-- Phase 3 계속: 나머지 템플릿 분석 및 이관.
+- 실 데이터로 Phase1/2 검증 → 버그 픽스.
+- Phase 3 계속: 다음 템플릿.
 
-_갱신: 2026-06-01 (Phase 3 온누리양식_발주서 워크플로우 추가)_
+_갱신: 2026-06-02 (Phase3 발주서출력업무 구현)_
