@@ -10,7 +10,7 @@
 ## 워크플로우 인덱스 (이관 완료 = 운영 중)
 | 워크플로우 | Phase | 상태 | 상세 |
 |---|---|---|---|
-| openmarket-merge (오픈마켓합포도서산간확인V7) | 1 | 운영 중 · 골든 5시트 PASS | workflows/openmarket-merge.md |
+| openmarket-merge (오픈마켓합포도서산간확인V7) | 1 | 운영 중 · 골든 5시트 PASS · 송장 단독파일(★★송장) 복원 | workflows/openmarket-merge.md |
 | onnuri-order (온누리양식_발주서) | 3 | 운영 중 · 골든 15/15 | workflows/onnuri-order.md |
 | logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
 
@@ -24,7 +24,7 @@
 - 없음.
 
 ## 다음 한 수
-- Phase 3 계속: 다음 이관 템플릿 사용자 안내 필요.
+- Phase 3 계속: 다음 이관 템플릿 — 사용자 실물 파일(.xlsm+입력+골든) 제공 대기.
 - Phase 4: 대시보드 페이지.
 
-_갱신: 2026-06-02 (KB 구조 재편 — 워크플로우 인덱스화. decisions/0004)_
+_갱신: 2026-06-02 (openmarket 송장 단독저장 복원 + UI 다운로드 영속화 반영)_
