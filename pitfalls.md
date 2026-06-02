@@ -1,15 +1,19 @@
-# 알려진 함정 / 주의 (작업 전 필독)
+# 알려진 함정 / 주의 (작업 전 필독 — 전역/공통)
+
+> 워크플로우 **전용** 함정은 여기 없다. 해당 워크플로우의 `workflows/<name>.md`를 읽을 것.
+> (openmarket-merge · onnuri-order · logistics-order)
 
 ## GitHub contents API (KB 저장소)
 - 기존 파일 덮어쓰기: 먼저 GET으로 현재 sha 받아 PUT에 포함. 안 하면 409/422. 신규 파일은 sha 불필요.
 - 읽기는 Accept: application/vnd.github.raw 헤더 → base64 아닌 raw 텍스트 직행(UTF-8). 기본 JSON 응답의 content는 base64+줄바꿈이라 디코딩 필요.
 - PUT의 content는 base64 인코딩(줄바꿈 없이).
 - 한글 파일명 API 경로: urllib.request는 한글 URL을 ASCII로 못 보냄. urllib.parse.quote(segment)로 퍼센트 인코딩 필수 (app/pages/1_파일처리.py 등).
-
+- 대용량 파일 업로드(예: 10551행 csv): curl 명령줄이 "Argument list too long" → Python urllib으로 업로드.
 - PAT은 비밀: repo·KB·로그에 절대 안 적음. 프로젝트 지식 파일에만. 만료 시 그 파일만 갱신. fine-grained(work-automation-wb + work-automation-app, contents 읽기·쓰기).
 
 ## 인코딩
 - 한글은 UTF-8. base64 디코딩 시 Latin-1 금지(모지바케). raw 헤더로 받으면 디코딩 자체가 불필요.
+- 향후 커스텀 Worker 만들 때 atob() UTF-8 미디코딩 버그 주의.
 
 ## Google Drive (엑셀 작업물 전용 — KB 아님)
 - 커넥터 update/delete 없음, 생성+읽기만. 엑셀은 템플릿=읽기전용·결과=날짜별 새 파일이라 무방. 삭제는 사용자 수동.
@@ -17,71 +21,30 @@
 - 파일 생성 시 contentMimeType + disableConversionToGoogleType=true.
 
 ## 보안 (업무 도메인)
-- KB에 PII·비밀 금지. 부수효과 동작은 정확한 payload 보여주고 승인.
+- KB에 PII·비밀 금지(고객정보·자격증명·계좌·주문자정보). 식별자(주문번호/참조ID)만.
+- 부수효과·되돌릴 수 없는 동작(발송·삭제·결제·권한·외부쓰기)은 정확한 payload(무엇을 누구에게) 보여주고 승인.
 
 ## 작업 규율 (투자시스템에서 배움)
-- 검증 단계화: 변경 전 실물 재확인 → 변경 후 대조. 최고 ROI.
+- 검증 단계화: 변경 전 실물(템플릿/VBA/데이터) 재확인 → 변경 후 대조. KB는 길잡이지 진실의 원천 아님. 최고 ROI.
 - 1작업단위 1로그. 막힌 것·미완·실패도 로그 "다음/상태"에 정직하게(작업>로그 지연이 제일 위험).
-- 향후 커스텀 Worker 만들 때 atob() UTF-8 미디코딩 버그 주의.
 
-## 한국어 처리 (엑셀/앱)
+## 한국어 처리 (엑셀/앱 — 전 워크플로우 공통)
 - 주소·상품명 매칭 전 NFC 정규화 필수(unicodedata.normalize("NFC", s)). 출처 다른 데이터가 NFD(자모 분리)면 같은 글자라도 부분일치 매칭 실패 → 도서산간/미배송 매칭 치명적.
 - reference csv는 UTF-8-sig(BOM)로 저장. Excel에서 직접 열어도 안 깨짐.
 - 대시보드 차트: matplotlib는 한글 폰트 미설치 시 □□□. Plotly/Altair(브라우저 폰트) 권장.
 - 정렬: VBA xlPinYin vs Python 코드포인트 정렬 차이 가능 → 골든 파일 대조로 확인.
 
-## 마켓플레이스 입력 파일 (.xls)
+## 마켓플레이스 입력 파일 (.xls — 데이터 포맷, 여러 워크플로우 공통)
 - 스마트스토어/쿠팡/G마켓 등이 내보내는 .xls 파일은 실제로 HTML 테이블. xlrd나 openpyxl로 열리지 않음.
 - 읽기: raw.decode('utf-8').replace('\ufeff','').replace('<feff>','') 후 pd.read_html(io.StringIO(html), header=0)[0].
 - 송장번호는 숫자로 파싱될 수 있음 → astype(str).str.replace('.0$','') 처리 필요.
-- dosan_list.csv가 크면(10551행) curl 명령줄이 "Argument list too long" 오류 → Python urllib으로 업로드.
 
-## VBA FasterCopyRows 버그 (재현 필수)
-- ListSheet.Range("B1:B" & LastRowList) — B1(헤더='주소')부터 읽음.
-- '주소' 자체가 키워드로 포함 → '(상세주소 없음)', '김승주소아과' 등 매칭됨.
-- 도서산간아님 예외 로직 없음 (VBA에 미구현, 해당 시트는 데이터만 있고 미사용).
-- Python 재현: ds_kw = ['주소'] + [normalize_kr(k) for k in ds['주소'].tolist() if k.strip()]
-
-## 상품명 줄바꿈 인코딩
-- 골든 xlsm: ,_x000D_\n (OOXML CRLF 인코딩) — pd.read_excel로 읽으면 리터럴 문자열.
-- HTML-xls 원본: ', ' (컴마+공백) — 같은 데이터, 표현 형식만 다름.
-- 테스트 비교 시 골든 정규화 필요: df['상품명'].str.replace(',_x000D_\n', ', ', regex=False)
-
-## 합포확인 정렬
-- VBA SortColumnBDescending: xlPinYin 정렬 (C열=주소 내림차순).
-- Python sort_values('주소', ascending=False)와 그룹 내 행 순서 차이 발생.
-- 테스트 시 check_like=True 단독으로는 부족 (index 기준 비교됨).
-  → 송장번호 기준 정렬 후 assert_frame_equal 사용.
-
-## 온누리양식_발주서 (onnuri_order)
-- openpyxl read_only로 읽은 셀 값은 숫자도 str로 읽힐 수 있음 → int() 명시 변환 필수.
-- SKU 테이블에 동일 관리코드 중복 존재 → drop_duplicates('관리코드', keep='first') 필수.
-- 수식: 합계 = 공급가 × 수량 + ceil(수량/최대합포수량) × 배송비
-  - 최대합포수량 = SKU!F열(배송비 부과 규칙). 코카콜라500=1, 일반음료=2~3.
-  - 배송비는 합포수량 초과 시 1배송당 1회 추가 (ceil로 반올림).
-- 출력: 원본 xlsx를 shutil.copy2 후 합계 컬럼만 openpyxl로 덮어쓰기 → 우편번호 등 원본 서식 보존.
-- VBA 로직: 천년경영업로드 시트 F열(총액)을 발주서 G열에 복사 후 SaveCopyAs (확인).
-  Python은 이 계산을 직접 수행하므로 천년경영업로드 시트 재현 불필요.
-
-
-## 발주서출력업무 (logistics_order)
-- HTML 매출통계 노이즈: .xls 안에 서브테이블(품절 사전경고)이 있어 pd.read_html[0] 앞에 'col0만 값, 나머지 NaN'인 노이즈 행이 섞임. → 'erp관리코드' 헤더 행을 찾아 그 위를 전부 skip.
-- 셀나누기(합포 1건 묶음): HTML rowspan 병합셀 → 두 번째 행의 총수량·정산금액이 NaN. 감지 후 위 행 값 ÷2를 두 행에 분배, 판매처그룹·선결제비·평균단가는 복사. (예: 코카콜라355+제로355 묶음 → 각 1+1)
-- 발주자료 아카이브 = 원본 8열, 중복제거 전(개별주문 보존). 완성 phase1(10열·구분/규격·중복제거후) 아님. run_phase1이 archive_df 별도 반환. 헤더는 '어드민 옵션'(띄어쓰기).
-- 상품관리(product_master) 컬럼 위치참조: iloc[:,4]=관리코드, iloc[:,14]=박스재고.
-- 낱개처리목록: 낱개코드→원코드 매핑. 원코드로 상품관리 재고 조회. 원코드가 상품관리에 없으면 GATE B(사용자가 낱개목록에 추가).
-- 수치 컬럼 float 명시: _필요수량 등은 .astype(float). 안 하면 낱개 배수곱(예 10×0.125=1.25) 대입 시 'Invalid value for dtype int64' 에러.
-- 재고 = 박스재고(상품관리) − 필요수량(낱개는 총수량×배수). 음수 = 품절목록. round 후 int.
-- 출력 디자인(프린트용): 구분색(선물세트 FFF3CD/식품 E2EFF7/음료 E3F1E5), 품절 빨강(C00000)+분홍(FDE7E7), 낱개 총수량 파랑(0B5394), 규격 가운데+병합, erp(C열) 숨김, 날짜 한글포맷.
-
-## Streamlit 멀티페이지 / 네비게이션
+## Streamlit 멀티페이지 / 네비게이션 (전역 인프라)
 - pages/ 하위 디렉토리는 자동으로 섹션 인식 안 됨. st.navigation() 명시 필수.
-- 새 워크플로우 기준데이터 서브페이지 추가 시: ① pages/2_기준데이터관리/ 에 파일 생성, ② app/streamlit_app.py 의 기준데이터관리 섹션에 st.Page() 한 줄 추가. 두 번째를 빠뜨리면 사이드바에 안 보임.
 - **이름 있는 섹션 페이지는 반드시 subdirectory에**: st.navigation()의 named section(비어있지 않은 key)에 등록할 페이지는 pages/하위디렉토리/ 안에 두어야 표시됨. pages/ root에 직접 두면 안 보임. (headerless 섹션 ""·" "은 root 파일 OK)
   - 새 섹션 추가 시: ① pages/<섹션명>/ 디렉토리 생성, ② 파일 생성, ③ streamlit_app.py에 _X = _P/"<섹션명>" 변수 추가 후 st.Page() 등록.
   - sys.path: subdirectory 파일은 parent 4번 (root pages 파일은 3번).
 - 섹션 헤더 없는 페이지: dict 키를 "" 또는 " "(공백)으로 설정. Python dict 중복 키 불가라 두 번째 무헤더 섹션은 " "(공백 1개) 사용.
-
 - **import된 하위 모듈 변경은 리부트 필요**: core/workflows/*.py 같은 import된 모듈을 수정·커밋하면, Streamlit이 페이지 스크립트는 새로 읽지만 sys.modules에 캐시된 모듈은 옛 버전 유지. 증상: 함수 시그니처 불일치(예: "not enough values to unpack expected 4 got 3"). 해결: Manage app → ⋮ → Reboot app으로 프로세스 재시작. 페이지 파일(.py in pages/) 수정은 자동 반영되지만 import 모듈은 아님.
 
-_갱신: 2026-06-02 (모듈 캐시 리부트 함정 추가)_
+_갱신: 2026-06-02 (전역/공통만 남기고 워크플로우 전용 함정은 workflows/로 분리 — decisions/0004)_
