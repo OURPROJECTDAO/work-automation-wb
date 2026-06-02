@@ -67,6 +67,9 @@
 ## Streamlit 멀티페이지 / 네비게이션
 - pages/ 하위 디렉토리는 자동으로 섹션 인식 안 됨. st.navigation() 명시 필수.
 - 새 워크플로우 기준데이터 서브페이지 추가 시: ① pages/2_기준데이터관리/ 에 파일 생성, ② app/streamlit_app.py 의 기준데이터관리 섹션에 st.Page() 한 줄 추가. 두 번째를 빠뜨리면 사이드바에 안 보임.
+- **이름 있는 섹션 페이지는 반드시 subdirectory에**: st.navigation()의 named section(비어있지 않은 key)에 등록할 페이지는 pages/하위디렉토리/ 안에 두어야 표시됨. pages/ root에 직접 두면 안 보임. (headerless 섹션 ""·" "은 root 파일 OK)
+  - 새 섹션 추가 시: ① pages/<섹션명>/ 디렉토리 생성, ② 파일 생성, ③ streamlit_app.py에 _X = _P/"<섹션명>" 변수 추가 후 st.Page() 등록.
+  - sys.path: subdirectory 파일은 parent 4번 (root pages 파일은 3번).
 - 섹션 헤더 없는 페이지: dict 키를 "" 또는 " "(공백)으로 설정. Python dict 중복 키 불가라 두 번째 무헤더 섹션은 " "(공백 1개) 사용.
 
 _갱신: 2026-06-01 (Streamlit 네비게이션 함정 추가)_
