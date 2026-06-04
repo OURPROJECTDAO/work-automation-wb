@@ -1,7 +1,7 @@
 # 알려진 함정 / 주의 (작업 전 필독 — 전역/공통)
 
 > 워크플로우 **전용** 함정은 여기 없다. 해당 워크플로우의 `workflows/<name>.md`를 읽을 것.
-> (openmarket-merge · onnuri-order · logistics-order)
+> (openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload)
 
 ## GitHub contents API (KB 저장소)
 - 기존 파일 덮어쓰기: 먼저 GET으로 현재 sha 받아 PUT에 포함. 안 하면 409/422. 신규 파일은 sha 불필요.
@@ -40,6 +40,13 @@
 - 읽기: raw.decode('utf-8').replace('\ufeff','').replace('<feff>','') 후 pd.read_html(io.StringIO(html), header=0)[0].
 - 송장번호는 숫자로 파싱될 수 있음 → astype(str).str.replace('.0$','') 처리 필요.
 
+## 암호 걸린 xlsx 입력 (스마트스토어 등)
+- 일부 마켓 내보내기 xlsx는 열기 암호가 걸림(예: 스마트스토어 스스주문, 암호 1323). openpyxl이 못 엶.
+- 복호화: msoffcrypto-tool. `off=msoffcrypto.OfficeFile(io.BytesIO(b)); off.load_key(password=pw); off.decrypt(buf)` → openpyxl.load_workbook(buf).
+- robust 패턴: `off.is_encrypted()`로 분기 — 평문 업로드면 그대로 열어 사용자가 미리 푼 파일도 허용.
+- requirements에 `msoffcrypto-tool` 추가 필수(Streamlit Cloud). (cheonnyeon-upload 사례)
+- 헤더가 1행이 아닐 수 있음: 안내문 행(r1) 다음 r2가 헤더, r3+ 데이터 (스스주문). read_only 차원 오인 가능 → 비 read_only로 calculate_dimension 확인.
+
 ## Streamlit 멀티페이지 / 네비게이션 (전역 인프라)
 - pages/ 하위 디렉토리는 자동으로 섹션 인식 안 됨. st.navigation() 명시 필수.
 - **이름 있는 섹션 페이지는 반드시 subdirectory에**: st.navigation()의 named section(비어있지 않은 key)에 등록할 페이지는 pages/하위디렉토리/ 안에 두어야 표시됨. pages/ root에 직접 두면 안 보임. (headerless 섹션 ""·" "은 root 파일 OK)
@@ -50,4 +57,4 @@
 
 - **download_button 클릭 = rerun → 실행 블록 안 위젯 소멸**: `if st.button("실행"):` 블록 안에서 결과·다운로드 버튼을 그리면, 다운로드 버튼 하나를 누르는 순간 rerun되어 실행버튼이 False → 블록 전체가 사라짐(여러 산출물 중 하나만 받고 끝남). 해결: 처리 결과를 st.session_state에 저장하고 download_button은 실행 블록 **밖**에서 session_state 기반으로 렌더(버튼마다 고유 key). (openmarket 결과/송장 2버튼 사례 — logs/2026-06-02-openmarket-download-persist)
 
-_갱신: 2026-06-02 (Streamlit download_button rerun 함정 추가)_
+_갱신: 2026-06-04 (암호 xlsx 복호화 패턴 추가)_
