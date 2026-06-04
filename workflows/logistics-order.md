@@ -28,7 +28,8 @@
 
 ## 전용 함정
 - **HTML 매출통계 노이즈**: .xls 안에 서브테이블(품절 사전경고)이 있어 `pd.read_html[0]` 앞에 'col0만 값, 나머지 NaN'인 노이즈 행이 섞임 → 'erp관리코드' 헤더 행을 찾아 그 위를 전부 skip.
-- **셀나누기(합포 1건 묶음)**: HTML rowspan 병합셀 → 두 번째 행의 총수량·정산금액이 NaN. 감지 후 위 행 값 ÷2를 두 행에 분배, 판매처그룹·선결제비·평균단가는 복사. (예: 코카콜라355+제로355 묶음 → 각 1+1)
+- **셀나누기(합포 1건 묶음) — 같은 상품**: HTML rowspan 병합셀 → 두 번째 행의 총수량·정산금액이 NaN. 감지 후 위 행 값 ÷2를 두 행에 분배, 판매처그룹·선결제비·평균단가는 복사. `split_merged_cells` 처리.
+- **셀나누기(합포 1건 묶음) — 다른 상품** ★2026-06-04 발견★: 두 서로 다른 상품이 합포된 경우, `pd.read_html`이 어드민옵션·옵션추가항목1을 **한 셀에 이어붙여** 파싱함. 예) `옵션추가항목1='31-03-0531-22-02'`, `어드민옵션='코카콜라355...[31-03-05]코카콜라제로355...[31-22-02]'`. 두 번째 행의 총수량이 NaN이 아니므로 `split_merged_cells`가 감지 못 함. → `split_multiproduct_cells`로 처리: `옵션추가항목1`에서 `\d{2}-\d{2}-\d{2}` 패턴 2개 이상 감지 시 수량/정산금액 ÷ 2, 어드민옵션을 첫 번째 `[erp코드]` 기준으로 분리. `run_phase1`에서 `fill_management_code` 전에 실행.
 - **발주자료 아카이브 = 원본 8열, 중복제거 전**(개별주문 보존). 완성 phase1(10열·구분/규격·중복제거 후) 아님. `run_phase1`이 archive_df를 별도 반환. 헤더는 '어드민 옵션'(띄어쓰기).
 - **상품관리(product_master) 컬럼 위치참조**: `iloc[:,4]`=관리코드, `iloc[:,14]`=박스재고.
 - **낱개처리목록**: 낱개코드→원코드 매핑. 원코드로 상품관리 재고 조회. 원코드가 상품관리에 없으면 GATE B(사용자가 낱개목록에 추가).
@@ -55,6 +56,7 @@
 - fixtures: sales_input.xls, product_master.csv(골든 스냅샷), classification/unit_list/spec_master.csv, golden_물류팀.csv, golden_품절목록.csv.
 - 테스트는 pm_df/cls_df/spec_df/unit_df를 fixture로 명시 주입 → 라이브 기준데이터 편집과 무관하게 결정적.
 - 골든 내장 상품관리(4222행)로 재실행 시 품절 10/10 일치. (업로드 상품관리는 다른 시점이라 품절 행수 다를 수 있음 — 정상.)
+- 주의: 다른 상품 합포(split_multiproduct_cells) 케이스는 골든 테스트 fixture에 아직 미포함. 필요 시 추가.
 
 ## 관련 로그 / 결정
 - decisions/0003-logistics-order-2phase-gate.md
@@ -63,3 +65,4 @@
 - logs/2026-06/2026-06-02-logistics-print-design.md (프린트 디자인)
 - logs/2026-06/2026-06-02-logistics-golden-test.md (골든 테스트)
 - logs/2026-06/2026-06-02-streamlit-infra-fixes.md (nav·모듈캐시 — 전역, pitfalls.md)
+- logs/2026-06/2026-06-04-logistics-multiproduct-fix.md (다른 상품 합포 버그픽스)
