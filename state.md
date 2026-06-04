@@ -25,8 +25,7 @@
 - 없음.
 
 ## 다음 한 수
-- **천년경영업로드 배포 후 Streamlit Cloud Reboot 필요** (신규 import 모듈 — Manage app → ⋮ → Reboot).
 - Phase 3 계속: 다음 이관 템플릿 — 사용자 실물 파일(.xlsm+입력+골든) 제공 대기.
 - Phase 4: 대시보드 페이지.
 
-_갱신: 2026-06-04 (cheonnyeon-upload 이관 완료 — logistics 체인·분류표 공유)_
+_갱신: 2026-06-04 (cheonnyeon-upload 라이브 확인 + 탭 st.stop 순서 픽스 반영)_
