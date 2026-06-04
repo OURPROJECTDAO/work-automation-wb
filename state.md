@@ -13,18 +13,20 @@
 | openmarket-merge (오픈마켓합포도서산간확인V7) | 1 | 운영 중 · 골든 5시트 PASS · 송장 단독파일(★★송장) 복원 | workflows/openmarket-merge.md |
 | onnuri-order (온누리양식_발주서) | 3 | 운영 중 · 골든 15/15 | workflows/onnuri-order.md |
 | logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
+| cheonnyeon-upload (천년경영업로드V15) | 3 | 운영 중 · 골든 27시트 0 불일치 · pytest 29 · logistics 체인 | workflows/cheonnyeon-upload.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
 - Phase 1: openmarket_merge 8단계 + pytest. 2026-06-01.
 - Phase 2: Streamlit 앱 + Community Cloud 배포 + 기준데이터 관리 UI. 2026-06-01.
-- Phase 3 (진행 중): 2종 완료 (onnuri-order, logistics-order). 나머지 템플릿 대기.
+- Phase 3 (진행 중): 3종 완료 (onnuri-order, logistics-order, cheonnyeon-upload). 나머지 템플릿 대기.
 
 ## 막힌 것 / 이슈
 - 없음.
 
 ## 다음 한 수
+- **천년경영업로드 배포 후 Streamlit Cloud Reboot 필요** (신규 import 모듈 — Manage app → ⋮ → Reboot).
 - Phase 3 계속: 다음 이관 템플릿 — 사용자 실물 파일(.xlsm+입력+골든) 제공 대기.
 - Phase 4: 대시보드 페이지.
 
-_갱신: 2026-06-02 (openmarket 송장 단독저장 복원 + UI 다운로드 영속화 반영)_
+_갱신: 2026-06-04 (cheonnyeon-upload 이관 완료 — logistics 체인·분류표 공유)_
