@@ -25,10 +25,12 @@
 | addr_col | 합포장 동일주소 판정 컬럼 |
 | recv_col | 수령인 표시 컬럼 |
 | has_guide_row | 헤더 다음 안내문 행 유무 (있으면 데이터 r3~, 없으면 r2~ / 1-based) |
+| password | (선택) 다운로드 파일에 항상 걸린 열기 암호 — 복호화용 |
 
 ### 현재 채널 값
 - **식봄**: format=xls, match_col=상품주문번호, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=배송지, recv_col=수취인명(받는사람), has_guide_row=True.
 - **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False.
+- **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False. 멀티시트(주문관리목록+택배사명+업로드주의사항).
 
 ## 처리 흐름 (2-phase + 합포장 게이트)
 1. 공통 송장 마스터(.xlsx, 시트 '송장출력') 세션 적재 — **PII 포함, 서버 미저장**.
@@ -40,6 +42,10 @@
 - **xls**(식봄): 진짜 OLE2 BIFF .xls(코드페이지 949) — **마켓 HTML-테이블 .xls 아님**(pitfalls .xls=HTML 함정과 구분). xlrd 읽기, xlwt로 헤더+안내문+데이터 재작성(셀타입 보존).
 - **xlsx**(올웨이즈): openpyxl. 출력은 **원본 .xlsx를 in-place 편집**(서식 완전 보존) — 송장/택배사 열 기입 후 잔존 N/A 행을 아래→위로 delete_rows. 인덱스 정렬 위해 parse 시 빈 행도 안 건너뜀.
 - **행 정렬**: parsed['rows'][i] = 엑셀 행(base+i). base = has_guide_row면 3, 아니면 2(1-based).
+- **암호 채널(배민상회)**: 다운로드 파일에 항상 열기 암호("qwer"). 업로드 시 `decrypt_if_needed`(msoffcrypto-tool)로 복호화 후 평문 bytes를 orig_bytes로 사용. **출력은 평문**(배민 업로드 주의사항: 암호 제거 필수). 평문 파일·미리 푼 파일도 is_encrypted() 분기로 허용.
+- **배민 멀티시트**: 주문관리목록(active)만 편집, 택배사명(공통)·업로드주의사항(공통) 보존(openpyxl in-place라 자동 보존).
+- **배민 ★ 필드 주의**: 헤더 `*`는 필수값. **택배사명·송장번호만 수정 허용**, 그 외 `*`필드(\*트래킹번호·\*주문상품상세번호·\*배송상품번호)는 수정 시 업로드 거부 → courier_col/invoice_col만 기입하므로 자동 충족.
+- **배민 멀티아이템 주문**: 같은 주문번호에 여러 품목행(예: 코카콜라+사이다) → VLOOKUP 첫매칭으로 전부 동일 송장(같은 박스). 정상 동작.
 
 ## 전용 함정
 - **택배사·송장번호 출력 규칙**: 택배사 = courier 일괄(없으면 lookup _택배사). 송장번호 = `to_invoice_number`로 **숫자**(전부 숫자면 int, '....0' float 꼬리표 제거). (2026-06-05)
