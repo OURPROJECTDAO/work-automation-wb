@@ -14,7 +14,7 @@
 | onnuri-order (온누리양식_발주서) | 3 | 운영 중 · 골든 15/15 | workflows/onnuri-order.md |
 | logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
 | cheonnyeon-upload (천년경영업로드V15) | 3 | 운영 중 · 골든 27시트 0 불일치 · pytest 29 · logistics 체인 | workflows/cheonnyeon-upload.md |
-| invoice-fill (송장처리/송장번호 일괄입력) | 3 | 운영 중 · 식봄·올웨이즈·배민상회·캐시노트 4채널 · 배송상태 변환 | workflows/invoice-fill.md |
+| invoice-fill (송장처리/송장번호 일괄입력) | 3 | 운영 중(확인) · 식봄·올웨이즈·배민상회·캐시노트 4채널 · 송장형식 채널별 · 배송상태 변환 | workflows/invoice-fill.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -23,11 +23,11 @@
 - Phase 3 (진행 중): 3종 완료 (onnuri-order, logistics-order, cheonnyeon-upload). 나머지 템플릿 대기.
 
 ## 막힌 것 / 이슈
-- 없음. (KST 타임존 픽스 + 온누리 빈 G열 픽스 — Reboot 후 실파일 정상 동작 확인 완료 2026-06-05)
+- 없음. (당일 전 픽스 + 송장 4채널 — Reboot 후 사용자 라이브/업로드 확인 완료 2026-06-05)
 
 ## 다음 한 수
 - Phase 3 계속: 다음 이관 템플릿 — 사용자 실물 파일(.xlsm+입력+골든) 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest — 골든에 빈셀 케이스 없어 이번 회귀 못 잡았던 갭 보완.
 - Phase 4: 대시보드 페이지.
 
-_갱신: 2026-06-05 (캐시노트 채널 추가 — 배송상태 변환 · 4채널)_
+_갱신: 2026-06-05 (송장 4채널 + 당일 픽스 운영 확인 완료)_
