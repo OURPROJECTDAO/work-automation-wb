@@ -34,7 +34,7 @@
 - **식봄**: format=xls, match_col=상품주문번호, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=배송지, recv_col=수취인명(받는사람), has_guide_row=True.
 - **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False.
 - **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False, **invoice_as_text=True**. 멀티시트(주문관리목록+택배사명+업로드주의사항).
-- **캐시노트**: format=xlsx(평문), match_col=**ORD코드**, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=주소, recv_col=수령인명, has_guide_row=False, **status_col=배송상태 / status_map={배송준비중→배송중}**. 송장번호는 현재 숫자(int) — 업로드 미검증, 거부 시 invoice_as_text=True로 전환.
+- **캐시노트**: format=xlsx(평문), match_col=**ORD코드**, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=주소, recv_col=수령인명, has_guide_row=False, **status_col=배송상태 / status_map={배송준비중→배송중}**. 송장번호 숫자(int) — 업로드 정상 확인(2026-06-05).
 
 ## 처리 흐름 (2-phase + 합포장 게이트)
 1. 공통 송장 마스터(.xlsx, 시트 '송장출력') 세션 적재 — **PII 포함, 서버 미저장**.
