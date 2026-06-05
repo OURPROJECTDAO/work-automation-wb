@@ -14,6 +14,7 @@
 | onnuri-order (온누리양식_발주서) | 3 | 운영 중 · 골든 15/15 | workflows/onnuri-order.md |
 | logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
 | cheonnyeon-upload (천년경영업로드V15) | 3 | 운영 중 · 골든 27시트 0 불일치 · pytest 29 · logistics 체인 | workflows/cheonnyeon-upload.md |
+| invoice-fill (송장처리/송장번호 일괄입력) | 3 | 운영 중 · 식봄 채널 · 택배사 일괄(한진택배)+송장 숫자화 픽스 | workflows/invoice-fill.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -29,4 +30,4 @@
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest — 골든에 빈셀 케이스 없어 이번 회귀 못 잡았던 갭 보완.
 - Phase 4: 대시보드 페이지.
 
-_갱신: 2026-06-05 (KST 타임존 픽스 + 온누리 빈 G열 픽스 — Reboot 후 정상 동작 확인 완료)_
+_갱신: 2026-06-05 (invoice-fill 워크플로우 문서화 + 택배사/송장번호 픽스 추가)_
