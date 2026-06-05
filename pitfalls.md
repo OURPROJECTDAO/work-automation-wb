@@ -35,6 +35,19 @@
 - 대시보드 차트: matplotlib는 한글 폰트 미설치 시 □□□. Plotly/Altair(브라우저 폰트) 권장.
 - 정렬: VBA xlPinYin vs Python 코드포인트 정렬 차이 가능 → 골든 파일 대조로 확인.
 
+## Streamlit Community Cloud 서버 시각 = UTC (날짜 하루 차이 버그)
+- **Streamlit Community Cloud는 UTC 타임존** 서버로 동작. `datetime.now()` / `datetime.date.today()` 는 UTC 반환.
+- 한국(KST) = UTC+9. 한국 자정~오전 9시 사이에 실행하면 UTC는 전날 → 파일명/셀 날짜가 하루 뒤쳐짐.
+- **모든 날짜 호출은 반드시 KST 기준**:
+  ```python
+  from datetime import datetime, timezone, timedelta
+  _KST = timezone(timedelta(hours=9))  # 모듈 상단에 선언
+  datetime.now(_KST)                   # datetime.now() 대체
+  datetime.now(_KST).date()            # datetime.date.today() 대체
+  ```
+- 적용 범위: 다운로드 파일명(mmdd·yymmdd·yyyymmdd), 엑셀 헤더 날짜, run_date 기본값, 처리 시간 표시 등.
+- 신규 워크플로우 추가 시 템플릿에 _KST 선언 포함할 것. (2026-06-05 전수 적용 완료)
+
 ## 마켓플레이스 입력 파일 (.xls — 데이터 포맷, 여러 워크플로우 공통)
 - 스마트스토어/쿠팡/G마켓 등이 내보내는 .xls 파일은 실제로 HTML 테이블. xlrd나 openpyxl로 열리지 않음.
 - 읽기: raw.decode('utf-8').replace('\ufeff','').replace('<feff>','') 후 pd.read_html(io.StringIO(html), header=0)[0].
@@ -58,4 +71,4 @@
 - **st.stop()은 탭 하나가 아니라 스크립트 전체를 중단 → 코드상 뒤에 오는 `with tabX:` 블록 미렌더**: st.tabs는 한 번의 스크립트 실행에서 모든 탭 컨테이너에 순차로 그린다. 어떤 탭 블록이 전제조건 미충족으로 st.stop()을 호출하면, 그 호출 시점 이후의 모든 코드(다른 탭 블록 포함)가 안 그려진다. 증상: 탭 제목은 보이는데 본문이 텅 빔. 해결: **st.stop()을 호출할 수 있는 탭 블록을 코드상 맨 뒤에 배치**(앞 탭들이 먼저 렌더되도록). 또는 전제조건 검사를 해당 탭 안에서 return-가능한 함수로 감싸기. (천년경영 탭이 발주서 탭의 상품관리-미확인 st.stop() 뒤에 있어 빈 화면 — logs/2026-06-04-cheonnyeon-tab-stop-order)
 - **download_button 클릭 = rerun → 실행 블록 안 위젯 소멸**: `if st.button("실행"):` 블록 안에서 결과·다운로드 버튼을 그리면, 다운로드 버튼 하나를 누르는 순간 rerun되어 실행버튼이 False → 블록 전체가 사라짐(여러 산출물 중 하나만 받고 끝남). 해결: 처리 결과를 st.session_state에 저장하고 download_button은 실행 블록 **밖**에서 session_state 기반으로 렌더(버튼마다 고유 key). (openmarket 결과/송장 2버튼 사례 — logs/2026-06-02-openmarket-download-persist)
 
-_갱신: 2026-06-04 (st.stop 교차-탭 차단 함정 추가)_
+_갱신: 2026-06-05 (Streamlit Community Cloud UTC 타임존 함정 추가 — KST 전수 픽스)_
