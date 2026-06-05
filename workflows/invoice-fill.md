@@ -26,11 +26,12 @@
 | recv_col | 수령인 표시 컬럼 |
 | has_guide_row | 헤더 다음 안내문 행 유무 (있으면 데이터 r3~, 없으면 r2~ / 1-based) |
 | password | (선택) 다운로드 파일에 항상 걸린 열기 암호 — 복호화용 |
+| invoice_as_text | (선택) True면 송장번호를 **문자열+일반(General)** 형식으로 기입(숫자셀 거부 채널). 기본 False=숫자(int) |
 
 ### 현재 채널 값
 - **식봄**: format=xls, match_col=상품주문번호, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=배송지, recv_col=수취인명(받는사람), has_guide_row=True.
 - **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False.
-- **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False. 멀티시트(주문관리목록+택배사명+업로드주의사항).
+- **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False, **invoice_as_text=True**. 멀티시트(주문관리목록+택배사명+업로드주의사항).
 
 ## 처리 흐름 (2-phase + 합포장 게이트)
 1. 공통 송장 마스터(.xlsx, 시트 '송장출력') 세션 적재 — **PII 포함, 서버 미저장**.
@@ -48,7 +49,8 @@
 - **배민 멀티아이템 주문**: 같은 주문번호에 여러 품목행(예: 코카콜라+사이다) → VLOOKUP 첫매칭으로 전부 동일 송장(같은 박스). 정상 동작.
 
 ## 전용 함정
-- **택배사·송장번호 출력 규칙**: 택배사 = courier 일괄(없으면 lookup _택배사). 송장번호 = `to_invoice_number`로 **숫자**(전부 숫자면 int, '....0' float 꼬리표 제거). (2026-06-05)
+- **송장번호 형식은 채널별**: 식봄·올웨이즈 = **숫자**(`to_invoice_number`, int). 배민 = **문자열+일반(General)**(`to_invoice_text`, invoice_as_text=True). 배민 원본 템플릿 \*송장번호 열은 '@'(텍스트) 형식인데, 숫자값을 넣으면 업로드 거부 → 문자열값+General 형식으로 써야 통과(사용자 실측 확인). xlsx 텍스트 경로는 `cell.number_format='General'` 명시.
+- **택배사 출력**: courier 일괄(없으면 lookup _택배사).
 - **포맷 분기**: parse/write는 cfg.format으로 xls/xlsx 분기. 새 채널이 또 다른 포맷이면 `_parse_template_*`/`_write_template_*` 추가.
 - **올웨이즈 invoice_col은 '운송장번호'**(식봄은 '송장번호'). courier_col은 둘 다 '택배사'.
 - VLOOKUP은 **첫 매칭만**. NFC 정규화 필수(전역 한국어 함정).
