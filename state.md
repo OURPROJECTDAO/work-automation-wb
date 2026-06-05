@@ -22,10 +22,11 @@
 - Phase 3 (진행 중): 3종 완료 (onnuri-order, logistics-order, cheonnyeon-upload). 나머지 템플릿 대기.
 
 ## 막힌 것 / 이슈
-- 없음.
+- **Reboot 대기**: KST 타임존 픽스 + 온누리 빈 G열 픽스 모두 import 모듈 변경 → Streamlit Reboot 후 실파일 재검증 필요(사용자).
 
 ## 다음 한 수
+- **Streamlit Reboot** 후 ① 모든 날짜 한국 기준 정상 ② 온누리 G열(합계) 채워짐 + 헤더 t="s" 유지 동시 재검증.
 - Phase 3 계속: 다음 이관 템플릿 — 사용자 실물 파일(.xlsm+입력+골든) 제공 대기.
 - Phase 4: 대시보드 페이지.
 
-_갱신: 2026-06-04 (cheonnyeon-upload 라이브 확인 + 탭 st.stop 순서 픽스 반영)_
+_갱신: 2026-06-05 (KST 타임존 전수 픽스 + 온누리 빈 G열 셀 버그픽스 — 둘 다 Reboot 대기)_
