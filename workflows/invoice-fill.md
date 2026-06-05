@@ -27,11 +27,14 @@
 | has_guide_row | 헤더 다음 안내문 행 유무 (있으면 데이터 r3~, 없으면 r2~ / 1-based) |
 | password | (선택) 다운로드 파일에 항상 걸린 열기 암호 — 복호화용 |
 | invoice_as_text | (선택) True면 송장번호를 **문자열+일반(General)** 형식으로 기입(숫자셀 거부 채널). 기본 False=숫자(int) |
+| status_col | (선택) 출력 시 값 변환할 상태 컬럼명 |
+| status_map | (선택) {원값:새값} 매핑 (예: {"배송준비중":"배송중"}) |
 
 ### 현재 채널 값
 - **식봄**: format=xls, match_col=상품주문번호, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=배송지, recv_col=수취인명(받는사람), has_guide_row=True.
 - **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False.
 - **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False, **invoice_as_text=True**. 멀티시트(주문관리목록+택배사명+업로드주의사항).
+- **캐시노트**: format=xlsx(평문), match_col=**ORD코드**, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=주소, recv_col=수령인명, has_guide_row=False, **status_col=배송상태 / status_map={배송준비중→배송중}**. 송장번호는 현재 숫자(int) — 업로드 미검증, 거부 시 invoice_as_text=True로 전환.
 
 ## 처리 흐름 (2-phase + 합포장 게이트)
 1. 공통 송장 마스터(.xlsx, 시트 '송장출력') 세션 적재 — **PII 포함, 서버 미저장**.
@@ -51,6 +54,8 @@
 ## 전용 함정
 - **송장번호 형식은 채널별**: 식봄·올웨이즈 = **숫자**(`to_invoice_number`, int). 배민 = **문자열+일반(General)**(`to_invoice_text`, invoice_as_text=True). 배민 원본 템플릿 \*송장번호 열은 '@'(텍스트) 형식인데, 숫자값을 넣으면 업로드 거부 → 문자열값+General 형식으로 써야 통과(사용자 실측 확인). xlsx 텍스트 경로는 `cell.number_format='General'` 명시.
 - **택배사 출력**: courier 일괄(없으면 lookup _택배사).
+- **상태 컬럼 변환(캐시노트)**: status_col/status_map 설정 시 출력 행의 상태값 치환(배송준비중→배송중). write 단계에서 적용, 다른 채널은 미설정→무영향.
+- **★ xlsx read_only 차원 오인**: 일부 채널 파일(캐시노트)은 dimension 레코드가 잘못돼 `load_workbook(read_only=True)`가 A1:A1로 오인 → 헤더 'X 1개'·0행. `_parse_template_xlsx`는 **read_only 미사용**(비 read_only)로 calculate_dimension 정확히. (천년경영 스스주문과 동류 함정)
 - **포맷 분기**: parse/write는 cfg.format으로 xls/xlsx 분기. 새 채널이 또 다른 포맷이면 `_parse_template_*`/`_write_template_*` 추가.
 - **올웨이즈 invoice_col은 '운송장번호'**(식봄은 '송장번호'). courier_col은 둘 다 '택배사'.
 - VLOOKUP은 **첫 매칭만**. NFC 정규화 필수(전역 한국어 함정).
