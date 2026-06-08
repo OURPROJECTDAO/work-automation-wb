@@ -55,13 +55,15 @@
 - master(거래처 매출)는 **PII**(영업기밀) → public app repo 금지.
 - **private repo `OURPROJECTDAO/work-automation-data`** 에 월별 parquet 보관. 앱이 `st.secrets`의 PAT로 R/W.
 - (대안 기각/백업: B1 Drive+서비스계정 — GCP 셋업 부담. B3 세션보유 — 영속 없음.)
-- ⚠ repo 생성·PAT 권한 추가·st.secrets 등록은 **사용자 수동**(fine-grained PAT는 repo 생성 권한 없음).
+- ✅ repo 생성·PAT Contents R/W 권한·st.secrets 등록 완료(2026-06-08). PAT 읽기/쓰기/삭제 라이브 검증됨.
+- ✅ `sales_2026-05.parquet` 적재·검증됨(10,053행, KPI 실파일 일치). 5월 부트스트랩 완료.
 
 ## 코드 / 데이터 / 테스트
 - `core/dashboard/sales_data.py` — parse_sales·as_category·split_by_month·date_range_replace·make_classifier·make_box_lookup·apply_categories.
+- `core/dashboard/store.py` — DataRepo R/W: list_partition_months·read_partition·write_partition·delete_partition·load_master·ingest(날짜구간 교체). token/repo 인자(core는 app 모름, 페이지가 st.secrets 주입). secrets 키: `[data] pat / repo`.
 - 기준데이터: `reference/logistics_classification.csv`(구분), `reference/product_master.csv`(중분류·박스내품).
 - 테스트: `tests/test_sales_data.py` (8 passed). fixtures `tests/fixtures/dashboard/` (합성·PII 없음).
-- 미구현: 저장 어댑터(work-automation-data R/W), 대시보드 페이지 `app/pages/3_대시보드.py`(현 플레이스홀더), 거래처 그룹 관리 탭.
+- 미구현: 대시보드 페이지 `app/pages/3_대시보드.py`(현 플레이스홀더 — load_master→apply_categories→KPI/차트/슬라이서), 부트스트랩/증분 업로더 UI, 거래처 그룹 관리 탭.
 
 ## 전용 함정
 - **합계행**: 맨끝 1행 거래일자 NaT = 합계. 제외 안 하면 전 수치 2배. `df[df['거래일자'].notna()]`.
