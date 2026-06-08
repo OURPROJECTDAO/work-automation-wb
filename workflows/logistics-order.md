@@ -16,7 +16,7 @@
 ## 코드 / 데이터
 - `core/workflows/logistics_order.py` (run_phase1 → 4-tuple 반환[archive_df 포함], run_phase2, generate_*_xlsx)
 - 기준데이터 (`reference/`, 고정):
-  - `logistics_classification.csv` (1012행, 멸치쇼핑 분류표)
+  - `logistics_classification.csv` (1485행, 멸치쇼핑 분류표)
   - `unit_list.csv` (383행, 낱개처리목록)
   - `spec_master.csv` (4366행, 규격파일)
 - 연동데이터: `product_master.csv` (상품관리, 박스재고 — **매일 갱신**, 연동데이터관리 페이지 + 타임스탬프)
@@ -71,3 +71,4 @@
 - logs/2026-06/2026-06-02-streamlit-infra-fixes.md (nav·모듈캐시 — 전역, pitfalls.md)
 - logs/2026-06/2026-06-04-logistics-multiproduct-fix.md (다른 상품 합포 버그픽스 — 숫자코드)
 - logs/2026-06/2026-06-08-logistics-multiproduct-bracket-fix.md (합포 감지 대괄호 기준 교체 — 영문/PC코드·N개)
+- logs/2026-06/2026-06-09-refdata-editor-search-mergeback.md (기준데이터 편집표 검색+merge-back — 낱개목록·분류표 등 전역)
