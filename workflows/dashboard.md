@@ -56,7 +56,11 @@
 - **private repo `OURPROJECTDAO/work-automation-data`** 에 월별 parquet 보관. 앱이 `st.secrets`의 PAT로 R/W.
 - (대안 기각/백업: B1 Drive+서비스계정 — GCP 셋업 부담. B3 세션보유 — 영속 없음.)
 - ✅ repo 생성·PAT Contents R/W 권한·st.secrets 등록 완료(2026-06-08). PAT 읽기/쓰기/삭제 라이브 검증됨.
-- ✅ `sales_2026-05.parquet` 적재·검증됨(10,053행, KPI 실파일 일치). 5월 부트스트랩 완료.
+- ✅ **3개년 부트스트랩 완료**(2026-06-08): 2024/2025/2026매출.xlsx(Drive inputs) → 29개 월 파티션(2024-01~2026-05), **313,293행**.
+  - 연도 KPI: 2024 매출 391.6억/이익률 6.4%/거래처 559, 2025 378.3억/6.4%/540, 2026(1~5월) 169.2억/6.6%/461.
+  - 전체 구분: 음료 64.1% / 식품 21.9% / 선물세트 11.5% / 미분류 2.6%. master 메모리 61MB(category).
+  - load_master 콜드 4.9초(29파티션 GitHub 순차 다운+합본) → @st.cache_data 세션 1회. 파티션 늘면 선형 증가 → 추후 합본 스냅샷/병렬 최적화 여지.
+- Drive 큰 파일 적재 경로: download_file_content 결과가 커서 컨텍스트 초과 시 `/mnt/user-data/tool_results/*.json`에 저장됨 → 디스크에서 inner JSON `content`(base64) 디코딩→parse→ingest. 챗·컨텍스트 한계 둘 다 우회.
 
 ## 코드 / 데이터 / 테스트
 - `core/dashboard/sales_data.py` — parse_sales·as_category·split_by_month·date_range_replace·make_classifier·make_box_lookup·apply_categories.
