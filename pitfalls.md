@@ -53,6 +53,12 @@
 - 읽기: raw.decode('utf-8').replace('\ufeff','').replace('<feff>','') 후 pd.read_html(io.StringIO(html), header=0)[0].
 - 송장번호는 숫자로 파싱될 수 있음 → astype(str).str.replace('.0$','') 처리 필요.
 
+## 진짜 OLE2 .xls 읽기 — xlrd CompDocError (여러 워크플로우 공통)
+- 채널 업로드 템플릿 .xls(스마트스토어 발 식봄 등)는 진짜 OLE2 BIFF(HTML-테이블 아님, xlrd로 읽음).
+- 일부 export는 CompDoc(OLE2) 디렉터리가 비표준 → `xlrd.open_workbook(...)`이 `CompDocError: Workbook corruption: seen[i]==n`로 죽음. 증상: 파일은 Excel에서 멀쩡히 열리는데 앱에선 "아예 안 들어감"(파싱 전체 실패).
+- 해결: **`xlrd.open_workbook(file_contents=..., ignore_workbook_corruption=True)`**. 정상 파일엔 무영향, 비표준 디렉터리만 관대 처리. (invoice-fill 식봄 2026-06-08)
+- xlwt로 다시 쓴 출력은 표준 OLE2라 기본 파서로 재독됨(출력엔 옵션 불필요).
+
 ## 암호 걸린 xlsx 입력 (스마트스토어 등)
 - 일부 마켓 내보내기 xlsx는 열기 암호가 걸림(예: 스마트스토어 스스주문, 암호 1323). openpyxl이 못 엶.
 - 복호화: msoffcrypto-tool. `off=msoffcrypto.OfficeFile(io.BytesIO(b)); off.load_key(password=pw); off.decrypt(buf)` → openpyxl.load_workbook(buf).
