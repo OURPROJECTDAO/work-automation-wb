@@ -25,3 +25,11 @@
 - 사용자가 네이버 마이박스에 자료를 모아둠 → 연동 검토. **마이박스는 개인용 공개 API 미지원**(서드파티 연동 거의 없음). NCP Object Storage(S3 호환)는 별개의 기업용 유료라 제외.
 - 프로젝트가 이미 Google Drive 연동(엑셀 작업물) 사용 중 → master(월별 parquet 파티션)도 **Google Drive** 보관 확정. 마이박스 → Drive 경유(다운로드/동기화).
 - 결정 #7 미확정 해소. 세션 보유(B)는 백업안.
+
+
+## 갱신 2026-06-08 (2) — 분류방식(A)·저장소(B2) 확정 + 실데이터 검증
+- **검증(5월 실파일 10,053행)**: 관리코드 조인키 product_master 미존재 1개. 박스내품 거래코드 99.7% 커버. 구분 1차 분류표 매출 87.6%.
+- **A 구분 = 2단 분류**: 1차 logistics_classification.csv(음료/식품/선물세트), 2차 product_master 중분류 fallback(음료-B동→음료, 통조림-C동→식품). 비식품(세제외/잡화)·미존재 → **미분류**(사용자 분류 전까지 유지, 분류 UI 추후). 최종 미분류 매출 5.5%.
+- **B 저장소 = B2 확정**(0006 #7/갱신(1)의 Drive 대체): master=PII → **private repo `OURPROJECTDAO/work-automation-data`** + 앱 st.secrets PAT로 R/W. Drive(B1)는 GCP 서비스계정 셋업 부담, 세션보유(B3)는 영속 없음으로 기각. GitHub 인프라 재사용.
+- **물류량** = 수량÷박스내품, 박스내품 결측/0 → 1.0 간주.
+- 구현: core/dashboard/sales_data.py + 테스트 8 passed 커밋. 상세 workflows/dashboard.md.
