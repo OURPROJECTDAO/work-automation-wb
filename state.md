@@ -15,7 +15,7 @@
 | logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
 | cheonnyeon-upload (천년경영업로드V15) | 3 | 운영 중 · 골든 27시트 0 불일치 · pytest 29 · logistics 체인 | workflows/cheonnyeon-upload.md |
 | invoice-fill (송장처리/송장번호 일괄입력) | 3 | 운영 중(확인) · 식봄·올웨이즈·배민상회·캐시노트 4채널 · 송장형식 채널별 · 배송상태 변환 | workflows/invoice-fill.md |
-| dashboard (영업이익현황 대시보드) | 4 | 운영 · 4탭(매출집계+그룹/구분 집계 · 데이터추가 · 거래처그룹 · 구분분류) · 마스터 41파티션(2023~2026-05)·거래처1041 · 차트/이익률/물류량 점진 | workflows/dashboard.md |
+| dashboard (영업이익현황 대시보드) | 4 | 운영 · 4탭(매출집계+그룹/구분 집계 · 데이터추가 · 거래처그룹 · 구분분류) · 마스터 41파티션(2023-01~2026-05)·42.2만행·거래처1041 · 차트/이익률/물류량 점진 | workflows/dashboard.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
