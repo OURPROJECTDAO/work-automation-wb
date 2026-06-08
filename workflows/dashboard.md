@@ -61,6 +61,7 @@
   - 전체 구분: 음료 64.1% / 식품 21.9% / 선물세트 11.5% / 미분류 2.6%. master 메모리 61MB(category).
   - load_master 콜드 4.9초(29파티션 GitHub 순차 다운+합본) → @st.cache_data 세션 1회. 파티션 늘면 선형 증가 → 추후 합본 스냅샷/병렬 최적화 여지.
 - Drive 큰 파일 적재 경로: download_file_content 결과가 커서 컨텍스트 초과 시 `/mnt/user-data/tool_results/*.json`에 저장됨 → 디스크에서 inner JSON `content`(base64) 디코딩→parse→ingest. 챗·컨텍스트 한계 둘 다 우회.
+- 용량 여유: 월 파티션 ~0.2MB(parquet)·날짜구간 교체 → 작업트리 연 ~2.2MB 증가. GitHub 파일 하드차단 100MB·레포 권장<1GB 대비 runway 사실상 무제한. 단 잦은 binary 덮어쓰기는 .git 히스토리에 옛 blob 누적(우리 규모 수십 년 무방, 필요 시 git gc).
 
 ## 코드 / 데이터 / 테스트
 - `core/dashboard/sales_data.py` — parse_sales·as_category·split_by_month·date_range_replace·make_classifier·make_box_lookup·apply_categories.
