@@ -68,7 +68,7 @@
 - 기준데이터: `reference/logistics_classification.csv`(구분), `reference/product_master.csv`(중분류·박스내품).
 - 테스트: `tests/test_sales_data.py` (8 passed). fixtures `tests/fixtures/dashboard/` (합성·PII 없음).
 - ✅ **대시보드 페이지 최소버전**(`app/pages/3_대시보드.py`, 2026-06-08): 매출 KPI(총매출·건수·기간) + 연도/구분 필터 + 집계기준 선택(구분/거래처/상품/관리코드)별 매출 표(비중·CSV 다운). @st.cache_data(ttl 1h) load. 시크릿 `[data] pat/repo`(없으면 `GITHUB_PAT` 폴백), reference는 로컬 csv.
-- 추후 추가(점진): 멀티연도 월별 추이 차트·이익/물류량 콤보(이중축)·이익률 KPI·물류량(박스내품)·거래처 그룹 관리 탭·증분 업로더 UI.
+- 추후 추가(점진): 멀티연도 월별 추이 차트·이익/물류량 콤보(이중축)·이익률 KPI·물류량(박스내품)·거래처 그룹 관리 탭. (증분 업로더 ✅ 완료)
 - requirements: pyarrow(parquet)·python-calamine 추가.
 
 ## 전용 함정
