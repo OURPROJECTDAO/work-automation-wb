@@ -32,7 +32,7 @@
 
 ### 현재 채널 값
 - **식봄**: format=xls, match_col=상품주문번호, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=배송지, recv_col=수취인명(받는사람), has_guide_row=True.
-- **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False.
+- **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False, **invoice_as_text=True**(0608 수정).
 - **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False, **invoice_as_text=True**. 멀티시트(주문관리목록+택배사명+업로드주의사항).
 - **캐시노트**: format=xlsx(평문), match_col=**ORD코드**, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=주소, recv_col=수령인명, has_guide_row=False, **status_col=배송상태 / status_map={배송준비중→배송중}**. 송장번호 숫자(int) — 업로드 정상 확인(2026-06-05).
 
@@ -52,7 +52,7 @@
 - **배민 멀티아이템 주문**: 같은 주문번호에 여러 품목행(예: 코카콜라+사이다) → VLOOKUP 첫매칭으로 전부 동일 송장(같은 박스). 정상 동작.
 
 ## 전용 함정
-- **송장번호 형식은 채널별**: 식봄·올웨이즈 = **숫자**(`to_invoice_number`, int). 배민 = **문자열+일반(General)**(`to_invoice_text`, invoice_as_text=True). 배민 원본 템플릿 \*송장번호 열은 '@'(텍스트) 형식인데, 숫자값을 넣으면 업로드 거부 → 문자열값+General 형식으로 써야 통과(사용자 실측 확인). xlsx 텍스트 경로는 `cell.number_format='General'` 명시.
+- **송장번호 형식은 채널별**: 식봄 = **숫자**(`to_invoice_number`, int). **올웨이즈·배민 = 문자열+일반(General)**(`to_invoice_text`, invoice_as_text=True). 올웨이즈는 골든 0608 실측 결과 운송장번호 셀이 **data_type='s'(문자열)+General** → 숫자(int)로 넣던 기존 코드를 invoice_as_text=True로 정정(2026-06-08). 배민 원본 \*송장번호 열은 '@'(텍스트) 형식이라 숫자값 넣으면 업로드 거부 → 문자열값+General로 통과. xlsx 텍스트 경로는 `cell.number_format='General'` 명시.
 - **택배사 출력**: courier 일괄(없으면 lookup _택배사).
 - **상태 컬럼 변환(캐시노트)**: status_col/status_map 설정 시 출력 행의 상태값 치환(배송준비중→배송중). write 단계에서 적용, 다른 채널은 미설정→무영향.
 - **★ xlsx read_only 차원 오인**: 일부 채널 파일(캐시노트)은 dimension 레코드가 잘못돼 `load_workbook(read_only=True)`가 A1:A1로 오인 → 헤더 'X 1개'·0행. `_parse_template_xlsx`는 **read_only 미사용**(비 read_only)로 calculate_dimension 정확히. (천년경영 스스주문과 동류 함정)
@@ -74,3 +74,4 @@
 ## 관련 로그
 - logs/2026-06/2026-06-05-invoice-fill-courier-number.md (택배사 일괄·송장 숫자 + 최초 문서화)
 - logs/2026-06/2026-06-05-invoice-fill-olweijeu-xlsx.md (포맷/스키마 일반화 + 올웨이즈 채널)
+- logs/2026-06/2026-06-08-invoice-fill-olweijeu-text.md (올웨이즈 운송장번호 문자열 기입 정정 — 골든0608 대조)
