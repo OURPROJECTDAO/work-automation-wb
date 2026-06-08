@@ -43,7 +43,7 @@
 4. `apply_decisions` → `finalize` → `write_template`: 잔존 N/A 행 삭제 후 원본 양식으로 출력 + N/A 건수 보고.
 
 ## 입출력 포맷별 처리 ★중요
-- **xls**(식봄): 진짜 OLE2 BIFF .xls(코드페이지 949) — **마켓 HTML-테이블 .xls 아님**(pitfalls .xls=HTML 함정과 구분). xlrd 읽기, xlwt로 헤더+안내문+데이터 재작성(셀타입 보존).
+- **xls**(식봄): 진짜 OLE2 BIFF .xls(코드페이지 949) — **마켓 HTML-테이블 .xls 아님**(pitfalls .xls=HTML 함정과 구분). xlrd 읽기(**`ignore_workbook_corruption=True` 필수** — 식봄 export OLE2 디렉터리가 비표준이라 기본 파서는 CompDocError로 송장 0건 기입; 0608 픽스), xlwt로 헤더+안내문+데이터 재작성(셀타입 보존).
 - **xlsx**(올웨이즈): openpyxl. 출력은 **원본 .xlsx를 in-place 편집**(서식 완전 보존) — 송장/택배사 열 기입 후 잔존 N/A 행을 아래→위로 delete_rows. 인덱스 정렬 위해 parse 시 빈 행도 안 건너뜀.
 - **행 정렬**: parsed['rows'][i] = 엑셀 행(base+i). base = has_guide_row면 3, 아니면 2(1-based).
 - **암호 채널(배민상회)**: 다운로드 파일에 항상 열기 암호("qwer"). 업로드 시 `decrypt_if_needed`(msoffcrypto-tool)로 복호화 후 평문 bytes를 orig_bytes로 사용. **출력은 평문**(배민 업로드 주의사항: 암호 제거 필수). 평문 파일·미리 푼 파일도 is_encrypted() 분기로 허용.
@@ -75,3 +75,4 @@
 - logs/2026-06/2026-06-05-invoice-fill-courier-number.md (택배사 일괄·송장 숫자 + 최초 문서화)
 - logs/2026-06/2026-06-05-invoice-fill-olweijeu-xlsx.md (포맷/스키마 일반화 + 올웨이즈 채널)
 - logs/2026-06/2026-06-08-invoice-fill-olweijeu-text.md (올웨이즈 운송장번호 문자열 기입 정정 — 골든0608 대조)
+- logs/2026-06/2026-06-08-invoice-fill-sikbom-compdoc.md (식봄 .xls CompDocError 읽기 픽스 — ignore_workbook_corruption, 64/68 매칭)
