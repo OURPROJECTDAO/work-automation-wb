@@ -5,8 +5,8 @@
 ## 요약
 - 영업이익현황(거래처별 매출, 트랜잭션 레벨) 3개년(~50만행) 파워BI 스타일 대시보드.
 - ERP API 불가 → 사용자가 5월 양식 .xlsx 다운로드만 가능. 부트스트랩 1년치씩 + 일/주/월 증분.
-- 데이터 계층 코어·저장 어댑터·3개년 부트스트랩·대시보드 최소버전+증분 업로더+거래처 그룹+구분 분류 탭 완료(2026-06-08). 차트/물류량/이익률 점진 확장.
-- 4탭: 📊 대시보드(매출 KPI+구분/그룹/거래처/상품/관리코드 집계) · ➕ 데이터 추가 · 👥 거래처 그룹 · 🏷 구분 분류.
+- 데이터 계층 코어·저장 어댑터·3개년 부트스트랩·대시보드(증분 업로더+거래처 그룹+구분 분류) 완료. 기간 날짜범위·일/월/연 추이 라인차트·그룹 내 거래처 체크박스 추가(2026-06-08). 이익률/물류량 점진 확장.
+- 4탭: 📊 대시보드(매출 KPI · 기간(날짜범위)/구분/그룹 필터 · 그룹 내 거래처 체크박스 · 일/월/연 추이(라인차트)+구분/그룹/거래처/상품/관리코드 집계) · ➕ 데이터 추가 · 👥 거래처 그룹 · 🏷 구분 분류.
 
 ## 데이터 흐름
 ```
@@ -71,10 +71,10 @@
 - `core/dashboard/store.py` — DataRepo R/W: list_partition_months·read_partition·write_partition·delete_partition·load_master·ingest(날짜구간 교체) + **read_groups·write_groups**(groups/store_groups.csv, 상호명→그룹). token/repo 인자(core는 app 모름, 페이지가 st.secrets 주입). secrets 키: `[data] pat / repo`.
 - 기준데이터: `reference/logistics_classification.csv`(구분), `reference/product_master.csv`(중분류·박스내품).
 - 테스트: `tests/test_sales_data.py` (8 passed). fixtures `tests/fixtures/dashboard/` (합성·PII 없음).
-- ✅ **대시보드 페이지 최소버전**(`app/pages/3_대시보드.py`, 2026-06-08): 매출 KPI(총매출·건수·기간) + 연도/구분 필터 + 집계기준 선택(구분/거래처/상품/관리코드)별 매출 표(비중·CSV 다운). @st.cache_data(ttl 1h) load. 시크릿 `[data] pat/repo`(없으면 `GITHUB_PAT` 폴백), reference는 로컬 csv.
+- ✅ **대시보드 페이지**(`app/pages/3_대시보드.py`): 매출 KPI(총매출·건수·기간) + **기간(날짜범위)/구분/그룹 필터** + **그룹 내 거래처 체크박스 선택**(멤버 ≤50 그룹만 data_editor 포함 체크박스; 큰 그룹은 '제외할 거래처' multiselect) + 집계기준 **일/월/연(시간순+라인차트)**·구분/그룹/거래처/상품/관리코드(매출순 표, 비중·CSV 다운). 탭 본문 `_render_dashboard()` 함수. @st.cache_data(ttl 1h) load. 시크릿 `[data] pat/repo`(없으면 `GITHUB_PAT` 폴백), reference는 로컬 csv.
 - ✅ 거래처 그룹 관리 탭([👥]) — 검색·인라인·일괄(NFC 매칭). 그룹맵=private repo groups/store_groups.csv. 전체 1,041곳 배정: 온라인 15 + 오프라인 1,026(2026-06-08, 온라인 외 전부 오프라인).
 - ✅ 구분 분류 도우미 탭([🏷]) — 미분류 코드(상품명·매출·건수) → 음료/식품/선물세트 지정 → 공유 분류표 추가(decisions/0007).
-- 추후 추가(점진): 멀티연도 월별 추이 차트·이익률 KPI·물류량(박스내품)·이익/물류량 콤보(이중축). (증분 업로더·거래처그룹·구분분류 ✅ 완료)
+- 추후 추가(점진): 이익률 KPI·물류량(박스내품)·이익/물류량 콤보(이중축). (증분 업로더·거래처그룹·구분분류·기간 날짜범위·일/월/연 매출추이 라인차트 ✅ 완료)
 - requirements: pyarrow(parquet)·python-calamine 추가.
 
 ## 전용 함정
@@ -84,6 +84,11 @@
 - **미분류 분류 = 공유표 + 대시보드 분류 도우미([🏷 구분 분류] 탭)** — decisions/0007. 코드별 수동 지정만(일괄 덤프 금지). 분류표에 추가는 발주 GATE A 트리거를 줄이기만 함(안 깨짐). 단 발주 안 거치는 코드 오분류 시 발주에서 GATE 없이 그 분류로 처리됨 주의. 분류 도우미는 app repo `reference/logistics_classification.csv`에 GITHUB_PAT으로 쓰기(발주 분류표 편집과 동일).
 - **비상품 카테고리(택배비/기타/반품)**: 분류표에 음료/식품/선물세트 외 라벨도 존재(비상품 코드 — 택배비·운임·반품·파렛트·온장고·세제/락스). 이 코드들은 발주 매출통계에 안 들어와 발주 GATE/색상 무해. 대시보드 구분 필터는 데이터 파생(_pref 우선 + 그 외 정렬) — 하드코딩 금지.
 - **dict 분류맵 중복키**: 분류표에 동일 관리코드 중복 시 dict는 last-wins. 표준 검증 시 미세 차이 가능(수치 영향 미미).
+
+- **date_input 범위는 선택 도중 1-tuple**: 시작일만 고른 순간 `st.date_input`이 (start,)만 반환 → unpack 에러. `dr[0], dr[-1]`로 방어.
+- **일별 추이 라인차트 점 수**: 전체기간 일별이면 점 1,200+ → Vega 무거움. 실사용은 날짜범위 좁혀 일별. 월/연은 가벼움.
+- **시간축 정렬·차트 인덱스**: 집계키 `%Y-%m-%d`·`%Y-%m`는 제로패딩 → 문자열 sort=시간순. 라인차트는 일/월을 datetime 인덱스로 변환해야 시간축(문자열이면 카테고리축).
+- **그룹 내 거래처 체크박스 = 작은 그룹만(≤50)**: 온라인 15곳용. 오프라인(1,041 중 1,026)은 체크박스 비현실 → '제외할 거래처' multiselect(검색)로. 제외분 `view[~상호명.isin(excluded)]`.
 
 ## 관련 로그 / 결정
 - decisions/0006-dashboard-data-layer.md (설계 + A/B 확정)
@@ -95,3 +100,4 @@
 - logs/2026-06/2026-06-08-phase4-dashboard-minimal.md (최소버전 매출집계 페이지)
 - logs/2026-06/2026-06-08-phase4-dashboard-uploader-tab.md (증분 업로더 [데이터 추가] 탭)
 - logs/2026-06/2026-06-08-phase4-dashboard-group-classify.md (거래처 그룹·구분 분류 탭)
+- logs/2026-06/2026-06-08-dashboard-date-store-filters.md (기간 날짜범위·일/월/연 추이·그룹 내 거래처 체크박스)
