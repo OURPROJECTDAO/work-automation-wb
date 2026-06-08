@@ -5,7 +5,8 @@
 ## 요약
 - 영업이익현황(거래처별 매출, 트랜잭션 레벨) 3개년(~50만행) 파워BI 스타일 대시보드.
 - ERP API 불가 → 사용자가 5월 양식 .xlsx 다운로드만 가능. 부트스트랩 1년치씩 + 일/주/월 증분.
-- 데이터 계층 코어·저장 어댑터·3개년 부트스트랩(313K행)·대시보드 최소버전+증분 업로더([데이터 추가] 탭) 완료(2026-06-08). 차트/물류량/이익률/거래처그룹 점진 확장.
+- 데이터 계층 코어·저장 어댑터·3개년 부트스트랩·대시보드 최소버전+증분 업로더+거래처 그룹+구분 분류 탭 완료(2026-06-08). 차트/물류량/이익률 점진 확장.
+- 4탭: 📊 대시보드(매출 KPI+구분/그룹/거래처/상품/관리코드 집계) · ➕ 데이터 추가 · 👥 거래처 그룹 · 🏷 구분 분류.
 
 ## 데이터 흐름
 ```
@@ -52,6 +53,8 @@
 - KPI: 매출 33.66억 / 이익 2.21억 / 이익률 6.55% / 물류량 ~21.6만.
 
 ## 저장소 (B2 — decisions/0006 갱신)
+- **거래처 그룹 매핑** `groups/store_groups.csv`(상호명,그룹)도 같은 private repo. 상호명=영업정보라 public app repo 금지.
+- 관측(2026-06-08): 마스터가 **41개 월 파티션(2023-01~2026-05), 고유 거래처 1,041곳**으로 성장(아래 313K/29파티션 수치는 stale).
 - master(거래처 매출)는 **PII**(영업기밀) → public app repo 금지.
 - **private repo `OURPROJECTDAO/work-automation-data`** 에 월별 parquet 보관. 앱이 `st.secrets`의 PAT로 R/W.
 - (대안 기각/백업: B1 Drive+서비스계정 — GCP 셋업 부담. B3 세션보유 — 영속 없음.)
@@ -65,24 +68,29 @@
 
 ## 코드 / 데이터 / 테스트
 - `core/dashboard/sales_data.py` — parse_sales·as_category·split_by_month·date_range_replace·make_classifier·make_box_lookup·apply_categories.
-- `core/dashboard/store.py` — DataRepo R/W: list_partition_months·read_partition·write_partition·delete_partition·load_master·ingest(날짜구간 교체). token/repo 인자(core는 app 모름, 페이지가 st.secrets 주입). secrets 키: `[data] pat / repo`.
+- `core/dashboard/store.py` — DataRepo R/W: list_partition_months·read_partition·write_partition·delete_partition·load_master·ingest(날짜구간 교체) + **read_groups·write_groups**(groups/store_groups.csv, 상호명→그룹). token/repo 인자(core는 app 모름, 페이지가 st.secrets 주입). secrets 키: `[data] pat / repo`.
 - 기준데이터: `reference/logistics_classification.csv`(구분), `reference/product_master.csv`(중분류·박스내품).
 - 테스트: `tests/test_sales_data.py` (8 passed). fixtures `tests/fixtures/dashboard/` (합성·PII 없음).
 - ✅ **대시보드 페이지 최소버전**(`app/pages/3_대시보드.py`, 2026-06-08): 매출 KPI(총매출·건수·기간) + 연도/구분 필터 + 집계기준 선택(구분/거래처/상품/관리코드)별 매출 표(비중·CSV 다운). @st.cache_data(ttl 1h) load. 시크릿 `[data] pat/repo`(없으면 `GITHUB_PAT` 폴백), reference는 로컬 csv.
-- 추후 추가(점진): 멀티연도 월별 추이 차트·이익/물류량 콤보(이중축)·이익률 KPI·물류량(박스내품)·거래처 그룹 관리 탭. (증분 업로더 ✅ 완료)
+- ✅ 거래처 그룹 관리 탭([👥]) — 검색·인라인·일괄(NFC 매칭). 그룹맵=private repo groups/store_groups.csv. 온라인 15곳 초안 시드(2026-06-08).
+- ✅ 구분 분류 도우미 탭([🏷]) — 미분류 코드(상품명·매출·건수) → 음료/식품/선물세트 지정 → 공유 분류표 추가(decisions/0007).
+- 추후 추가(점진): 멀티연도 월별 추이 차트·이익률 KPI·물류량(박스내품)·이익/물류량 콤보(이중축). (증분 업로더·거래처그룹·구분분류 ✅ 완료)
 - requirements: pyarrow(parquet)·python-calamine 추가.
 
 ## 전용 함정
 - **합계행**: 맨끝 1행 거래일자 NaT = 합계. 제외 안 하면 전 수치 2배. `df[df['거래일자'].notna()]`.
 - **관리코드 NFC**: 출처 다른 데이터 NFD면 조인 실패. `unicodedata.normalize("NFC", ...)` 후 조인.
-- **분류표는 발주 흐름 코드만**: logistics_classification은 발주서출력업무를 거친 코드 위주(1021개)라 영업 데이터 꼬리(296코드, 매출 12.4%)가 빠짐 → 2차 fallback 필요. 미분류는 발주 분류표에 직접 넣지 말 것(발주 GATE 오염). 대시보드 분류 UI 별도.
+- **분류표는 발주 흐름 코드 위주**: logistics_classification은 발주서출력업무를 거친 코드 위주라 영업 데이터 꼬리가 빠짐 → 2차 fallback(product_master 중분류) 필요.
+- **미분류 분류 = 공유표 + 대시보드 분류 도우미([🏷 구분 분류] 탭)** — decisions/0007. 코드별 수동 지정만(일괄 덤프 금지). 분류표에 추가는 발주 GATE A 트리거를 줄이기만 함(안 깨짐). 단 발주 안 거치는 코드 오분류 시 발주에서 GATE 없이 그 분류로 처리됨 주의. 분류 도우미는 app repo `reference/logistics_classification.csv`에 GITHUB_PAT으로 쓰기(발주 분류표 편집과 동일).
 - **dict 분류맵 중복키**: 분류표에 동일 관리코드 중복 시 dict는 last-wins. 표준 검증 시 미세 차이 가능(수치 영향 미미).
 
 ## 관련 로그 / 결정
 - decisions/0006-dashboard-data-layer.md (설계 + A/B 확정)
+- decisions/0007-dashboard-shared-classification.md (미분류 분류 = 공유표 + 분류 도우미)
 - logs/2026-06/2026-06-08-phase4-dashboard-design.md (큰 틀·목업)
 - logs/2026-06/2026-06-08-phase4-dashboard-datalayer.md (조인검증·코어구현·커밋)
 - logs/2026-06/2026-06-08-phase4-store-adapter.md (저장어댑터·B2 라이브검증·5월적재)
 - logs/2026-06/2026-06-08-phase4-bootstrap-ingest.md (3개년 313K행 부트스트랩)
 - logs/2026-06/2026-06-08-phase4-dashboard-minimal.md (최소버전 매출집계 페이지)
 - logs/2026-06/2026-06-08-phase4-dashboard-uploader-tab.md (증분 업로더 [데이터 추가] 탭)
+- logs/2026-06/2026-06-08-phase4-dashboard-group-classify.md (거래처 그룹·구분 분류 탭)
