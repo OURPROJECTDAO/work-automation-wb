@@ -27,9 +27,9 @@
 - 없음.
 
 ## 다음 한 수
-- **Phase 4 대시보드 구현**: 큰 틀 확정(decisions/0006). 미결: master 저장위치(A Drive / B 세션) 사용자 택.
+- **Phase 4 대시보드 구현**: 큰 틀 확정(decisions/0006). master 저장위치 = **Google Drive 확정**(마이박스 API 미지원 → Drive 경유). 미결정 없음 → 바로 구현 착수 가능.
   - 구현 순서: ① reference 조인 검증(product_master 박스내품·대분류) ② 부트스트랩 업로더(연 1년, calamine→월 parquet) ③ 파티션 누적(날짜구간 교체) ④ 대시보드 페이지(파워BI 스타일) + 거래처 그룹 관리 탭.
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
-_갱신: 2026-06-08 (Phase 4 대시보드 설계 확정 — decisions/0006)_
+_갱신: 2026-06-08 (Phase 4 설계 확정 + master 저장위치 Google Drive 확정 — decisions/0006)_
