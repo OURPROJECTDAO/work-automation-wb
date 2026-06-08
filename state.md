@@ -15,7 +15,7 @@
 | logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
 | cheonnyeon-upload (천년경영업로드V15) | 3 | 운영 중 · 골든 27시트 0 불일치 · pytest 29 · logistics 체인 | workflows/cheonnyeon-upload.md |
 | invoice-fill (송장처리/송장번호 일괄입력) | 3 | 운영 중(확인) · 식봄·올웨이즈·배민상회·캐시노트 4채널 · 송장형식 채널별 · 배송상태 변환 | workflows/invoice-fill.md |
-| dashboard (영업이익현황 대시보드) | 4 | 운영 · 매출 집계(구분/거래처/상품/관리코드) + 증분 업로더 · 3개년 313K행 · 차트/물류량 점진추가 | workflows/dashboard.md |
+| dashboard (영업이익현황 대시보드) | 4 | 운영 · 4탭(매출집계+그룹/구분 집계 · 데이터추가 · 거래처그룹 · 구분분류) · 마스터 41파티션(2023~2026-05)·거래처1041 · 차트/이익률/물류량 점진 | workflows/dashboard.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -28,9 +28,9 @@
 - 없음. (B2 인프라 완료 — repo·PAT R/W·st.secrets 검증됨 2026-06-08.)
 
 ## 다음 한 수
-- **Phase 4 대시보드 점진 확장**: 매출 집계 + 증분 업로더 배포 완료. 다음 후보 — ① 멀티연도 월별 매출 추이 차트 ② 이익률 KPI ③ 물류량(수량÷박스내품) ④ 이익/물류량 콤보 ⑤ 거래처 그룹 관리 탭. 사용자 우선순위 따라 1개씩. 상세 workflows/dashboard.md.
+- **Phase 4 대시보드 점진 확장**: 매출집계·증분업로더·거래처그룹·구분분류 배포 완료. ⚠ store.py(core) 변경분 적용에 Reboot app 필요. 다음 후보 — ① 멀티연도 월별 매출 추이 차트 ② 이익률 KPI ③ 물류량(수량÷박스내품) ④ 이익/물류량 콤보. 상세 workflows/dashboard.md.
 - core/ 신규 모듈을 페이지가 import → 첫 배포 후 Reboot app 필요(pitfalls 모듈캐시).
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
-_갱신: 2026-06-08 (Phase 4 대시보드 최소버전+증분 업로더([데이터 추가] 탭) 배포 — 매출 집계, 이후 차트/물류량 점진 확장)_
+_갱신: 2026-06-08 (대시보드 거래처 그룹·구분 분류 탭 추가 + 그룹 집계/필터 연동. 온라인 15곳 초안 시드. store.py core 변경 → Reboot app 필요)_
