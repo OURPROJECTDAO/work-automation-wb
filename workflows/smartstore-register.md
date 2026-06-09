@@ -50,8 +50,9 @@
 - 확장자 실검사 필요. gi.esmplus.com 샌드박스 차단 → 설정>Capabilities>Code execution 도메인 허용 + 새 세션. (글로벌하베스트 jpg 확인)
 
 ## Reference / 양식
-- reference/smartstore_bulk_template.xlsx (양식 원본) — app repo 커밋 완료(2026-06-09).
-- reference/smartstore_category_food.csv — 커밋 완료.
+- reference/smartstore_bulk_template.xlsx (**출력** 일괄등록 양식 원본) — app repo 커밋 완료(2026-06-09).
+- reference/smartstore_category_food.csv (카테고리 룩업 630) — 커밋 완료.
+- **reference/smartstore_input_form_v1.xlsx (배치 입력폼 v1)** — 사용자에게 배포하는 입력 수집 양식. 3시트(작성안내·배치설정·상품목록). 입력=관리코드·업로드구분·합포장(박스기준)·과세여부(필수) + 상품명·카테고리(선택, 비우면 AI). 배치설정=마진율(디폴트10). 이미지확장자는 입력 아님(URL 실검사 자동판별). 커밋 2026-06-10.
 
 ## 처리한 배치
 - 글로벌하베스트 15개(박스10/낱개5) → /outputs 글로벌하베스트_일괄등록.xlsx 생성·서식검증 통과. 2026-06-09.
