@@ -41,7 +41,7 @@
 - 보유 N 외 값(7·9·11·13·14·…) 필요 시 템플릿 추가. 특히 박스내품 14를 낱개로 올리면 N14 없음.
 
 ## 카테고리
-- 룩업표: reference/smartstore_category_food.csv (630, 식품). **app repo 커밋 보류(승인 대기)**.
+- 룩업표: reference/smartstore_category_food.csv (630, 식품). app repo 커밋 완료(2026-06-09).
 - 예(글로벌하베스트): 새우칩·메밀칩·누룽지과자 → 일반스낵(50022500) · 그린티 → 녹차/홍차음료(50012001) · 우롱티·자스민티 → 기타전통/차음료(50012002) · 요구르트스파클링 → 기타탄산음료(50002257) · 동서커피믹스 → 커피믹스/인스턴트커피(50002606).
 
 ## 이미지
@@ -50,14 +50,14 @@
 - 확장자 실검사 필요. gi.esmplus.com 샌드박스 차단 → 설정>Capabilities>Code execution 도메인 허용 + 새 세션. (글로벌하베스트 jpg 확인)
 
 ## Reference / 양식
-- reference/smartstore_bulk_template.xlsx (양식 원본) — **app repo 커밋 보류(승인 대기)**.
-- reference/smartstore_category_food.csv — **커밋 보류**.
+- reference/smartstore_bulk_template.xlsx (양식 원본) — app repo 커밋 완료(2026-06-09).
+- reference/smartstore_category_food.csv — 커밋 완료.
 
 ## 처리한 배치
 - 글로벌하베스트 15개(박스10/낱개5) → /outputs 글로벌하베스트_일괄등록.xlsx 생성·서식검증 통과. 2026-06-09.
 
 ## 미해결
-- reference 커밋 승인대기 · 이미지 확장자 자동검증 · 면세 처리 · 보유N 외 값/N=8 중복 · (공통)엔진+캐시 미구현.
+- 이미지 확장자 자동검증 · 면세 처리 · 보유N 외 값/N=8 중복 · (공통)엔진+캐시 미구현.
 
 ## 관련
 - 공통 개념 → workflows/product-registration-common.md
