@@ -19,6 +19,7 @@
 | product-registration (공통 개념) | — | 전 채널 공유: 낱개/박스·합포장→배송비N·마진산정공식·상품명정제·카테고리매핑·캐시·서식일치. 플랫폼별 슬롯(양식·카테고리표·배송비코드·수수료) 정의 | workflows/product-registration-common.md |
 | smartstore-register (스마트스토어) | — | 운영(챗 네이티브) · 공통=product-registration-common · SS 전용값(양식13컬럼·수수료6%·카테고리csv·N→코드표·고정값·이미지) · 글로벌하베스트 배치 생성 | workflows/smartstore-register.md |
 | easyadmin-register (이지어드민 상품등록) | — | 운영(챗 네이티브) · **정산채널(판매처 아님)**·신규상품 필수경유 · 기입7열(A·B·C·D·E·AB·AC)·낱개레거시[…ㅁ…]/박스[코드]명·B=20010·AB=4·AC=낱개박스내품/박스합포장(기본1) | workflows/easyadmin-register.md |
+| esm-register (ESM=G마켓/옥션) | — | 운영(챗 네이티브) · 공통=product-registration-common · G마켓 단독·수수료17%·양식261열 8행부터·기입15열·카테고리표(K·M 동행)·배송 유료15285·고정값(td680708/무제한/40/146068) · 글로벌하베스트 15박스 생성 | workflows/esm-register.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -37,4 +38,4 @@
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
-_갱신: 2026-06-09 (easyadmin-register 신설 — 이지어드민 정산채널 상품등록)_
+_갱신: 2026-06-09 (esm-register 신설 — ESM/G마켓 상품등록, 박스 배치)_
