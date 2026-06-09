@@ -56,6 +56,11 @@
 - 스마트스토어 정제 박스명 그대로. 박스 suffix `{박스내품}개`. [관리코드] 프리픽스 없음(이지어드민과 다름).
 - ESM 제한: 상품명+프로모션 합 ≤100byte(한글 2byte). 현 배치 최대 39byte.
 
+## 자산 위치 (고정 — 챗 네이티브, 앱 미사용)
+- **양식(빈)**: app repo `reference/esm_bulk_template.xlsx` (NEW 일반상품 261열, 1~7행 구조 보존). 배치 시 raw 다운로드→openpyxl load(read_only 금지).
+- **카테고리표**: app repo `reference/esm_category_food.csv` (헤더+291행, 컬럼 ESM카테고리명·사이트카테고리명·사이트·ESM카테고리(K)·사이트카테고리(M)). 커밋 완료(승인 후).
+- (앱 코드 참조 0건 — 두 자산 모두 대화창만 사용. product_master 등 앱용 reference와 별개.)
+
 ## 데이터 출처
 - product_master(app repo): 관리코드→박스매입단가·박스내품·규격.
 - 정제명/모드/합포장 = 글로벌하베스트 소스 시트(상품코드·관리코드·상품명·업로드구분·합포장·규격).
@@ -69,7 +74,7 @@
 - 글로벌하베스트 15개(전부 박스) → /outputs ESM_글로벌하베스트_일괄등록.xlsx. 2026-06-09.
 
 ## 미해결 / 주의
-- ESM 카테고리표(식품 291행) app repo reference 커밋 — 사용자 승인 후(공개 repo). 커밋하면 차기 배치 결정적 룩업.
+- ~~카테고리표 app repo 커밋 승인 대기~~ → **완료**(reference/esm_category_food.csv). 양식도 reference/esm_bulk_template.xlsx로 고정 — 다음 배치 재업로드 불필요.
 - 옥션(A열 계열 C/L/O/U/AH) 미사용 — 옥션 동시등록 필요해지면 A ID·A카테고리·A판매가·A재고·A발송정책 추가.
 - 누룽지과자=스낵, 요구르트스파클링=기타탄산음료로 확정(사용자 승인).
 
