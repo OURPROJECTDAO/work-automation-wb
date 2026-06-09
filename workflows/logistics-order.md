@@ -39,6 +39,7 @@
 - **낱개처리목록**: 낱개코드→원코드 매핑. 원코드로 상품관리 재고 조회. 원코드가 상품관리에 없으면 GATE B(사용자가 낱개목록에 추가).
 - **수치 컬럼 float 명시**: `_필요수량` 등은 `.astype(float)`. 안 하면 낱개 배수곱(예 10×0.125=1.25) 대입 시 `Invalid value for dtype int64` 에러.
 - **재고 계산**: 재고 = 박스재고(상품관리) − 필요수량(낱개는 총수량×배수). 음수 = 품절목록. round 후 int.
+- **GATE A/B UI 어드민옵션 슬라이스 — NaN 방어**: `unmatched` 행은 `df[...][['erp관리코드','어드민옵션']].to_dict('records')` 산출. 어드민옵션이 빈값이면 **float NaN** → `row.get('어드민옵션','')[:30]`이 `TypeError: 'float' object is not subscriptable`로 크래시(2026-06-10 발생). UI(1_파일처리.py)에서 `('' if pd.isna(v) else str(v))[:30]`로 방어. GATE B(335줄 f-string)도 nan 표시 방지 동일 처리.
 
 ## 출력 디자인 (프린트용 — 물류팀 전달)
 - 타이틀 바: 남색(2F5496) 배경 + 흰 글씨, 날짜 "YYYY년 M월 D일 X요일".
