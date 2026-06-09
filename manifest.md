@@ -17,7 +17,7 @@
 | sku_list | onnuri-order |
 | unit_list / spec_master | logistics-order |
 | bm_commission / sub_list | cheonnyeon-upload |
-| smartstore_category_food / smartstore_bulk_template | smartstore-register |
+| smartstore_category_food / smartstore_bulk_template / smartstore_input_form_v1 | smartstore-register |
 | esm_category_food / esm_bulk_template | esm-register |
 | (easyadmin 양식 — **미보관, C 참조**) | easyadmin-register |
 | `groups/store_groups.csv` (data repo, private) | dashboard |
@@ -35,7 +35,7 @@
 > 양식·카테고리 = 거의 불변(정본 = app `reference/`). 소스·결과 = 배치별(Drive).
 | 채널 | 양식 | 카테고리표 | 소스/결과 (Drive) |
 |---|---|---|---|
-| smartstore | `reference/smartstore_bulk_template.xlsx` | `reference/smartstore_category_food.csv` | 상품등록/(smartstore 폴더 미생성) |
+| smartstore | `reference/smartstore_bulk_template.xlsx` (출력양식) · `reference/smartstore_input_form_v1.xlsx` (배치 입력폼) | `reference/smartstore_category_food.csv` | 상품등록/(smartstore 폴더 미생성) |
 | esm | `reference/esm_bulk_template.xlsx` | `reference/esm_category_food.csv` | 상품등록/esm/ (소스 `[소스]글로벌하베스트.xlsx`) |
 | easyadmin | **미보관(다음 배치 때 확보)** | 불필요(정산채널) | 상품등록/(easyadmin 폴더 미생성) |
 
