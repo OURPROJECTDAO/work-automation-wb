@@ -8,18 +8,20 @@
 - 웹 앱: Streamlit Community Cloud 배포·운영 중.
 
 ## 워크플로우 인덱스 (이관 완료 = 운영 중)
-| 워크플로우 | Phase | 상태 | 상세 |
+> 상태는 통제어휘(운영중/진행중/이슈/개념doc). **상세·검증·미해결·자산은 각 workflows/<name>.md**. 연결=manifest.md.
+
+| 워크플로우 (내부명) | Phase | 상태 | 상세 |
 |---|---|---|---|
-| openmarket-merge (오픈마켓합포도서산간확인V7) | 1 | 운영 중 · 골든 5시트 PASS · 송장 단독파일(★★송장) 복원 | workflows/openmarket-merge.md |
-| onnuri-order (온누리양식_발주서) | 3 | 운영 중 · 골든 15/15 · 빈 G셀 픽스 | workflows/onnuri-order.md |
-| logistics-order (발주서출력업무) | 3 | 운영 중 · 골든 4 passed · 프린트 디자인 | workflows/logistics-order.md |
-| cheonnyeon-upload (천년경영업로드V15) | 3 | 운영 중 · 골든 27시트 0 불일치 · pytest 29 · logistics 체인 | workflows/cheonnyeon-upload.md |
-| invoice-fill (송장처리/송장번호 일괄입력) | 3 | 운영 중(확인) · 식봄·올웨이즈·배민상회·캐시노트 4채널 · 송장형식 채널별 · 배송상태 변환 | workflows/invoice-fill.md |
-| dashboard (영업이익현황 대시보드) | 4 | 운영 · 📊 지표 토글 매출/이익(택배비=ERP 00-12 라인·3000/2500 보정) · 집계기준 행×열 교차표(피벗) · 기간/구분/그룹·거래처 체크박스·일/월/연 추이 · 마스터 41파티션·42.2만행·거래처1041 · 물류량 점진 | workflows/dashboard.md |
-| product-registration (공통 개념) | — | 전 채널 공유: 낱개/박스·합포장→배송비N·마진산정공식·상품명정제·카테고리매핑·캐시·서식일치. 플랫폼별 슬롯(양식·카테고리표·배송비코드·수수료) 정의 | workflows/product-registration-common.md |
-| smartstore-register (스마트스토어) | — | 운영(챗 네이티브) · 공통=product-registration-common · SS 전용값(양식13컬럼·수수료6%·카테고리csv·N→코드표·고정값·이미지) · 글로벌하베스트 배치 생성 | workflows/smartstore-register.md |
-| easyadmin-register (이지어드민 상품등록) | — | 운영(챗 네이티브) · **정산채널(판매처 아님)**·신규상품 필수경유 · 기입7열(A·B·C·D·E·AB·AC)·낱개레거시[…ㅁ…]/박스[코드]명·B=20010·AB=4·AC=낱개박스내품/박스합포장(기본1) | workflows/easyadmin-register.md |
-| esm-register (ESM=G마켓/옥션) | — | 운영(챗 네이티브) · 공통=product-registration-common · G마켓 단독·수수료17%·양식261열 8행부터·기입15열·카테고리표(K·M 동행)·배송 유료15285·고정값(td680708/무제한/40/146068) · 글로벌하베스트 15박스 생성 | workflows/esm-register.md |
+| openmarket-merge (오픈마켓합포도서산간확인V7) | 1 | 운영중 | workflows/openmarket-merge.md |
+| onnuri-order (온누리양식_발주서/제이티발주) | 3 | 운영중 | workflows/onnuri-order.md |
+| logistics-order (발주서출력업무) | 3 | 운영중 | workflows/logistics-order.md |
+| cheonnyeon-upload (천년경영업로드V15) | 3 | 운영중 | workflows/cheonnyeon-upload.md |
+| invoice-fill (송장처리) | 3 | 운영중 (4채널) | workflows/invoice-fill.md |
+| dashboard (영업이익현황) | 4 | 운영중 (이익률·물류량 점진) | workflows/dashboard.md |
+| product-registration-common (등록 공통) | — | 개념doc | workflows/product-registration-common.md |
+| smartstore-register (스마트스토어) | — | 운영중 (챗) | workflows/smartstore-register.md |
+| easyadmin-register (이지어드민·정산채널) | — | 운영중 (챗) | workflows/easyadmin-register.md |
+| esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -38,4 +40,4 @@
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
-_갱신: 2026-06-09 (esm-register 신설 — ESM/G마켓 상품등록, 박스 배치)_
+_갱신: 2026-06-09 (워크플로우 인덱스 상태 슬림화 — 통제어휘+포인터, 상세는 각 doc)_
