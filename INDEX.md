@@ -18,7 +18,7 @@
 - logs/YYYY-MM/*.md — 작업 로그 (append-only, 1작업단위 1건)
 - decisions/NNNN-*.md — ADR (append-only)
 
-현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register (state.md 인덱스 참조).
+현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · channel-margin-monitor (state.md 인덱스 참조).
 
 ## 읽기 규칙 (세션 시작 — 한 번에)
 - PAT는 프로젝트 지식 파일에서 읽는다(절대 repo에 두지 않음).
