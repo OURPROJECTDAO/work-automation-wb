@@ -40,8 +40,8 @@
 - **상품등록 운영 중**(챗 네이티브, ADR 0009): smartstore·esm·easyadmin. **멀티채널 배치 입력폼 v2**(`reference/product_input_form_v2.xlsx`, 대상 채널=스마트스토어/G마켓/둘 다) 배포 완료(2026-06-10) — smartstore·esm 공용, 구 v1 deprecated. 이미지확장자=URL 실검사 자동판별 확정. 미해결 — 결정적 엔진/캐시 미구현. 상세 workflows/product-registration-common.md·*-register.md.
 - **대시보드 product_attributes**: ✅ 슬림화(ADR 0011, 2026-06-10) — 4컬럼(식품음료·합포수량·최종분류). 차원=세분류만 + 식품음료 구분 3차 fallback(브랜드·b2b 폐기). **Reboot app 필요.** 451 합포수량 채우면 병합. 상세 workflows/dashboard.md.
 - **상품마진(온라인) 탭**: ✅ 신설(ADR 0012, 2026-06-10) — 합포×내품 택배배분 추정 + 채널 보정계수(실제송장÷추정송장). 온라인 거래처 자동스코프. page-only. 상세 workflows/dashboard.md.
-- **channel-margin-monitor 착수**(채널 가격·마진 모니터, 스마트스토어 먼저): reference 3종 영속화 완료(baseline_margin 1229·margin_floor 61·sobun 136). 마진식=우리식(이익/정산액)·실택배비 2700단일·매입가×판매자바코드N·코드4-tier(박스/PC/소분/합포). **다음 = 페이지 구현**. 상세 workflows/channel-margin-monitor.md.
+- **channel-margin-monitor 구현 완료**(채널 가격·마진 모니터, 스마트스토어): reference 3종 영속화 + 코어(core/workflows/channel_margin_monitor.py)+독립 페이지(app/pages/6_채널마진모니터.py). 골든 705/706 검증. 마진식=우리식(이익/정산액)·실택배비 2700·매입가×판매자바코드N(분수가능)·코드4-tier. **⚠️ 첫 배포 Reboot 1회** 후 실사용 확인 → 운영중 전환. 상세 workflows/channel-margin-monitor.md.
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
-_갱신: 2026-06-10 (channel-margin-monitor 착수 — reference 3종 영속화)_
+_갱신: 2026-06-10 (channel-margin-monitor 코어+페이지 구현 — Reboot 대기)_
