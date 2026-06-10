@@ -57,6 +57,7 @@
 - ESM 제한: 상품명+프로모션 합 ≤100byte(한글 2byte). 현 배치 최대 39byte.
 
 ## 자산 위치 (고정 — 챗 네이티브, 앱 미사용)
+- **입력폼(사용자 수집)**: 공통 `reference/product_input_form_v2.xlsx` (멀티채널, 대상 채널=G마켓 선택). 합포장·과세 컬럼은 ESM에선 무시(AC=15285 고정·과세 자동). 상세 product-registration-common.md.
 - **양식(빈)**: app repo `reference/esm_bulk_template.xlsx` (NEW 일반상품 261열, 1~7행 구조 보존). 배치 시 raw 다운로드→openpyxl load(read_only 금지).
 - **카테고리표**: app repo `reference/esm_category_food.csv` (헤더+291행, 컬럼 ESM카테고리명·사이트카테고리명·사이트·ESM카테고리(K)·사이트카테고리(M)). 커밋 완료(승인 후).
 - (앱 코드 참조 0건 — 두 자산 모두 대화창만 사용. product_master 등 앱용 reference와 별개.)
