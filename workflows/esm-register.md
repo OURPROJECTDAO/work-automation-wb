@@ -78,6 +78,7 @@
 - ~~카테고리표 app repo 커밋 승인 대기~~ → **완료**(reference/esm_category_food.csv). 양식도 reference/esm_bulk_template.xlsx로 고정 — 다음 배치 재업로드 불필요.
 - 옥션(A열 계열 C/L/O/U/AH) 미사용 — 옥션 동시등록 필요해지면 A ID·A카테고리·A판매가·A재고·A발송정책 추가.
 - 누룽지과자=스낵, 요구르트스파클링=기타탄산음료로 확정(사용자 승인).
+- 양식 도입 전 업로드건 사후 백필: G마켓 export(정제명)↔소스(원본명) 조인은 규격(용량+박스내품수)+맛 키워드 매칭 사용. 합포장은 소스 시트에만 있음(ESM 출력엔 없음). logs/2026-06/2026-06-10-esm-postupload-backfill.md.
 
 ## 관련
 - 공통 → workflows/product-registration-common.md · 스마트스토어 → smartstore-register.md · 이지어드민 → easyadmin-register.md
