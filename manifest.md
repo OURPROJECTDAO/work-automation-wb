@@ -25,6 +25,7 @@
 | esm_category_food / esm_bulk_template | esm-register |
 | (easyadmin 양식 — **미보관, C 참조**) | easyadmin-register |
 | margin_floor / sobun | channel-margin-monitor |
+| `listing_<channel>.csv` (+meta) — 채널 상품관리 스냅샷, 페이지에서 교체/병합 | channel-margin-monitor |
 | `groups/store_groups.csv` (data repo, private) | dashboard |
 | `master/sales_YYYY-MM.parquet` (data repo, private) | dashboard |
 
