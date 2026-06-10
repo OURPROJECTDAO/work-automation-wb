@@ -17,7 +17,8 @@
 | sku_list | onnuri-order |
 | unit_list / spec_master | logistics-order |
 | bm_commission / sub_list | cheonnyeon-upload |
-| smartstore_category_food / smartstore_bulk_template / smartstore_input_form_v1 | smartstore-register |
+| smartstore_category_food / smartstore_bulk_template | smartstore-register |
+| `product_input_form_v2.xlsx` (배치 입력폼, **멀티채널 공유**) | smartstore + esm (구 smartstore_input_form_v1 deprecated) |
 | esm_category_food / esm_bulk_template | esm-register |
 | (easyadmin 양식 — **미보관, C 참조**) | easyadmin-register |
 | `groups/store_groups.csv` (data repo, private) | dashboard |
