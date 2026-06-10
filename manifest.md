@@ -9,7 +9,7 @@
 |---|---|---|---|---|
 | `product_master.csv` | app `reference/` | logistics-order(재고 iloc14)·dashboard(중분류·박스내품)·smartstore/easyadmin/esm-register(매입가·박스내품·규격) | 연동데이터관리>상품관리 (매일 갱신·타임스탬프) | **연동데이터**(매일 변동). 컬럼 위치참조(iloc4=관리코드,14=박스재고) 깨지면 logistics 재고 오류 |
 | `logistics_classification.csv` | app `reference/` | logistics-order(구분 GATE A)·cheonnyeon-upload(구분 룩업,읽기만)·dashboard(1차 구분) | 발주서출력업무 페이지 + 대시보드 🏷분류 도우미 | 코드 추가는 발주 GATE 줄이기만(안 깨짐). 단 발주 안 거치는 코드 오분류 시 그 분류로 처리 주의 |
-| `product_attributes.csv` | app `reference/` | dashboard(브랜드·최종분류·b2b_b2c 차원 + 식품음료=구분 3차 fallback) | 합포데이터.xlsx(Drive 작성용)에서 수동컬럼 추출 재커밋(product_master 패턴) | 관리코드 고정 속성표(1,134). PII 없음. **구분과 별도유지+연동**: 구분 source=logistics_classification, 식품음료(I)는 3차 fallback로만 |
+| `product_attributes.csv` | app `reference/` | dashboard(세분류=최종분류 차원 + 식품음료=구분 3차 fallback) | 합포데이터.xlsx(Drive 작성용)에서 추출 재커밋 | 관리코드 속성표(1,134). **4컬럼만**: 식품음료·합포수량·최종분류(ADR 0011, 브랜드·b2b·정제규격 폐기). PII 없음. 구분 source=logistics_classification 별도유지 |
 
 ## A-2. 단일소비자 reference (소유 워크플로우 전용 — 영향 국소)
 | 파일(app `reference/`) | 소유 |
