@@ -87,7 +87,7 @@
 - ✅ 그룹 내 거래처 선택: 전체 선택/해제 **토글** 버튼(`dash_store_bulk`+버전키로 매 토글 재초기화, 단순 pop은 해제 불가 함정) · 매출 열 accounting(콤마) 포맷.
 - ✅ 거래처 그룹 관리 탭([👥]) — 검색·인라인·일괄(NFC 매칭). 그룹맵=private repo groups/store_groups.csv. 전체 1,041곳 배정: 온라인 15 + 오프라인 1,026(2026-06-08, 온라인 외 전부 오프라인).
 - ✅ 구분 분류 도우미 탭([🏷]) — 미분류 코드(상품명·매출·건수) → 음료/식품/선물세트 지정 → 공유 분류표 추가(decisions/0007).
-- ⏳ **product_attributes 조인**(2026-06-10 CSV 커밋 완료, apply_categories 조인·차원추가 미구현): 브랜드·최종분류(세분류)·b2b_b2c 슬라이서/피벗 차원 + 식품음료=구분 3차 fallback. 구분 source는 logistics_classification 별도유지(연동만). 빈속성→미지정. 상세 logs/2026-06/2026-06-10-product-attributes-reference.md.
+- ✅ **product_attributes 조인 완료**(2026-06-10): load_sales/apply_categories가 관리코드 조인 → 매출 모드 차원 **브랜드·세분류(최종분류)·소매/도매(b2b_b2c)** + 식품음료=구분 **3차 fallback**(make_classifier food_map). 구분 source=logistics_classification 별도유지. 빈속성→미지정. ⚠️sales_data.py는 core 모듈 → 배포 후 Reboot 필요. logs 2026-06-10-product-attributes-reference·dashboard-product-attributes-dims.
 - 추후 추가(점진): 물류량(박스내품)·이익/물류량 콤보(이중축). (증분 업로더·거래처그룹·구분분류·기간 날짜범위·일/월/연 추이·이익 모드[이익률 포함] ✅ 완료)
 - requirements: pyarrow(parquet)·python-calamine 추가.
 
