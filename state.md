@@ -37,7 +37,7 @@
 - **Phase 4 대시보드 점진 확장**: 매출집계·증분업로더·거래처그룹·구분분류·기간 날짜범위·일/월/연 추이·**이익 모드(택배비=ERP 00-12 라인, 3000/2500 보정 토글, 이익률=이익/매입가, 전체 거래처)** 배포 완료(decisions/0008). 다음 후보 — ① 물류량(수량÷박스내품) ② 이익/물류량 콤보(이중축). 상세 workflows/dashboard.md.
 - core/ 신규 모듈을 페이지가 import → 첫 배포 후 Reboot app 필요(pitfalls 모듈캐시).
 - **상품등록 운영 중**(챗 네이티브, ADR 0009): smartstore·esm·easyadmin. **멀티채널 배치 입력폼 v2**(`reference/product_input_form_v2.xlsx`, 대상 채널=스마트스토어/G마켓/둘 다) 배포 완료(2026-06-10) — smartstore·esm 공용, 구 v1 deprecated. 이미지확장자=URL 실검사 자동판별 확정. 미해결 — 결정적 엔진/캐시 미구현. 상세 workflows/product-registration-common.md·*-register.md.
-- **대시보드 product_attributes**: `reference/product_attributes.csv`(1,134코드, 브랜드·최종분류·b2b_b2c·식품음료) 커밋 완료(2026-06-10). ⏳ apply_categories 조인+차원(브랜드/최종분류/b2b_b2c) 미구현. 구분 별도유지+식품음료 3차 fallback. triage 나머지 640 추후. 상세 workflows/dashboard.md.
+- **대시보드 product_attributes**: ✅ 조인 완료(2026-06-10) — 매출 모드 차원 브랜드·세분류·소매/도매 + 식품음료 구분 3차 fallback. **sales_data.py(core) 변경 → Reboot app 필요.** triage 나머지 640 추후. 상세 workflows/dashboard.md.
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
