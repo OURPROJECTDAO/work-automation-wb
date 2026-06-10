@@ -63,6 +63,28 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
 - 실 다운로드 712행: 정산액 707/707, base매입단가 706/707, 마진율 705/706 골든(엑셀 결과페이지 캐시) 일치. 차이=폐기한 3000/3700 분기 + 매입단가 vintage 1건.
 - 신식(2700): 평균마진 10.28%·미달 79·제한 37·미설정 9·미매칭 5. 합포(-CB-) 이 다운로드 0건(로직만 검증).
 
+## 채널 추가 레시피 (★앞으로 채널 다수 추가 — 이 순서)
+새 채널 = 보통 **CHANNEL_CONFIG 한 세트 (+ 필요 시 정산식 변형)** 만으로 추가. 코드 4-tier 해석·reference(baseline/margin_floor/sobun/product_master)·페이지 UI·listing 저장은 전부 **공통(수정 불필요)**.
+
+1. **다운로드 샘플 확보**: 그 채널 상품관리/리스팅 다운로드(.xlsx) 1개. 컬럼 위치·헤더행·데이터시작행이 채널마다 다름 → 실물 필수.
+2. **컬럼 매핑(cols)**: 상품번호(키)·판매자상품코드(관리코드/PC/변환)·상품명·판매가·배송비·즉시할인·포인트·판매자바코드(N) 의 1-indexed 열. 없는 항목은 parse_download에서 0/공백 처리(채널에 따라 할인·포인트·바코드 없을 수 있음).
+3. **정산 상수**: commission(수수료율)·ship_settle(배송비 정산계수)·real_ship(실택배비)·header_row·data_start·sheet.
+4. **기준마진율 컬럼**: baseline_margin.csv에 그 채널 확정마진율 열 존재 확인(현재 10채널: 스마트스토어·자사몰·ESM·배민상회·식봄·올웨이즈·캐시노트·쿠팡·토마토·알리). 없으면 기준마진율시트에서 재추출.
+5. **apply_floor**: 제조사 단가하한(margin_floor)을 그 채널에 적용할지.
+6. **CHANNEL_CONFIG 한 세트 추가** (key·commission·ship_settle·real_ship·baseline_col·apply_floor·sheet·header_row·data_start·cols).
+7. **selectbox 자동 노출**: 페이지가 `CHANNEL_CONFIG.keys()` 사용 → 페이지 코드 수정 불필요.
+8. **골든 검증**: 가능하면 그 채널 기존 엑셀 결과와 대조(스마트스토어 705/706 방식). 코드 4-tier·N(분수 포함) 확인.
+9. **Reboot app 1회**(core 모듈 수정 시).
+10. listing은 첫 '상품관리 갱신' 시 `listing_<key>.csv` 자동 생성.
+
+## 채널별 다른 것 / 공통인 것
+- **채널별(추가 시 정의)**: 수수료율 · 정산계수 · 실택배비 · baseline 컬럼 · 마진제한 적용여부 · 다운로드 컬럼맵/헤더·데이터행.
+- **공통(불변)**: 코드 4-tier 해석(박스/PC/소분/합포 — 같은 상품코드 체계) · reference(product_master·sobun·baseline_margin·margin_floor) · 페이지 UI(KPI/필터/표/CSV) · listing 저장/갱신.
+- **⚠️ 정산식 구조 차이 주의**: 현재 compute() 정산식은 **스마트스토어형** — `정산액 = 판매가net×(1−수수료) + 배송비×정산계수`. 채널에 따라 정산 구조가 다를 수 있음:
+  - 배민상회: 수수료율이 **관리코드별**(bm_commission.csv) + 추가 차감(천년경영 H식 `F×(1−수수료−0.03)`).
+  - 식봄·쿠팡·알리·대용량 등: 단일 계수지만 값 상이(천년경영 마켓별 H식: 식봄0.93·캐시노트0.94·쿠팡0.88·알리0.91·대용량 `F×0.93+G×0.967`).
+  - 이런 채널은 commission 상수만으론 부족 → compute()에 **채널별 정산 훅(settle_fn)** 추가 검토(상수로 표현되면 config, 아니면 함수). **천년경영 workflows/cheonnyeon-upload.md 마켓별 H식이 채널 정산식 1차 참고.**
+
 ## 관련
 - logs/2026-06/2026-06-10-channel-margin-monitor-references.md
 - manifest.md (A baseline_margin·product_master / A-2 margin_floor·sobun)
