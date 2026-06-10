@@ -44,4 +44,4 @@
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
-_갱신: 2026-06-10 (channel-margin-monitor 코어+페이지 구현 — Reboot 대기)_
+_갱신: 2026-06-10 (channel-margin-monitor listing 연동데이터화 — 저장본 자동로드+갱신, Reboot 대기)_
