@@ -81,7 +81,7 @@
 ## 코드 / 데이터 / 테스트
 - `core/dashboard/sales_data.py` — parse_sales·as_category·split_by_month·date_range_replace·make_classifier·make_box_lookup·apply_categories.
 - `core/dashboard/store.py` — DataRepo R/W: list_partition_months·read_partition·write_partition·delete_partition·load_master·ingest(날짜구간 교체) + **read_groups·write_groups**(groups/store_groups.csv, 상호명→그룹). token/repo 인자(core는 app 모름, 페이지가 st.secrets 주입). secrets 키: `[data] pat / repo`.
-- 기준데이터: `reference/logistics_classification.csv`(구분), `reference/product_master.csv`(중분류·박스내품).
+- 기준데이터: `reference/logistics_classification.csv`(구분), `reference/product_master.csv`(중분류·박스내품), **`reference/product_attributes.csv`(관리코드 고정 속성표 1,134 — 브랜드·최종분류·b2b_b2c·식품음료; 합포데이터.xlsx에서 추출, manifest A)**.
 - 테스트: `tests/test_sales_data.py` (8 passed). fixtures `tests/fixtures/dashboard/` (합성·PII 없음).
 - ✅ **대시보드 페이지**(`app/pages/3_대시보드.py`): **지표 토글 매출/이익**. 기간(날짜범위)/구분/그룹 필터 + 그룹 내 거래처 체크박스(≤50 그룹 data_editor, 큰 그룹 '제외' multiselect). **매출 모드**: KPI(총매출·건수·기간) + 일/월/연(라인차트)·구분/그룹/거래처/상품/관리코드 매출표(00-12 숨김). **이익 모드**: 택배비 단가 토글(3000/2500 보정) + KPI(매출·매입가·송장·택배비·이익·이익률) + 일/월/연/거래처/그룹 이익표·추이(구분필터 미적용). **집계 기준 행×열 교차표(피벗)**: 기준1(행)+기준2(열, 선택) → 셀=매출/이익, 합계 행·열, 행 상위 100·카테고리 열 상위 30 캡, 시간 열은 시간순(`_dim_key`/`_pivot_table`). `_render_dashboard()`+`_won()`. @st.cache_data(ttl 1h). 시크릿 `[data] pat/repo`(없으면 `GITHUB_PAT`).
 - ✅ 그룹 내 거래처 선택: 전체 선택/해제 **토글** 버튼(`dash_store_bulk`+버전키로 매 토글 재초기화, 단순 pop은 해제 불가 함정) · 매출 열 accounting(콤마) 포맷.
