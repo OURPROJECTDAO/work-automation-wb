@@ -40,6 +40,8 @@
 | esm | `reference/esm_bulk_template.xlsx` | `reference/esm_category_food.csv` | 상품등록/esm/ (소스 `[소스]글로벌하베스트.xlsx`) |
 | easyadmin | **미보관(다음 배치 때 확보)** | 불필요(정산채널) | 상품등록/(easyadmin 폴더 미생성) |
 
+입력 수집 양식(공통, 멀티채널): `reference/product_input_form_v2.xlsx` — smartstore·esm 공용(대상 채널 선택). 구 `smartstore_input_form_v1.xlsx` deprecated.
+
 Drive 폴더ID: 업무자동화-KB=14A71qcaYm90gDxnbwSglEoMShccnn1-0 · inputs=1XtcfqkLbUd4mhKFYWSnI8cEYB3lN6D9W · outputs=1oAExNiKw_uV9NLWVOa3a2ImDsMtpMU30 · 상품등록=1f3h8XrIfOT2ctBYxI8KfShroY17ghKUF · 상품등록/esm=1Vsf5iQb8X40BwUvra1_FbymD8JXG21vy
 
 ## D. 공유 코드/페이지 (app repo — 한 파일이 여러 워크플로우 호스팅)
