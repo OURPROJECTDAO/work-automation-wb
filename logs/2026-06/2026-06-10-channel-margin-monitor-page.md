@@ -17,3 +17,11 @@
 - 배포·실사용 확인 후 상태 운영중 전환.
 - 미해결: ① 미매칭 엣지 `(임박)…` 등 수기 접두 코드(현재 미매칭 표시) ② baseline↔product_master 조인 갭 ③ 마진제한 적용채널 세분화(현 전채널) ④ 합포 -CB- 실데이터 대조 추후 ⑤ sobun↔unit_list↔sub_list 통합.
 - 타 채널: CHANNEL_CONFIG 한 세트 추가(수수료·기준마진열·다운로드 컬럼맵).
+
+
+## 후속 (같은 날) — st.navigation 등록 누락 픽스
+- 증상: Reboot 후에도 좌측 메뉴에 페이지 안 뜸(사용자 스크린샷).
+- 원인: 이 앱은 pages/ 자동탐지가 아니라 `app/streamlit_app.py`의 명시적 `st.navigation()` 구조. 페이지 파일만 커밋하고 등록을 빠뜨림(patterns.md "pages/ root 파일 명시 등록 필수"를 적용 안 함).
+- 픽스: streamlit_app.py 헤더없는 " " 섹션(대시보드 옆)에 `st.Page(_P/"6_채널마진모니터.py", title="채널마진모니터", icon="💹")` 추가. ast OK 커밋.
+- streamlit_app.py는 진입 스크립트(import 모듈 아님) → 재배포(1~2분) 후 자동 반영, 추가 Reboot 불필요.
+- 교훈(기존 함정 재확인): 새 페이지 추가 시 파일 생성 + **streamlit_app.py st.navigation 등록**이 한 세트. 단독 파일은 안 뜸.
