@@ -29,7 +29,7 @@
 - **cheonnyeon-upload ← logistics-order**: 발주자료 아카이브(★★발주자료) 앞 7열을 입력으로 받음 + logistics_classification.csv 공유. (decisions/0005)
 - **dashboard ⇄ logistics-order**: logistics_classification.csv 공유(대시보드 1차 구분 = 발주 분류표). 대시보드 🏷도우미가 이 표에 쓰기(decisions/0007).
 - **dashboard ← product_master**: 중분류 2차 fallback·박스내품(물류량).
-- **dashboard ← product_attributes**: 브랜드·최종분류(세분류)·b2b_b2c 차원. 식품음료(I)=구분 **3차** fallback(1차 logistics_classification → 2차 product_master 중분류 → 3차 product_attributes 식품음료). 구분 source는 별도유지(logistics_classification).
+- **dashboard ← product_attributes**: 세분류(최종분류) 차원 + 식품음료=구분 **3차** fallback(1차 logistics_classification → 2차 product_master 중분류 → 3차 식품음료). 구분 source 별도유지. (브랜드·b2b 차원은 ADR 0011로 폐기.)
 - **smartstore / easyadmin / esm-register → product-registration-common 상속**: 공통 개념(낱개·박스·합포N·판매가공식·상품명·서식). 공통 규칙 바꾸면 3채널 전부 영향. (decisions/0009)
 - **3 등록채널 ← product_master**: 매입가·박스내품·규격.
 - **invoice-fill ← 송장 마스터(송장출력.xlsx)**: 세션 업로드(PII, 미저장). ⚠️openmarket-merge '송장출력' 시트 계열로 보이나 문서상 명시 연결 없음 — 확인 필요.
