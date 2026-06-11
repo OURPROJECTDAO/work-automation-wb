@@ -61,12 +61,13 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **`ship_fee_const`**: 다운로드에 배송비 숫자가 없는 채널은 상수로(식봄=3000).
 - **`ship_fee_policy`**(신규 2026-06-11): 특정 컬럼값 조건부 배송비. `{col, map, default}` — 다운로드 col값이 map에 있으면 그 값, 없으면 default. 캐시노트={col25(배송정책코드 Y), map{DVP212991:3000}, default0}. 우선순위 ship_fee_const > ship_fee_policy > cols['배송비'].
 - **`n_source`**: `"download"`(=바코드 col, 스마트스토어 기본) / `"ref"`(=hapo_multiplier 상품번호 조회, 식봄·캐시노트).
+- **`exclude_row_if_col_filled`**(신규 2026-06-11): 지정 컬럼에 값이 있으면 그 **행을 parse에서 제외**. 쿠팡=5(E열 바코드) → 값 있으면 **로켓그로스**(배송방식 다름)라 판매자택배 모니터 비대상. parse_download가 `excl_col` 처리(채널 무관).
 - cols에서 없는 컬럼(즉시할인·포인트·배송비·바코드)은 **생략 가능** → parse_download가 0/상수/None 처리.
 - 식봄: commission 0.07 · ship_fee_const 3000 · n_source "ref" · sheet 식봄붙여넣기 · header 4 · data 5 · cols{상품번호1,코드2,상품명6,판매가19,정가16}.
 - **캐시노트**: commission 0.06 · ship_fee_policy{col25,map{DVP212991:3000},default0} · n_source "ref" · sheet 상품 · header 3 · data 4 · cols{상품번호1(A),코드5(E),상품명3(C),판매가14(N),정가15(O)} · **extra_cols{오퍼코드17(Q),옵션코드18(R)}** · **price_form**(append, cashnote_price_template.xlsx, '(캐시노트)양식', data 4, fixed{F=수정,L=Y,N=9999}, G=판매단가(권장가)·H=할인전단가(무늬용 가짜=표준 FAKE_JEONG)·O=관리코드). baseline_col 캐시노트.
 - **`commission_source`**(신규): `"download"`면 수수료가 채널 단일값이 아니라 **상품별**(다운로드 컬럼). compute가 `_num(rec[commission_field])/commission_div + commission_add` 로 행별 산출. 없으면 단일 `commission`.
 - **배민상회**: commission_source "download"·commission_field 수수료raw·div 100·add 0.03 · ship_fee_policy{col60(BH 배송방법),map{무료배송:0},default3000} · n_source "ref" · sheet sheet1 · header 2 · data 3 · cols{상품번호1(A),코드22(V),상품명2(B),판매가24(X),정가23(W)} · extra_cols{수수료raw:73,옵션번호:18,옵션명:21} · **price_form**(append, baemin_price_template.xlsx, '(배민)양식', data 2, J=변경판매가(권장가)·**H=변경소비자가=무늬용 가짜(표준 FAKE_JEONG)**·G/I=현재 소비자가/판매가·C=옵션번호·D=옵션명·E=관리코드). baseline_col 배민상회. bm_commission.csv(천년경영용)는 **미사용** — 다운로드 BU가 수수료 직접 보유.
-- **쿠팡**: commission 0.12 · ship_fee_const 0(배송비 항상 0) · n_source "ref"(옵션ID) · sheet data · header 3 · data 4 · cols{상품번호3(C 옵션ID),코드6(F),상품명7(G),판매가10(J),정가11(K)} · **price_form{mode "filter", write{판매가16(P),정가17(Q)}}**. baseline_col 쿠팡.
+- **쿠팡**: commission 0.12 · ship_fee_const 0(배송비 항상 0) · n_source "ref"(옵션ID) · sheet data · header 3 · data 4 · cols{상품번호3(C 옵션ID),코드6(F),상품명7(G),판매가10(J),정가11(K)} · **`exclude_row_if_col_filled`:5(E열 바코드)** · **price_form{mode "filter", write{판매가16(P),정가17(Q)}}**. baseline_col 쿠팡.
 - **`price_form.mode`**: `append`(템플릿에 선택행 기입 — 식봄/캐시노트/배민) · **`filter`(원본 다운로드의 변경요청 컬럼에 기입, 선택만 남김 — 쿠팡 `build_filter_price_xlsx`)** · 없으면 smartstore(원본 판매가 직접 수정). filter/smartstore는 '전체 교체' 저장 원본(.xlsx) 필요.
 
 ## 전용 함정
@@ -81,6 +82,8 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **쿠팡 빈 관리코드 미매칭(2026-06-11)**: 다운로드 일부(155건)는 업체상품코드(F) 빈값 → 매입가 미해결(미매칭). 골든도 동일하게 미해결(매입가 NA)이라 우리 결과가 골든과 일치 — 버그 아님. 골든 `RIGHT(관리코드,LEN-2)` fallback은 접두코드용(이미 4-tier로 풀림)이라 미구현.
 - **배민상회 상품별 수수료(2026-06-11)**: 수수료가 채널 단일이 아니라 다운로드 **BU(73)**에 상품별로 내장(4.5·5.0…). 정산식 수수료 = BU/100 + 0.03(추가 고정). compute가 행별 rate=1−수수료 적용. listing에 수수료raw 보존(없으면 commission=0.03만 적용되는 오류 → 가드 등재). bm_commission.csv는 천년경영 전용, 모니터 미사용.
 - **배민상회 컬럼 함정**: 관리코드 = **V(22) 관리용 상품명**(B 상품명 아님). 판매가=X(24)(소비자가 W(23)는 정가). 배송비=BH(60) 배송방법=='무료배송'?0:3000.
+- **쿠팡 바코드=로켓그로스 제외(2026-06-11)**: 쿠팡 다운로드 **E열(5)=바코드**. 판매자택배 상품은 항상 공백, 값이 있으면 로켓그로스(미매칭 아님—배송방식 차이) → `exclude_row_if_col_filled`:5로 parse 단계 행 제외. **기존 쿠팡 listing은 바코드를 저장한 적 없어 소급 필터 불가 → '상품관리 갱신→전체 교체' 1회 재파싱 필요**('신규만 추가'는 기존 행 유지).
+- **★ extra_cols 숫자ID float(2026-06-11)**: parse_download의 extra_cols는 `_pid`로 읽음(과거 `_nfc` → 배민 **옵션번호**가 숫자셀이라 `510609.0`으로 양식 C열에 찍힘). `_pid`는 정수값 float만 int화(수수료raw `4.5`·옵션명 텍스트 불변). 구 listing에 이미 `510609.0` 저장된 건은 **csv_text_to_recs의 `_deflo`**(`-?\d+\.0`→정수)가 라운드트립에서 재파싱 없이 복원.
 - **listing CSV 스키마 유연(2026-06-11)**: recs_to_csv/csv_text_to_recs가 LISTING_COLS + extra_cols 키(오퍼/옵션코드·수수료raw) 자동 포함·복원. 새 extra_cols 채널은 CSV 코드 수정 불필요(하위호환).
 - **구 listing 스키마 공란(2026-06-11)**: `extra_cols`(캐시노트 오퍼코드·옵션코드)는 도입 후 저장된 listing에만 존재. 도입 전 스냅샷은 그 컬럼이 없어 가격변경 양식 A/D가 빈 채로 나감 → **'상품관리 갱신 → 전체 교체' 1회 재파싱 필요**('신규만 추가'는 기존 행 미채움). 페이지 가드: price_form이 쓰는 extra_cols 필드가 저장본에 전부 비면 경고. (logs/2026-06-11-cashnote-stale-listing)
 - **골든 BCD 버림(캐시노트)**: 골든 결과페이지 A(상품번호)만 매칭 키. B(상품코드)·C(옵션코드)·D(옵션ID)는 구 붙여넣기 레이아웃이라 값 불일치(B=0,C=9999) → 미사용.
@@ -95,7 +98,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
   - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·**H=할인전단가=무늬용 가짜 정가(표준 FAKE_JEONG)**·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**. **할인전단가는 실제 가격 아님 — 마진/모니터는 판매단가(N)만 사용**, 양식 H는 listing 정가 보존이 아니라 매번 생성(식봄은 jeong_fake 없음 → 실제 정가 보존).
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호 정수정규화) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어).
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어).
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config` — 배송비 출처에 ship_fee_policy 분기 포함).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
@@ -108,6 +111,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **쿠팡 가격변경 filter**(2026-06-11): 선택만 남김·P=권장가·Q=가짜(+20~30%)·R/S 공란·조회(J/K) 보존·preview=파일 일치.
 - **배민상회 가격변경 양식**(end-to-end, 2026-06-11): 옵션번호/옵션명/수수료raw 캡처·라운드트립 보존. 표본 양식 — A상품번호·C옵션번호·D옵션명·E관리코드·G현재소비자가·I현재판매가·J변경판매가(권장가)·**H변경소비자가=표준 FAKE_JEONG(권장가+20~30% 랜덤)** 기입, 예시행 제거. (초기 gap유지 → 사용자 요청으로 전 채널 랜덤 표준화)
 - **배민상회 골든 대조** (배민결과페이지 395행, 2026-06-11): 골든∩계산 394/394. 입력 — 판매가 394/394·배송비 394/394·**수수료(상품별 BU/100+0.03) 394/394**·N 394/394·base 392/393(1 vintage). **정산가 394/394 일치**(정산식 동일, 실택배비만 표준차). run: 394건·미매칭0·미설정6·마진미달20·제한35·평균마진율 10.2%.
+- **배민 양식 외부링크 수정(2026-06-11)**: `baemin_price_template.xlsx`가 원본 마스터 통합문서를 가리키는 **고아 외부참조**(externalLinks)를 품어 출력 파일을 엑셀에서 열 때 '외부 연결 업데이트 불가' 경고(숫자는 리터럴이라 다 맞음). 템플릿 정리본 커밋 + **`_strip_external_links`**(zip레벨: externalLinks 파트·workbook `<externalReferences>`·rels·Content_Types 제거, 외부링크 없으면 no-op)를 **append/bulk/filter 3개 출력 빌더 전부**에 적용(방어). cashnote/sikbom 템플릿은 외부링크 0건이라 무영향. 검증: 템플릿 ext (2,T,T,T)→(0,F,F,F), 양식 출력 ext 0, 시트 보존.
 
 ## 채널 추가 레시피 (★앞으로 채널 다수 — 이 순서)
 새 채널 = 보통 **CHANNEL_CONFIG 한 세트** 만(정산식은 스마트스토어 표준 고정). 코드 4-tier·reference·페이지·listing 저장은 공통(수정 불필요).
@@ -128,3 +132,5 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - logs/2026-06/2026-06-11-channel-margin-monitor-cashnote.md · -cashnote-price-change.md · -cashnote-fake-jeongga.md · -cashnote-stale-listing.md · -baemin.md · -baemin-price-change.md · -fake-jeong-standard.md · -coupang.md
 - logs/2026-06/2026-06-11-channel-margin-monitor-sikbom.md · -price-change-form.md · 2026-06-10-references.md
 - manifest.md (A baseline_margin·product_master·hapo_multiplier / A-2 margin_floor·sobun·listing)
+
+_갱신: 2026-06-11 (쿠팡 바코드 로켓그로스 제외 + 배민 양식 외부링크 strip + extra_cols 옵션번호 정수화)_
