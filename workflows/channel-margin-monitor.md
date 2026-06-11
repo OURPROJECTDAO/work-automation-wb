@@ -78,9 +78,9 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 
 ## 가격 일괄변경
 - **스마트스토어** (원본 filter형): 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx). 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). ⚠️ delete_rows row_dimensions 잔존 → keep_last 초과 키 삭제 필수(전역 pitfalls). 함수: `compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`.
-- **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가, 정가/할인전단가=max(정가,판매단가).
+- **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가. jeong_field = `jeong_fake` 있으면 가짜 정가 생성(판매가×(1+랜덤pct)·단위 반올림·>판매가), 없으면 max(실제정가,판매가) 보존.
   - 식봄: `sikbom_price_template.xlsx`('(식봄)양식', data 7), fixed{E열='n'}. A=상품번호·B=코드·C=상품명·D=정가·F=판매단가.
-  - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·H=할인전단가(≥판매단가)·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백 — 양식 예시행과 동일). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**.
+  - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·**H=할인전단가=무늬용 가짜 정가(권장가×(1+랜덤 0.20~0.30)·100원 반올림·>판매가, `jeong_fake`)**·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**. **할인전단가는 실제 가격 아님 — 마진/모니터는 판매단가(N)만 사용**, 양식 H는 listing 정가 보존이 아니라 매번 생성(식봄은 jeong_fake 없음 → 실제 정가 보존).
 
 ## 코드 / 페이지
 - `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호 정수정규화) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어).
