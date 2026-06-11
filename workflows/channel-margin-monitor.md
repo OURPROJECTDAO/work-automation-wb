@@ -68,7 +68,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **`commission_source`**(신규): `"download"`면 수수료가 채널 단일값이 아니라 **상품별**(다운로드 컬럼). compute가 `_num(rec[commission_field])/commission_div + commission_add` 로 행별 산출. 없으면 단일 `commission`.
 - **배민상회**: commission_source "download"·commission_field 수수료raw·div 100·add 0.03 · ship_fee_policy{col60(BH 배송방법),map{무료배송:0},default3000} · n_source "ref" · sheet sheet1 · header 2 · data 3 · cols{상품번호1(A),코드22(V),상품명2(B),판매가24(X),정가23(W)} · extra_cols{수수료raw:73,옵션번호:18,옵션명:21} · **price_form**(append, baemin_price_template.xlsx, '(배민)양식', data 2, J=변경판매가(권장가)·**H=변경소비자가=무늬용 가짜(표준 FAKE_JEONG)**·G/I=현재 소비자가/판매가·C=옵션번호·D=옵션명·E=관리코드). baseline_col 배민상회. bm_commission.csv(천년경영용)는 **미사용** — 다운로드 BU가 수수료 직접 보유.
 - **쿠팡**: commission 0.12 · ship_fee_const 0(배송비 항상 0) · n_source "ref"(옵션ID) · sheet data · header 3 · data 4 · cols{상품번호3(C 옵션ID),코드6(F),상품명7(G),판매가10(J),정가11(K)} · **`exclude_row_if_col_filled`:5(E열 바코드)** · **price_form{mode "filter", write{판매가16(P),정가17(Q)}}**. baseline_col 쿠팡.
-- **`price_form.mode`**: `append`(템플릿에 선택행 기입 — 식봄/캐시노트/배민) · **`filter`(원본 다운로드의 변경요청 컬럼에 기입, 선택만 남김 — 쿠팡 `build_filter_price_xlsx`)** · 없으면 smartstore(원본 판매가 직접 수정). filter/smartstore는 '전체 교체' 저장 원본(.xlsx) 필요.
+- **`price_form.mode`**: `append`(템플릿에 선택행 기입 — 식봄/캐시노트/배민) · **`filter`(원본 다운로드의 변경요청 컬럼에 기입, 선택만 남김 — 쿠팡 `build_filter_price_xlsx`, **zip레벨 수술로 네이티브 포맷 보존**)** · 없으면 smartstore(원본 판매가 직접 수정). filter/smartstore는 '전체 교체' 저장 원본(.xlsx) 필요(**쿠팡은 반드시 전체 교체 — 네이티브 raw**).
 
 ## 전용 함정
 - 다운로드 가이드행 skip(채널별 header_row/data_start). 판매자상품코드 빈 행 존재.
@@ -80,6 +80,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **캐시노트 배송비 조건부**: 배송정책코드(Y=25) DVP212991→3000, DVP447716 등→0. 식봄 상수와 다름(ship_fee_policy). 골든 배송비 484/33 분포와 일치.
 - **쿠팡 키=옵션ID(2026-06-11)**: 업체상품ID(A)는 multi-option(499 ID/2058 옵션)이라 키 부적합. 골든 조인·hapo·관리코드 조회 전부 **옵션ID(C)** 기준 → 상품번호=옵션ID.
 - **쿠팡 빈 관리코드 미매칭(2026-06-11)**: 다운로드 일부(155건)는 업체상품코드(F) 빈값 → 매입가 미해결(미매칭). 골든도 동일하게 미해결(매입가 NA)이라 우리 결과가 골든과 일치 — 버그 아님. 골든 `RIGHT(관리코드,LEN-2)` fallback은 접두코드용(이미 4-tier로 풀림)이라 미구현.
+- **★ 쿠팡 가격변경 openpyxl→inlineStr 업로드 실패(2026-06-11)**: `build_filter_price_xlsx`가 `load_workbook→wb.save()`로 라운드트립하면 openpyxl이 **전 문자열 셀을 inlineStr로 재직렬화**(sharedStrings 없음·XML선언 없음) → **쿠팡 업로더가 거부**(골든=네이티브 sharedStrings `t="s"`). 해결: openpyxl 저장 제거, **원본 .xlsx(전체 교체=업로드 바이트 그대로=네이티브)를 zip레벨 수술**(헤더행 보존+선택행 연속 재번호+P/Q 숫자 기입, sharedStrings/styles/mergeCells/네임스페이스/XML선언 원본 유지). 검증: 출력 row4가 골든 row4와 완전 일치·파트목록 동일. **전제: raw가 네이티브** → 쿠팡은 '전체 교체' 사용('신규만 추가'=`append_rows_to_raw` openpyxl 저장이 raw를 inlineStr로 변질). 헬퍼: `_sheet_part`·`_read_sst`·`_cell_text`·`_set_num_cell`·`_renumber_row`·`_col_letter`. (logs/2026-06-11-coupang-filter-native)
 - **배민상회 상품별 수수료(2026-06-11)**: 수수료가 채널 단일이 아니라 다운로드 **BU(73)**에 상품별로 내장(4.5·5.0…). 정산식 수수료 = BU/100 + 0.03(추가 고정). compute가 행별 rate=1−수수료 적용. listing에 수수료raw 보존(없으면 commission=0.03만 적용되는 오류 → 가드 등재). bm_commission.csv는 천년경영 전용, 모니터 미사용.
 - **배민상회 컬럼 함정**: 관리코드 = **V(22) 관리용 상품명**(B 상품명 아님). 판매가=X(24)(소비자가 W(23)는 정가). 배송비=BH(60) 배송방법=='무료배송'?0:3000.
 - **쿠팡 바코드=로켓그로스 제외(2026-06-11)**: 쿠팡 다운로드 **E열(5)=바코드**. 판매자택배 상품은 항상 공백, 값이 있으면 로켓그로스(미매칭 아님—배송방식 차이) → `exclude_row_if_col_filled`:5로 parse 단계 행 제외. **기존 쿠팡 listing은 바코드를 저장한 적 없어 소급 필터 불가 → '상품관리 갱신→전체 교체' 1회 재파싱 필요**('신규만 추가'는 기존 행 유지).
@@ -92,13 +93,14 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
 ## 가격 일괄변경
+- **쿠팡** (filter형, 네이티브 수술 2026-06-11): 원본 다운로드(조회 A~O + 변경요청 P~S) 자체가 변경요청 컬럼형. `build_filter_price_xlsx`가 **openpyxl 저장 없이 zip레벨 수술** — 헤더행 보존, 선택 옵션ID(C열) 행만 남겨 연속 재번호, P(16)=권장가·Q(17)=가짜정가(`t`없는 숫자) 기입, sharedStrings 등 원본 포맷 보존. openpyxl 라운드트립은 inlineStr 변질로 쿠팡 업로드 실패(전용 함정 참조). 전제: raw 네이티브('전체 교체').
 - **스마트스토어** (원본 filter형): 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx). 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). ⚠️ delete_rows row_dimensions 잔존 → keep_last 초과 키 삭제 필수(전역 pitfalls). 함수: `compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`.
 - **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가. **jeong_field(정가/할인전단가/소비자가)는 전 채널 표준 `FAKE_JEONG`** — 권장가×(1+랜덤 0.20~0.30)·100원 반올림·>권장가, 매번 생성(실정가/마크업 보존 아님). 채널이 pf['jeong_fake']로 %만 오버라이드 가능. (사용자 표준 확정 2026-06-11)
   - 식봄: `sikbom_price_template.xlsx`('(식봄)양식', data 7), fixed{E열='n'}. A=상품번호·B=코드·C=상품명·**D=정가(무늬용 가짜=표준 FAKE_JEONG)**·F=판매단가(권장가).
   - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·**H=할인전단가=무늬용 가짜 정가(표준 FAKE_JEONG)**·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**. **할인전단가는 실제 가격 아님 — 마진/모니터는 판매단가(N)만 사용**, 양식 H는 listing 정가 보존이 아니라 매번 생성(식봄은 jeong_fake 없음 → 실제 정가 보존).
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어).
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어) + **build_filter_price_xlsx(쿠팡, zip 수술·openpyxl 미사용) + 수술 헬퍼(_sheet_part·_read_sst·_cell_text·_set_num_cell·_renumber_row·_col_letter)**.
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config` — 배송비 출처에 ship_fee_policy 분기 포함).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
@@ -134,3 +136,5 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - manifest.md (A baseline_margin·product_master·hapo_multiplier / A-2 margin_floor·sobun·listing)
 
 _갱신: 2026-06-11 (쿠팡 바코드 로켓그로스 제외 + 배민 양식 외부링크 strip + extra_cols 옵션번호 정수화)_
+
+_갱신: 2026-06-11 (쿠팡 가격변경 filter 네이티브 zip 수술 — openpyxl inlineStr 업로드 실패 해소)_
