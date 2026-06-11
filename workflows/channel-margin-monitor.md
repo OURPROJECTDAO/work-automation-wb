@@ -5,7 +5,7 @@
 ## 요약
 - 판매 채널의 라이브 리스팅(상품관리 다운로드)을 받아 상품별 마진율을 계산 → 기준마진 대비 이탈 탐지 + 기준마진 달성 권장가를 역산하는 모니터.
 - 등록(신규)이 아니라 **운영 중 리스팅 점검**. 사용자 엑셀([1]마스터 수식 조인본) 대체.
-- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · 식봄(모니터+가격변경) · 캐시노트(모니터+가격변경) · **배민상회(모니터, 2026-06-11; 상품별 수수료)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
+- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · 식봄(모니터+가격변경) · 캐시노트(모니터+가격변경) · **배민상회(모니터+가격변경, 2026-06-11; 상품별 수수료)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
 - **표준 정산식 = 웹앱 스마트스토어형**(사용자 확정 2026-06-11). 새 채널은 골든이 다른 값을 쓰더라도 **스마트스토어 구조(2700 flat 실택배비·ceil 권장가)에 맞추고 수수료율만 채널별**로 둔다. 골든은 입력 검증용 참고(마진율/권장가는 골든과 의도적으로 다를 수 있음).
 
 ## 입력 (저장본 자동 로드, 갱신 시에만 업로드)
@@ -52,6 +52,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - `listing_<key>.csv`(+meta): 채널 저장 상품관리 스냅샷(정가 컬럼 포함). `listing_<key>.xlsx`: 스마트스토어 원본 일괄변경 양식(filter 원천).
 - `sikbom_price_template.xlsx`: 식봄 '상품 일괄수정' 양식 고정 템플릿(append 원천). manifest A-2.
 - `cashnote_price_template.xlsx`: 캐시노트 '옵션 일괄수정' 양식 고정 템플릿((캐시노트)양식, append 원천). manifest A-2.
+- `baemin_price_template.xlsx`: 배민상회 가격변경 양식 고정 템플릿((배민)양식, append 원천). manifest A-2.
 - 연동: `product_master.csv`(매입가·재고·규격·박스내품).
 
 ## CHANNEL_CONFIG (채널 추가 = 여기에 한 세트)
@@ -63,7 +64,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - 식봄: commission 0.07 · ship_fee_const 3000 · n_source "ref" · sheet 식봄붙여넣기 · header 4 · data 5 · cols{상품번호1,코드2,상품명6,판매가19,정가16}.
 - **캐시노트**: commission 0.06 · ship_fee_policy{col25,map{DVP212991:3000},default0} · n_source "ref" · sheet 상품 · header 3 · data 4 · cols{상품번호1(A),코드5(E),상품명3(C),판매가14(N),정가15(O)} · **extra_cols{오퍼코드17(Q),옵션코드18(R)}** · **price_form**(append, cashnote_price_template.xlsx, '(캐시노트)양식', data 4, fixed{F=수정,L=Y,N=9999}, G=판매단가(권장가)·H=할인전단가(max(정가,권장가))·O=관리코드). baseline_col 캐시노트.
 - **`commission_source`**(신규): `"download"`면 수수료가 채널 단일값이 아니라 **상품별**(다운로드 컬럼). compute가 `_num(rec[commission_field])/commission_div + commission_add` 로 행별 산출. 없으면 단일 `commission`.
-- **배민상회**: commission_source "download"·commission_field 수수료raw·div 100·add 0.03 · ship_fee_policy{col60(BH 배송방법),map{무료배송:0},default3000} · n_source "ref" · sheet sheet1 · header 2 · data 3 · cols{상품번호1(A),코드22(V),상품명2(B),판매가24(X),정가23(W)} · extra_cols{수수료raw:73}. baseline_col 배민상회. price_form 없음(양식 미제공). bm_commission.csv(천년경영용)는 **미사용** — 다운로드 BU가 수수료 직접 보유.
+- **배민상회**: commission_source "download"·commission_field 수수료raw·div 100·add 0.03 · ship_fee_policy{col60(BH 배송방법),map{무료배송:0},default3000} · n_source "ref" · sheet sheet1 · header 2 · data 3 · cols{상품번호1(A),코드22(V),상품명2(B),판매가24(X),정가23(W)} · extra_cols{수수료raw:73,옵션번호:18,옵션명:21} · **price_form**(append, baemin_price_template.xlsx, '(배민)양식', data 2, J=변경판매가(권장가)·**H=변경소비자가=권장가+(정가−판매가) gap유지(jeong_gap)**·G/I=현재 소비자가/판매가·C=옵션번호·D=옵션명·E=관리코드). baseline_col 배민상회. bm_commission.csv(천년경영용)는 **미사용** — 다운로드 BU가 수수료 직접 보유.
 
 ## 전용 함정
 - 다운로드 가이드행 skip(채널별 header_row/data_start). 판매자상품코드 빈 행 존재.
@@ -84,7 +85,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 
 ## 가격 일괄변경
 - **스마트스토어** (원본 filter형): 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx). 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). ⚠️ delete_rows row_dimensions 잔존 → keep_last 초과 키 삭제 필수(전역 pitfalls). 함수: `compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`.
-- **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가. jeong_field = `jeong_fake` 있으면 가짜 정가 생성(판매가×(1+랜덤pct)·단위 반올림·>판매가), 없으면 max(실제정가,판매가) 보존.
+- **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가. jeong_field 3모드 — ① `jeong_fake`(캐시노트): 판매가×(1+랜덤pct)·단위 반올림 ② `jeong_gap`(배민상회): 판매가+(정가−판매가) 마크업 유지(정가≤판매가면 판매가) ③ 기본(식봄): max(실제정가,판매가) 보존.
   - 식봄: `sikbom_price_template.xlsx`('(식봄)양식', data 7), fixed{E열='n'}. A=상품번호·B=코드·C=상품명·D=정가·F=판매단가.
   - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·**H=할인전단가=무늬용 가짜 정가(권장가×(1+랜덤 0.20~0.30)·100원 반올림·>판매가, `jeong_fake`)**·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**. **할인전단가는 실제 가격 아님 — 마진/모니터는 판매단가(N)만 사용**, 양식 H는 listing 정가 보존이 아니라 매번 생성(식봄은 jeong_fake 없음 → 실제 정가 보존).
 
@@ -98,6 +99,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **식봄 골든 대조** (식봄결과페이지 716행, 2026-06-11): 정산가 H 485/485·합포 N 485/485·매입가 480/485(5 vintage). 로직 불일치 0.
 - **캐시노트 골든 대조** (캐시노트결과페이지 513행, 2026-06-11): 골든∩계산 **513/513**. 입력 — 판매가 509/513(4 가격변동)·**배송비 513/513**·**N(합포) 513/513**·base매입단가 461/463(2 vintage, 50 골든#N/A). run: 544건·미매칭4(빈코드)·미설정10·마진미달26·제한36·평균마진율 9.2%. 정산가/마진율은 2700표준이라 골든과 의도적 차이.
 - **캐시노트 가격변경 양식** (end-to-end, 2026-06-11): 오퍼/옵션코드 100% 캡처·listing 라운드트립 보존. 표본 5건 양식 — A=OFR·D=SKU·F=수정·G=권장가·H=정가(≥G)·L=Y·N=9999·O=관리코드 전건 일치, 예시행 제거·잔행 0. 식봄 회귀(합성) PASS.
+- **배민상회 가격변경 양식**(end-to-end, 2026-06-11): 옵션번호/옵션명/수수료raw 캡처·라운드트립 보존. 표본 양식 — A상품번호·C옵션번호·D옵션명·E관리코드·G현재소비자가·I현재판매가·J변경판매가(권장가)·**H변경소비자가=J+(정가−판매가)** 전건 일치(마크업 0이면 H=J), 예시행 제거.
 - **배민상회 골든 대조** (배민결과페이지 395행, 2026-06-11): 골든∩계산 394/394. 입력 — 판매가 394/394·배송비 394/394·**수수료(상품별 BU/100+0.03) 394/394**·N 394/394·base 392/393(1 vintage). **정산가 394/394 일치**(정산식 동일, 실택배비만 표준차). run: 394건·미매칭0·미설정6·마진미달20·제한35·평균마진율 10.2%.
 
 ## 채널 추가 레시피 (★앞으로 채널 다수 — 이 순서)
@@ -116,6 +118,6 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 ## 관련
 - decisions/0013-sikbom-margin-monitor.md (식봄 + 스마트스토어 표준 채택 + hapo_multiplier N)
 - decisions/0014-cashnote-margin-monitor.md (캐시노트 + 6% 단일 + ship_fee_policy + _pid)
-- logs/2026-06/2026-06-11-channel-margin-monitor-cashnote.md · -cashnote-price-change.md · -cashnote-fake-jeongga.md · -cashnote-stale-listing.md · -baemin.md
+- logs/2026-06/2026-06-11-channel-margin-monitor-cashnote.md · -cashnote-price-change.md · -cashnote-fake-jeongga.md · -cashnote-stale-listing.md · -baemin.md · -baemin-price-change.md
 - logs/2026-06/2026-06-11-channel-margin-monitor-sikbom.md · -price-change-form.md · 2026-06-10-references.md
 - manifest.md (A baseline_margin·product_master·hapo_multiplier / A-2 margin_floor·sobun·listing)
