@@ -38,6 +38,12 @@
 - 진단: `unzip -l out.xlsx | grep externalLink` / `unzip -p out.xlsx xl/workbook.xml | grep externalReference`.
 - 해결: ① 템플릿 자체를 정리(외부링크 4종 제거: 파트·workbook `<externalReferences>`·workbook.xml.rels 관계·`[Content_Types].xml` override) ② 코드에서 저장 직후 zip레벨 strip(외부링크 없으면 no-op). channel-margin-monitor `_strip_external_links` 참고(배민 양식, logs/2026-06-11).
 
+## openpyxl 저장이 네이티브 포맷 파괴 (엄격 업로더 거부 — 전 워크플로우 공통)
+- **openpyxl(≥3.1) `load_workbook→wb.save()` 라운드트립은 로드된 문자열 셀을 전부 `t="inlineStr"`로 재직렬화**(sharedStrings.xml 제거·XML 선언 누락·네이티브 네임스페이스 상실). Excel은 열리지만 **엄격한 플랫폼 업로더(쿠팡 등 Apache POI류)는 inlineStr를 거부**. 증상: 숫자·내용 다 맞는데 업로드만 실패.
+- 진단: `unzip -l out.xlsx | grep sharedStrings`(없으면 의심), 시트 xml에 `t="inlineStr"` 존재.
+- 해결: 플랫폼 양식을 **선택행 남기기·몇 칸 기입** 정도만 수정할 땐 openpyxl 대신 **원본 .xlsx를 zip레벨로 수술**(원본 sheet xml 텍스트 편집 + sharedStrings/styles 등 그대로 repack) → 네이티브 포맷 100% 보존. 단 원본 raw 자체가 네이티브여야 함(업로드 바이트 그대로 저장). channel-margin-monitor 쿠팡 `build_filter_price_xlsx` 참고(logs/2026-06-11).
+- **append류(`append_rows_to_raw`)도 openpyxl 저장 → 네이티브 파괴**. 네이티브 보존이 필요한 채널(쿠팡)은 '신규만 추가'(=append) 대신 '전체 교체'(업로드 바이트 저장)를 쓸 것.
+
 ## 한국어 처리 (엑셀/앱 — 전 워크플로우 공통)
 - 주소·상품명 매칭 전 NFC 정규화 필수(unicodedata.normalize("NFC", s)). 출처 다른 데이터가 NFD(자모 분리)면 같은 글자라도 부분일치 매칭 실패 → 도서산간/미배송 매칭 치명적.
 - **숫자 ID 키 정규화 (전 워크플로우 공통)**: openpyxl은 정수 ID 셀(예 상품번호 46903)을 **float(46903.0)**로 읽음. str()/NFC만 하면 '46903.0' → CSV/reference의 '46903' 키와 매칭 실패(조용히 미매칭=기본값). 정수값 float은 int화 후 키로 쓸 것(`int(v) if isinstance(v,float) and v.is_integer() else v`). (channel-margin-monitor 캐시노트 N 전건 1 오류 사례, logs/2026-06-11-cashnote)
@@ -45,4 +51,4 @@
 - 대시보드 차트: matplotlib는 한글 폰트 미설치 시 □□□. Plotly/Altair(브라우저 폰트) 권장.
 - 정렬: VBA xlPinYin vs Python 코드포인트 정렬 차이 가능 → 골든 파일 대조로 확인.
 
-_갱신: 2026-06-11 (xlsx 외부링크 잔존 함정 추가 — 배민 양식 사례)_
+_갱신: 2026-06-11 (openpyxl 저장 네이티브 포맷 파괴 함정 추가 — 쿠팡 업로드 사례)_
