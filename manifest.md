@@ -12,6 +12,7 @@
 | `product_attributes.csv` | app `reference/` | dashboard(세분류=최종분류 차원 + 식품음료=구분 3차 fallback) | 합포데이터.xlsx(Drive 작성용)에서 추출 재커밋 | 관리코드 속성표(1,134). **4컬럼만**: 식품음료·합포수량·최종분류(ADR 0011, 브랜드·b2b·정제규격 폐기). PII 없음. 구분 source=logistics_classification 별도유지 |
 
 | `baseline_margin.csv` | app `reference/` | channel-margin-monitor(확정마진율, 채널별 열) | 추후 연동데이터 페이지 | 관리코드+10채널 확정마진율(1,229). 키에 박스/PC/소분/합포 혼재. **향후 전 채널 모니터 공용** |
+| `hapo_multiplier.csv` | app `reference/` | channel-margin-monitor(합포량 N, 바코드 없는 채널) | 상품몇개합포인지.xlsx에서 추출 재커밋 | 상품번호·합포량·채널(3,339). 골든 '마진율예외처리시트'. **상품번호 단일키**(채널무관), 미등록 N=1, 분수 가능. 스마트스토어 판매자바코드의 외부판 — **다중채널 공용**(ADR 0013) |
 
 ## A-2. 단일소비자 reference (소유 워크플로우 전용 — 영향 국소)
 | 파일(app `reference/`) | 소유 |
@@ -36,7 +37,7 @@
 - **dashboard ← product_attributes**: 세분류(최종분류) 차원 + 식품음료=구분 **3차** fallback(1차 logistics_classification → 2차 product_master 중분류 → 3차 식품음료). 구분 source 별도유지. (브랜드·b2b 차원은 ADR 0011로 폐기.)
 - **smartstore / easyadmin / esm-register → product-registration-common 상속**: 공통 개념(낱개·박스·합포N·판매가공식·상품명·서식). 공통 규칙 바꾸면 3채널 전부 영향. (decisions/0009)
 - **3 등록채널 ← product_master**: 매입가·박스내품·규격.
-- **channel-margin-monitor ← product_master·baseline_margin·sobun**: product_master(매입가/재고/규격/박스내품, 코드 4-tier 해석)·baseline_margin(확정마진율 채널열)·sobun(소분 변환코드→원코드·내품나누기). 합포 -CB-는 코드파싱(reference 없음). ⚠️sobun ↔ logistics `unit_list` ↔ cheonnyeon `sub_list` 소분/낱개 개념 중복 — 통합 추후 검토.
+- **channel-margin-monitor ← product_master·baseline_margin·sobun·hapo_multiplier**: product_master(매입가/재고/규격/박스내품, 코드 4-tier 해석)·baseline_margin(확정마진율 채널열)·sobun(소분 변환코드→원코드·내품나누기). 합포 -CB-는 코드파싱(reference 없음). 합포량 N(판매배수)은 바코드 없는 채널(식봄 등)에서 hapo_multiplier(상품번호) 조회 — 스마트스토어는 다운로드 바코드. ⚠️sobun ↔ logistics `unit_list` ↔ cheonnyeon `sub_list` 소분/낱개 개념 중복 — 통합 추후 검토.
 - **invoice-fill ← 송장 마스터(송장출력.xlsx)**: 세션 업로드(PII, 미저장). ⚠️openmarket-merge '송장출력' 시트 계열로 보이나 문서상 명시 연결 없음 — 확인 필요.
 
 ## C. 상품등록 채널 자산 위치 (챗 네이티브)
