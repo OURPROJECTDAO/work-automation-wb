@@ -81,6 +81,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **쿠팡 키=옵션ID(2026-06-11)**: 업체상품ID(A)는 multi-option(499 ID/2058 옵션)이라 키 부적합. 골든 조인·hapo·관리코드 조회 전부 **옵션ID(C)** 기준 → 상품번호=옵션ID.
 - **쿠팡 빈 관리코드 미매칭(2026-06-11)**: 다운로드 일부(155건)는 업체상품코드(F) 빈값 → 매입가 미해결(미매칭). 골든도 동일하게 미해결(매입가 NA)이라 우리 결과가 골든과 일치 — 버그 아님. 골든 `RIGHT(관리코드,LEN-2)` fallback은 접두코드용(이미 4-tier로 풀림)이라 미구현.
 - **★ 쿠팡 가격변경 openpyxl→inlineStr 업로드 실패(2026-06-11)**: `build_filter_price_xlsx`가 `load_workbook→wb.save()`로 라운드트립하면 openpyxl이 **전 문자열 셀을 inlineStr로 재직렬화**(sharedStrings 없음·XML선언 없음) → **쿠팡 업로더가 거부**(골든=네이티브 sharedStrings `t="s"`). 해결: openpyxl 저장 제거, **원본 .xlsx(전체 교체=업로드 바이트 그대로=네이티브)를 zip레벨 수술**(헤더행 보존+선택행 연속 재번호+P/Q 숫자 기입, sharedStrings/styles/mergeCells/네임스페이스/XML선언 원본 유지). 검증: 출력 row4가 골든 row4와 완전 일치·파트목록 동일. **전제: raw가 네이티브** → 쿠팡은 '전체 교체' 사용('신규만 추가'=`append_rows_to_raw` openpyxl 저장이 raw를 inlineStr로 변질). 헬퍼: `_sheet_part`·`_read_sst`·`_cell_text`·`_set_num_cell`·`_renumber_row`·`_col_letter`. (logs/2026-06-11-coupang-filter-native)
+- **★ 쿠팡 raw가 '신규만 추가'로 inlineStr 오염 → 수술 출력도 inlineStr(2026-06-11)**: 네이티브 수술이 정상이어도 **읽는 원본 `reference/listing_coupang.xlsx`가 inlineStr이면 수술이 충실히 보존해 출력도 inlineStr** → 쿠팡 거부("양식 맞는데 데이터 못잡음"). 원인: 과거 '신규만 추가'(`append_rows_to_raw`=openpyxl load→save)가 raw 데이터행 전부를 inlineStr로 변질(헤더만 t=s 남음). 진단: raw 데이터행 t=s 0·inlineStr 다수 = 오염. 해결 ①raw 치유(inlineStr→sharedStrings 무손실 역변환: 셀 `t="s"`+`<v>idx</v>`, 스타일 `s=` 보존, 빈셀은 빈 스타일셀, sst 기존 si verbatim+신규 append) ②**가드: filter형 채널은 '신규만 추가' 비활성화**(page `native_raw=cfg['price_form']['mode']=='filter'` → `disabled`). 검증: openpyxl 전수 24,985셀 무손실·엔드투엔드 수술 출력 inlineStr 0·골든 네이티브 일치. Reboot 불필요(reference 런타임·page 자동·수술 라이브). (logs/2026-06-11-coupang-heal)
 - **배민상회 상품별 수수료(2026-06-11)**: 수수료가 채널 단일이 아니라 다운로드 **BU(73)**에 상품별로 내장(4.5·5.0…). 정산식 수수료 = BU/100 + 0.03(추가 고정). compute가 행별 rate=1−수수료 적용. listing에 수수료raw 보존(없으면 commission=0.03만 적용되는 오류 → 가드 등재). bm_commission.csv는 천년경영 전용, 모니터 미사용.
 - **배민상회 컬럼 함정**: 관리코드 = **V(22) 관리용 상품명**(B 상품명 아님). 판매가=X(24)(소비자가 W(23)는 정가). 배송비=BH(60) 배송방법=='무료배송'?0:3000.
 - **쿠팡 바코드=로켓그로스 제외(2026-06-11)**: 쿠팡 다운로드 **E열(5)=바코드**. 판매자택배 상품은 항상 공백, 값이 있으면 로켓그로스(미매칭 아님—배송방식 차이) → `exclude_row_if_col_filled`:5로 parse 단계 행 제외. **기존 쿠팡 listing은 바코드를 저장한 적 없어 소급 필터 불가 → '상품관리 갱신→전체 교체' 1회 재파싱 필요**('신규만 추가'는 기존 행 유지).
@@ -93,7 +94,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
 ## 가격 일괄변경
-- **쿠팡** (filter형, 네이티브 수술 2026-06-11): 원본 다운로드(조회 A~O + 변경요청 P~S) 자체가 변경요청 컬럼형. `build_filter_price_xlsx`가 **openpyxl 저장 없이 zip레벨 수술** — 헤더행 보존, 선택 옵션ID(C열) 행만 남겨 연속 재번호, P(16)=권장가·Q(17)=가짜정가(`t`없는 숫자) 기입, sharedStrings 등 원본 포맷 보존. openpyxl 라운드트립은 inlineStr 변질로 쿠팡 업로드 실패(전용 함정 참조). 전제: raw 네이티브('전체 교체').
+- **쿠팡** (filter형, 네이티브 수술 2026-06-11): 원본 다운로드(조회 A~O + 변경요청 P~S) 자체가 변경요청 컬럼형. `build_filter_price_xlsx`가 **openpyxl 저장 없이 zip레벨 수술** — 헤더행 보존, 선택 옵션ID(C열) 행만 남겨 연속 재번호, P(16)=권장가·Q(17)=가짜정가(`t`없는 숫자) 기입, sharedStrings 등 원본 포맷 보존. openpyxl 라운드트립은 inlineStr 변질로 쿠팡 업로드 실패(전용 함정 참조). 전제: raw 네이티브('전체 교체'). **★ filter형 채널은 '신규만 추가' 비활성(가드, 2026-06-11) — append가 raw를 inlineStr로 오염시키므로 '전체 교체'만 허용.**
 - **스마트스토어** (원본 filter형): 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx). 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). ⚠️ delete_rows row_dimensions 잔존 → keep_last 초과 키 삭제 필수(전역 pitfalls). 함수: `compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`.
 - **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가. **jeong_field(정가/할인전단가/소비자가)는 전 채널 표준 `FAKE_JEONG`** — 권장가×(1+랜덤 0.20~0.30)·100원 반올림·>권장가, 매번 생성(실정가/마크업 보존 아님). 채널이 pf['jeong_fake']로 %만 오버라이드 가능. (사용자 표준 확정 2026-06-11)
   - 식봄: `sikbom_price_template.xlsx`('(식봄)양식', data 7), fixed{E열='n'}. A=상품번호·B=코드·C=상품명·**D=정가(무늬용 가짜=표준 FAKE_JEONG)**·F=판매단가(권장가).
@@ -138,3 +139,5 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 _갱신: 2026-06-11 (쿠팡 바코드 로켓그로스 제외 + 배민 양식 외부링크 strip + extra_cols 옵션번호 정수화)_
 
 _갱신: 2026-06-11 (쿠팡 가격변경 filter 네이티브 zip 수술 — openpyxl inlineStr 업로드 실패 해소)_
+
+_갱신: 2026-06-11 (쿠팡 raw inlineStr 오염 치유 + filter형 '신규만 추가' 비활성 가드)_
