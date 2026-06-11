@@ -61,13 +61,14 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **N(합포량)**: 스마트스토어=판매자바코드(BZ), 그 외=hapo_multiplier. **매입가×N 반드시 반영**(빼면 N>1/<1 리스팅 마진 오류).
 - **식봄 정산식은 골든과 의도적으로 다름**: 골든은 실택배비 3000/3700·권장가 ROUND. 우리는 **스마트스토어 표준(2700 flat·ceil)** 채택 → 식봄 마진율은 골든보다 (3000-2700)/정산액 만큼(합포≥2는 (3700-2700)/정산액) **높게** 나옴(정상, 버그 아님). 골든 대조는 입력(정산가·매입가·N)만 일치 확인용.
 - **식봄 가격 일괄변경 양식 = 미지원**(다운로드 양식 구조 상이 + 즉시할인 컬럼 없음). 모니터·CSV만. 양식 출력은 listing_식봄.xlsx 원본 저장 + 식봄 양식 컬럼맵 별도 작업 필요. 페이지는 원본 미저장 시 '원본 양식 없음' 가드.
+- **시트명 폴백(2026-06-11)**: 다운로드 실제 시트명이 cfg['sheet']와 다를 수 있음(식봄 신규 다운로드 시트명 ≠ '식봄붙여넣기') → `_pick_ws`가 명시시트 부재 시 첫 시트 사용. 식봄은 단일 시트라 안전. cfg['sheet']는 '있으면 우선' 힌트일 뿐.
 - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
 ## 가격 일괄변경 (스마트스토어 전용, 2026-06-11)
 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx) 내보내기. 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). **⚠️ openpyxl delete_rows는 row_dimensions 잔존 → keep_last 초과 키 삭제 필수**(전역 pitfalls 등재). 함수: `adjust_price`·`compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`. (식봄 등 다른 채널엔 미적용)
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + parse_download(missing-col tolerant·ship_fee_const) + compute(n_source 분기) + run.
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + parse_download(missing-col tolerant·ship_fee_const·_pick_ws 시트폴백) + compute(n_source 분기) + run.
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 네이티브 다중행 선택 + CSV/가격일괄변경 양식. **식봄은 selectbox에 자동 노출**(페이지 수정 불필요).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
