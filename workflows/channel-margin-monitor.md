@@ -5,7 +5,7 @@
 ## 요약
 - 판매 채널의 라이브 리스팅(상품관리 다운로드)을 받아 상품별 마진율을 계산 → 기준마진 대비 이탈 탐지 + 기준마진 달성 권장가를 역산하는 모니터.
 - 등록(신규)이 아니라 **운영 중 리스팅 점검**. 사용자 엑셀([1]마스터 수식 조인본) 대체.
-- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · 식봄(모니터+가격변경) · **캐시노트(모니터, 2026-06-11; 가격변경 보류)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
+- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · 식봄(모니터+가격변경) · **캐시노트(모니터+가격변경, 2026-06-11)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
 - **표준 정산식 = 웹앱 스마트스토어형**(사용자 확정 2026-06-11). 새 채널은 골든이 다른 값을 쓰더라도 **스마트스토어 구조(2700 flat 실택배비·ceil 권장가)에 맞추고 수수료율만 채널별**로 둔다. 골든은 입력 검증용 참고(마진율/권장가는 골든과 의도적으로 다를 수 있음).
 
 ## 입력 (저장본 자동 로드, 갱신 시에만 업로드)
@@ -15,7 +15,7 @@
   - **스마트스토어** (`[일괄수정 (전체 업로드)]`): r2=헤더, r3~5=가이드, r6+=데이터. A 상품번호·B 판매자상품코드·D 상품명·F 판매가·AO(41) 기본배송비·BF(58) 즉시할인·BQ(69) 포인트·BZ(78) 판매자바코드(N).
   - **식봄** (`식봄붙여넣기` 시트): r1~3 유의사항, **r4=헤더, r5+=데이터**. A(1) 상품no(키)·B(2) 상품코드(관리코드)·F(6) 상품명·**S(19) 판매단가(=판매가)**. **즉시할인·포인트·배송비(숫자)·바코드 컬럼 없음.** P(16)=정가(취소선용, 미사용). M(13)=택배배송비'명'(숫자 아님 → 배송비는 상수 3000).
   - **캐시노트** (`상품` 시트, KCD 마켓): **r3=헤더, r4+=데이터**. A(1) ID(상품번호 키)·E(5) 입점사 관리 코드(관리코드)·C(3) 상품명·**N(14) 판매 단가(=판매가)**·O(15) 할인 전 단가(정가). F(6) 요율(=6, 수수료율). **즉시할인·포인트·바코드 컬럼 없음(식봄형).** Y(25) 배송 정책 코드 → 배송비 조건부(아래). 둘째 시트 `상품 필드값`은 드롭다운값(무관). ⚠️ ID가 숫자셀 → `_pid` 정수정규화 필수.
-- listing CSV 컬럼 = 상품번호·코드·상품명·판매가·배송비·즉시할인·포인트·바코드(없는 채널은 0/공백). 배송비는 파싱 시점에 해소된 숫자로 저장(캐시노트 정책 조건부도 숫자로 baked).
+- listing CSV 컬럼 = 상품번호·코드·상품명·판매가·정가·배송비·즉시할인·포인트·바코드·**오퍼코드·옵션코드**(없는 채널은 0/공백). 배송비는 파싱 시점에 해소된 숫자로 저장(캐시노트 정책 조건부도 숫자로 baked). **오퍼코드(OFR)·옵션코드(SKU)** = 캐시노트 가격변경 양식 A/D용, 다운로드 Q(17)·R(18)에서 `extra_cols`로 캡처(listing에 보존, 양식 생성 시 다운로드 불필요).
 
 ## 마진 계산 (확정 공식 — 스마트스토어 표준)
 ```
@@ -50,6 +50,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - `sobun.csv` (136): 변환관리코드·원코드·내품나누기·소분규격. 매입가/재고 런타임 산출.
 - `listing_<key>.csv`(+meta): 채널 저장 상품관리 스냅샷(정가 컬럼 포함). `listing_<key>.xlsx`: 스마트스토어 원본 일괄변경 양식(filter 원천).
 - `sikbom_price_template.xlsx`: 식봄 '상품 일괄수정' 양식 고정 템플릿(append 원천). manifest A-2.
+- `cashnote_price_template.xlsx`: 캐시노트 '옵션 일괄수정' 양식 고정 템플릿((캐시노트)양식, append 원천). manifest A-2.
 - 연동: `product_master.csv`(매입가·재고·규격·박스내품).
 
 ## CHANNEL_CONFIG (채널 추가 = 여기에 한 세트)
@@ -59,7 +60,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **`n_source`**: `"download"`(=바코드 col, 스마트스토어 기본) / `"ref"`(=hapo_multiplier 상품번호 조회, 식봄·캐시노트).
 - cols에서 없는 컬럼(즉시할인·포인트·배송비·바코드)은 **생략 가능** → parse_download가 0/상수/None 처리.
 - 식봄: commission 0.07 · ship_fee_const 3000 · n_source "ref" · sheet 식봄붙여넣기 · header 4 · data 5 · cols{상품번호1,코드2,상품명6,판매가19,정가16}.
-- **캐시노트**: commission 0.06 · ship_fee_policy{col25,map{DVP212991:3000},default0} · n_source "ref" · sheet 상품 · header 3 · data 4 · cols{상품번호1(A),코드5(E),상품명3(C),판매가14(N),정가15(O)}. baseline_col 캐시노트. price_form 없음(가격변경 보류).
+- **캐시노트**: commission 0.06 · ship_fee_policy{col25,map{DVP212991:3000},default0} · n_source "ref" · sheet 상품 · header 3 · data 4 · cols{상품번호1(A),코드5(E),상품명3(C),판매가14(N),정가15(O)} · **extra_cols{오퍼코드17(Q),옵션코드18(R)}** · **price_form**(append, cashnote_price_template.xlsx, '(캐시노트)양식', data 4, fixed{F=수정,L=Y,N=9999}, G=판매단가(권장가)·H=할인전단가(max(정가,권장가))·O=관리코드). baseline_col 캐시노트.
 
 ## 전용 함정
 - 다운로드 가이드행 skip(채널별 header_row/data_start). 판매자상품코드 빈 행 존재.
@@ -74,11 +75,14 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **시트명 폴백**: 다운로드 실제 시트명이 cfg['sheet']와 다를 수 있음 → `_pick_ws`가 명시시트 부재 시 첫 시트. cfg['sheet']는 '있으면 우선' 힌트.
 - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
-## 가격 일괄변경 (스마트스토어 전용, 2026-06-11)
-표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx) 내보내기. 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). **⚠️ openpyxl delete_rows는 row_dimensions 잔존 → keep_last 초과 키 삭제 필수**(전역 pitfalls 등재). 함수: `adjust_price`·`compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`. 식봄=별도 양식 append(`build_price_form_append`). **캐시노트는 가격변경 보류**(양식 실물 확보 후 식봄형 여부 판단).
+## 가격 일괄변경
+- **스마트스토어** (원본 filter형): 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx). 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). ⚠️ delete_rows row_dimensions 잔존 → keep_last 초과 키 삭제 필수(전역 pitfalls). 함수: `compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`.
+- **식봄·캐시노트** (append형 — 채널 '일괄수정' 양식에 선택 행만 기입): `build_append_items(pf,rows,recs,pids)`(채널 무관 — source{양식필드→소스키}·price_field·jeong_field로 items+preview 생성) → `build_price_form_append`(cols{필드→컬럼} writer + fixed{컬럼→값}, 예시행 제거·keep_last 정리). 판매단가=권장가, 정가/할인전단가=max(정가,판매단가).
+  - 식봄: `sikbom_price_template.xlsx`('(식봄)양식', data 7), fixed{E열='n'}. A=상품번호·B=코드·C=상품명·D=정가·F=판매단가.
+  - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·H=할인전단가(≥판매단가)·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백 — 양식 예시행과 동일). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**.
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호 정수정규화) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·_pick_ws·정가) + compute(n_source 분기) + run + build_price_form_append(식봄) + build_bulk_price_xlsx(스마트스토어).
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호 정수정규화) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어).
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config` — 배송비 출처에 ship_fee_policy 분기 포함).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
@@ -86,6 +90,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **스마트스토어 골든 705/706** (2026-06-10): 정산액 707/707·base매입단가 706/707·마진율 705/706.
 - **식봄 골든 대조** (식봄결과페이지 716행, 2026-06-11): 정산가 H 485/485·합포 N 485/485·매입가 480/485(5 vintage). 로직 불일치 0.
 - **캐시노트 골든 대조** (캐시노트결과페이지 513행, 2026-06-11): 골든∩계산 **513/513**. 입력 — 판매가 509/513(4 가격변동)·**배송비 513/513**·**N(합포) 513/513**·base매입단가 461/463(2 vintage, 50 골든#N/A). run: 544건·미매칭4(빈코드)·미설정10·마진미달26·제한36·평균마진율 9.2%. 정산가/마진율은 2700표준이라 골든과 의도적 차이.
+- **캐시노트 가격변경 양식** (end-to-end, 2026-06-11): 오퍼/옵션코드 100% 캡처·listing 라운드트립 보존. 표본 5건 양식 — A=OFR·D=SKU·F=수정·G=권장가·H=정가(≥G)·L=Y·N=9999·O=관리코드 전건 일치, 예시행 제거·잔행 0. 식봄 회귀(합성) PASS.
 
 ## 채널 추가 레시피 (★앞으로 채널 다수 — 이 순서)
 새 채널 = 보통 **CHANNEL_CONFIG 한 세트** 만(정산식은 스마트스토어 표준 고정). 코드 4-tier·reference·페이지·listing 저장은 공통(수정 불필요).
@@ -103,6 +108,6 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 ## 관련
 - decisions/0013-sikbom-margin-monitor.md (식봄 + 스마트스토어 표준 채택 + hapo_multiplier N)
 - decisions/0014-cashnote-margin-monitor.md (캐시노트 + 6% 단일 + ship_fee_policy + _pid)
-- logs/2026-06/2026-06-11-channel-margin-monitor-cashnote.md
+- logs/2026-06/2026-06-11-channel-margin-monitor-cashnote.md · -cashnote-price-change.md
 - logs/2026-06/2026-06-11-channel-margin-monitor-sikbom.md · -price-change-form.md · 2026-06-10-references.md
 - manifest.md (A baseline_margin·product_master·hapo_multiplier / A-2 margin_floor·sobun·listing)
