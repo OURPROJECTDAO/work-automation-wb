@@ -69,7 +69,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 
 ## 코드 / 페이지
 - `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + parse_download(missing-col tolerant·ship_fee_const·_pick_ws 시트폴백) + compute(n_source 분기) + run.
-- `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 네이티브 다중행 선택 + CSV/가격일괄변경 양식. **식봄은 selectbox에 자동 노출**(페이지 수정 불필요).
+- `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 네이티브 다중행 선택 + CSV/가격일괄변경 양식. **식봄은 selectbox에 자동 노출**(페이지 수정 불필요). **전 컬럼 헤더에 수식 설명 help**(`_col_config(cfg)` — 채널 동적: 정산액=(net)×(1−수수료)+배송비×0.967·마진율=(정산액−매입가−2700)/정산액·배송비출처·N출처 등, 2026-06-11).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
 ## 검증
