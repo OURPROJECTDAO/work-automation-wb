@@ -40,7 +40,7 @@
 - **상품등록 운영 중**(챗 네이티브, ADR 0009): smartstore·esm·easyadmin. **멀티채널 배치 입력폼 v2**(`reference/product_input_form_v2.xlsx`, 대상 채널=스마트스토어/G마켓/둘 다) 배포 완료(2026-06-10) — smartstore·esm 공용, 구 v1 deprecated. 이미지확장자=URL 실검사 자동판별 확정. 미해결 — 결정적 엔진/캐시 미구현. 상세 workflows/product-registration-common.md·*-register.md.
 - **대시보드 product_attributes**: ✅ 슬림화(ADR 0011, 2026-06-10) — 4컬럼(식품음료·합포수량·최종분류). 차원=세분류만 + 식품음료 구분 3차 fallback(브랜드·b2b 폐기). **Reboot app 필요.** 451 합포수량 채우면 병합. 상세 workflows/dashboard.md.
 - **상품마진(온라인) 탭**: ✅ 신설(ADR 0012, 2026-06-10) — 합포×내품 택배배분 추정 + 채널 보정계수(실제송장÷추정송장). 온라인 거래처 자동스코프. page-only. 상세 workflows/dashboard.md.
-- **channel-margin-monitor**(채널 가격·마진 모니터, 운영중): 스마트스토어·**식봄 둘 다 모니터+가격변경**. 표준 정산식=스마트스토어형(2700·ceil), 수수료만 채널별(식봄7%). 식봄 가격변경=별도 '상품 일괄수정' 양식 append(`sikbom_price_template.xlsx`, E열=n, 정가 listing 보존). 컬럼 헤더에 수식 help. PC낱개 재고=박스재고 수정. config축: ship_fee_const·n_source·price_form. **⚠️ core 수정분 Reboot app 필요**. 미해결 — baseline↔product_master 조인 갭·정렬 시 선택 리셋·식봄 listing 정가 채우려면 '전체 교체' 1회. 다음 채널=캐시노트/쿠팡/알리. 상세 workflows/channel-margin-monitor.md.
+- **channel-margin-monitor**(채널 가격·마진 모니터, 운영중): 스마트스토어·**식봄 둘 다 모니터+가격변경**. 표준 정산식=스마트스토어형(2700·ceil), 수수료만 채널별(식봄7%). 식봄 가격변경=별도 '상품 일괄수정' 양식 append(`sikbom_price_template.xlsx`, E열=n, 정가 listing 보존). 컬럼 헤더에 수식 help. PC낱개 재고=박스재고 수정. config축: ship_fee_const·n_source·price_form. **⚠️ core 수정분 Reboot app 필요**. 미해결 — baseline↔product_master 조인 갭·정렬 시 선택 리셋·식봄 listing 정가 채우려면 '전체 교체' 1회. **다음 세션: 캐시노트 채널 추가**(사용자 선택) — 다운로드 .xlsx 샘플 대기. 추정 수수료 6%(×0.94, 천년경영 H식), 정산식=스마트스토어 표준(2700·ceil), N출처는 다운로드 바코드 유무로 결정. 가격변경은 양식 확인 후 식봄식 분리. 이후 쿠팡/알리. 상세 workflows/channel-margin-monitor.md.
 - (백로그) Phase 3 나머지 템플릿 이관 — 사용자 실물 파일 제공 대기.
 - (백로그) 온누리 빈 G셀 회귀 fixture/pytest.
 
