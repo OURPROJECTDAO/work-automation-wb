@@ -5,7 +5,7 @@
 ## 요약
 - 판매 채널의 라이브 리스팅(상품관리 다운로드)을 받아 상품별 마진율을 계산 → 기준마진 대비 이탈 탐지 + 기준마진 달성 권장가를 역산하는 모니터.
 - 등록(신규)이 아니라 **운영 중 리스팅 점검**. 사용자 엑셀([1]마스터 수식 조인본) 대체.
-- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · **식봄(모니터, 2026-06-11 추가)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
+- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · **식봄(모니터+가격변경, 2026-06-11)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
 - **표준 정산식 = 웹앱 스마트스토어형**(사용자 확정 2026-06-11). 새 채널은 골든이 다른 값을 쓰더라도 **스마트스토어 구조(2700 flat 실택배비·ceil 권장가)에 맞추고 수수료율만 채널별**로 둔다. 골든은 입력 검증용 참고(마진율/권장가는 골든과 의도적으로 다를 수 있음).
 
 ## 입력 (저장본 자동 로드, 갱신 시에만 업로드)
@@ -46,7 +46,8 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - `hapo_multiplier.csv` (3,339, 신규 2026-06-11): **상품번호·합포량·채널**. = 사용자 `상품몇개합포인지.xlsx`(골든의 '마진율예외처리시트'). 바코드 없는 채널의 N 공급(스마트스토어 판매자바코드의 외부판). **상품번호 단일키**(플랫폼마다 고유 → 채널 무관 조회), 미등록 N=1, 분수 가능. 공용·manifest A.
 - `margin_floor.csv` (48): 관리코드·제한내용(텍스트). 제조사 단가하한. 숫자 클램프 X — 권장가 칸 텍스트 표시. 전 채널 적용.
 - `sobun.csv` (136): 변환관리코드·원코드·내품나누기·소분규격. 매입가/재고 런타임 산출.
-- `listing_<key>.csv`(+meta): 채널 저장 상품관리 스냅샷. `listing_<key>.xlsx`: 원본 일괄변경 양식(가격변경 출력 원천).
+- `listing_<key>.csv`(+meta): 채널 저장 상품관리 스냅샷(**정가 컬럼 포함, 2026-06-11** — 식봄 가격변경 정가 보존용). `listing_<key>.xlsx`: 스마트스토어 원본 일괄변경 양식(filter 원천).
+- `sikbom_price_template.xlsx`: 식봄 '상품 일괄수정' 양식 고정 템플릿(append 원천). manifest A-2.
 - 연동: `product_master.csv`(매입가·재고·규격·박스내품).
 
 ## CHANNEL_CONFIG (채널 추가 = 여기에 한 세트)
@@ -60,7 +61,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - 다운로드 가이드행 skip(채널별 header_row/data_start). 판매자상품코드 빈 행 존재.
 - **N(합포량)**: 스마트스토어=판매자바코드(BZ), 그 외=hapo_multiplier. **매입가×N 반드시 반영**(빼면 N>1/<1 리스팅 마진 오류).
 - **식봄 정산식은 골든과 의도적으로 다름**: 골든은 실택배비 3000/3700·권장가 ROUND. 우리는 **스마트스토어 표준(2700 flat·ceil)** 채택 → 식봄 마진율은 골든보다 (3000-2700)/정산액 만큼(합포≥2는 (3700-2700)/정산액) **높게** 나옴(정상, 버그 아님). 골든 대조는 입력(정산가·매입가·N)만 일치 확인용.
-- **식봄 가격 일괄변경 양식 = 미지원**(다운로드 양식 구조 상이 + 즉시할인 컬럼 없음). 모니터·CSV만. 양식 출력은 listing_식봄.xlsx 원본 저장 + 식봄 양식 컬럼맵 별도 작업 필요. 페이지는 원본 미저장 시 '원본 양식 없음' 가드.
+- **식봄 가격변경 = '상품 일괄수정' 양식(다운로드와 별개)**. 다운로드는 '다운로드 전용(수정·업로드 불가)' → 업로드 양식은 `reference/sikbom_price_template.xlsx`(고정 템플릿)에 **선택 행만 채우는 append 방식**(스마트스토어=원본 filter와 다름). E열(수량별 판매단가 설정)=n 고정, 판매단가=권장가, 정가는 listing 저장값 유지(정가≥판매단가 보장). 식봄은 즉시할인·포인트 없어 할인우선 규칙 미적용.
 - **시트명 폴백(2026-06-11)**: 다운로드 실제 시트명이 cfg['sheet']와 다를 수 있음(식봄 신규 다운로드 시트명 ≠ '식봄붙여넣기') → `_pick_ws`가 명시시트 부재 시 첫 시트 사용. 식봄은 단일 시트라 안전. cfg['sheet']는 '있으면 우선' 힌트일 뿐.
 - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
@@ -68,7 +69,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 표에서 상품 선택 → CSV 또는 가격 일괄변경 양식(.xlsx) 내보내기. 타깃=권장가. **할인 우선 규칙**(`adjust_price`): 인상 시 즉시할인 먼저↓, 인하 시 먼저↑, 포인트 불변. 양식=원본 전 컬럼 보존·변경행만 출력(미체크/빈행 삭제). **⚠️ openpyxl delete_rows는 row_dimensions 잔존 → keep_last 초과 키 삭제 필수**(전역 pitfalls 등재). 함수: `adjust_price`·`compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`. (식봄 등 다른 채널엔 미적용)
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + parse_download(missing-col tolerant·ship_fee_const·_pick_ws 시트폴백) + compute(n_source 분기) + run.
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + parse_download(missing-col tolerant·ship_fee_const·_pick_ws 시트폴백·정가) + compute(n_source 분기) + run + **build_price_form_append(식봄 양식)** + build_bulk_price_xlsx(스마트스토어).
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 네이티브 다중행 선택 + CSV/가격일괄변경 양식. **식봄은 selectbox에 자동 노출**(페이지 수정 불필요). **전 컬럼 헤더에 수식 설명 help**(`_col_config(cfg)` — 채널 동적: 정산액=(net)×(1−수수료)+배송비×0.967·마진율=(정산액−매입가−2700)/정산액·배송비출처·N출처 등, 2026-06-11).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
