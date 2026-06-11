@@ -62,7 +62,7 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
 - **★ 할인 우선 규칙**(`adjust_price`): net(=판매가−즉시할인−포인트)을 권장가로 맞추되, **인상 시 즉시할인을 먼저 줄이고** 모자라면 판매가↑. **인하 시 즉시할인을 먼저 늘리고** 모자라면 판매가↓. **포인트 불변**. → 결과는 항상 판매가 100원배수 유지.
 - **양식 = 우리 상품관리 다운로드와 컬럼 동일**(헤더 1–5행 보존, 데이터 6행~, A상품번호·F판매가·BF즉시할인·BG단위·BQ포인트·BZ바코드). **(나) 확정: 전 컬럼 보존, 변경할 행만 출력**(미체크/빈행 삭제). 변경 셀 = F·BF(+BG='원'/할인0이면 BF·BG 비움).
 - **G열(단위가격 사용여부, cfg `unitprice_use_col`=7)**: 출력 행에서 비어있으면 'N' 채움, 값 있으면 보존. (그 외 컬럼은 원본 보존)
-- **빈행 금지**: 플랫폼 업로드 시 변경 행 외(빈행 포함) 남으면 빈 상품행 등록됨 → 비체크·빈행 전부 삭제(연속구간 `_ranges_desc`로 아래부터). 출력 = 헤더(1–5행) + 체크행만.
+- **빈행 금지**: 플랫폼 업로드 시 변경 행 외(빈행 포함) 남으면 빈 상품행 등록됨 → 비체크·빈행 전부 삭제(연속구간 `_ranges_desc`로 아래부터). 출력 = 헤더(1–5행) + 체크행만. **⚠️ openpyxl delete_rows는 row_dimensions를 남겨 빈 `<row>` 요소가 잔존(셀 없어도 플랫폼이 빈 상품행 인식) → keep_last 초과 row_dimensions 키 삭제 필수**(2026-06-11 골든 대조).
 - **원본 .xlsx 필수**: 양식 출력은 `reference/listing_<key>.xlsx`(원본 전체 컬럼)에서 행을 가져옴 → **상품관리 갱신(전체 교체) 1회로 원본 저장이 선결**. 미저장 시 "원본 양식 없음" 안내.
 - 다운로드 rerun 함정 회피: 생성 bytes를 session_state에 저장 후 download_button. 변경 미리보기(현재가→새가·방향) 동반.
 - 함수: core `adjust_price`·`compute_new_prices`·`build_bulk_price_xlsx`·`append_rows_to_raw`.
@@ -103,6 +103,7 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
 ## 관련
 - logs/2026-06/2026-06-11-channel-margin-monitor-price-change-form.md (가격 일괄변경 양식 + 권장가 올림)
 - logs/2026-06/2026-06-11-channel-margin-monitor-form-g-and-rows.md (양식 G기본N·빈행삭제)
+- logs/2026-06/2026-06-11-channel-margin-monitor-form-empty-rows-fix.md (빈 row 완전제거·row_dimensions)
 - logs/2026-06/2026-06-11-channel-margin-monitor-margin-under-threshold.md (마진미달 임계 -1%)
 - logs/2026-06/2026-06-10-channel-margin-monitor-references.md
 - manifest.md (A baseline_margin·product_master / A-2 margin_floor·sobun)
