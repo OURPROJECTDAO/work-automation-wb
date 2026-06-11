@@ -27,6 +27,7 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
 ```
 - 우리 등록 공식(이익/정산액 분모)과 동일. **단 실택배비 = 2700 단일**(엑셀 원본 3000/3700 폐기 — 합포장 묶음판매 +700 접음, 사용자 확인 2026-06-10).
 - 수수료율·확정마진율은 채널별. 스마트스토어 수수료 6%.
+- **마진미달 판정**: `탐지 < MARGIN_UNDER_THRESHOLD`(= **-0.01**, 기준마진율보다 1%p↑ 낮음). KPI '마진 미달' + 페이지 '마진미달만' 필터 공용 단일상수(core). 전 채널 공통. (2026-06-11: 탐지<0→<-0.01, 79→24건)
 
 ## 코드 해석 (매입가/재고/규격) — 4-tier
 | 코드 형태 | base 매입가 | 재고 | 규격 | 소스 |
@@ -86,5 +87,6 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
   - 이런 채널은 commission 상수만으론 부족 → compute()에 **채널별 정산 훅(settle_fn)** 추가 검토(상수로 표현되면 config, 아니면 함수). **천년경영 workflows/cheonnyeon-upload.md 마켓별 H식이 채널 정산식 1차 참고.**
 
 ## 관련
+- logs/2026-06/2026-06-11-channel-margin-monitor-margin-under-threshold.md (마진미달 임계 -1%)
 - logs/2026-06/2026-06-10-channel-margin-monitor-references.md
 - manifest.md (A baseline_margin·product_master / A-2 margin_floor·sobun)
