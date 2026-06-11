@@ -70,7 +70,7 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
 
 ## 코드 / 페이지 (구현 완료 2026-06-10)
 - `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG(채널별) + load_references + resolve_code(4-tier) + parse_download + compute + run.
-- `app/pages/6_채널마진모니터.py` (독립 페이지): 채널선택 → .xlsx 업로드 → @st.cache_data run → KPI + 필터(코드유형·마진미달·재고0·제한·미매칭) + 표(권장가/제한 합성열) + CSV.
+- `app/pages/6_채널마진모니터.py` (독립 페이지): 채널선택 → 저장 listing 자동로드 → KPI + **검색(상품번호·관리코드·상품명 부분일치)** + 필터(코드유형·마진미달·재고0·제한·미매칭) + **선택 체크박스 표**(전체선택/해제) + CSV/가격일괄변경 양식 내보내기.
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈이라 첫 배포 후 Reboot app 1회 필요.**
 - 채널 추가 = CHANNEL_CONFIG 한 세트(수수료·정산계수·실택배비·baseline 채널열·마진제한·다운로드 컬럼맵).
 
@@ -104,6 +104,7 @@ N        = 판매자바코드 (빈값/0 → 1; 그 관리코드 기준 판매수
 - logs/2026-06/2026-06-11-channel-margin-monitor-price-change-form.md (가격 일괄변경 양식 + 권장가 올림)
 - logs/2026-06/2026-06-11-channel-margin-monitor-form-g-and-rows.md (양식 G기본N·빈행삭제)
 - logs/2026-06/2026-06-11-channel-margin-monitor-form-empty-rows-fix.md (빈 row 완전제거·row_dimensions)
+- logs/2026-06/2026-06-11-channel-margin-monitor-table-search.md (표 검색 필터)
 - logs/2026-06/2026-06-11-channel-margin-monitor-margin-under-threshold.md (마진미달 임계 -1%)
 - logs/2026-06/2026-06-10-channel-margin-monitor-references.md
 - manifest.md (A baseline_margin·product_master / A-2 margin_floor·sobun)
