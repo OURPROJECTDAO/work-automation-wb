@@ -33,6 +33,11 @@
 ## openpyxl 행 삭제 (전 워크플로우 공통)
 - **`delete_rows`는 셀만 지우고 `ws.row_dimensions`(행 높이/서식)는 남긴다** → 빈 `<row>` 요소가 sheet XML에 잔존. openpyxl max_row로는 안 보여도 외부 파서(플랫폼 업로드 등)는 빈 상품행으로 인식. 행 삭제 후 마지막 유효행 초과 `row_dimensions` 키를 직접 삭제할 것. (channel-margin-monitor 가격변경 양식, logs/2026-06-11)
 
+## xlsx 외부링크(externalLinks) 잔존 (템플릿 기반 출력 전 워크플로우 공통)
+- **원본 마스터 통합문서를 가리키던 양식 템플릿이 고아 외부참조(`xl/externalLinks/`+workbook `<externalReferences>`)를 품으면**, openpyxl `load→save`가 이를 **그대로 전파** → 출력 파일을 엑셀에서 열 때 '외부 연결을 업데이트할 수 없습니다' 경고. **데이터 셀이 전부 리터럴(inlineStr/숫자)이라 수식 의존이 없어도** 경고는 뜸(숫자는 다 맞음). 
+- 진단: `unzip -l out.xlsx | grep externalLink` / `unzip -p out.xlsx xl/workbook.xml | grep externalReference`.
+- 해결: ① 템플릿 자체를 정리(외부링크 4종 제거: 파트·workbook `<externalReferences>`·workbook.xml.rels 관계·`[Content_Types].xml` override) ② 코드에서 저장 직후 zip레벨 strip(외부링크 없으면 no-op). channel-margin-monitor `_strip_external_links` 참고(배민 양식, logs/2026-06-11).
+
 ## 한국어 처리 (엑셀/앱 — 전 워크플로우 공통)
 - 주소·상품명 매칭 전 NFC 정규화 필수(unicodedata.normalize("NFC", s)). 출처 다른 데이터가 NFD(자모 분리)면 같은 글자라도 부분일치 매칭 실패 → 도서산간/미배송 매칭 치명적.
 - **숫자 ID 키 정규화 (전 워크플로우 공통)**: openpyxl은 정수 ID 셀(예 상품번호 46903)을 **float(46903.0)**로 읽음. str()/NFC만 하면 '46903.0' → CSV/reference의 '46903' 키와 매칭 실패(조용히 미매칭=기본값). 정수값 float은 int화 후 키로 쓸 것(`int(v) if isinstance(v,float) and v.is_integer() else v`). (channel-margin-monitor 캐시노트 N 전건 1 오류 사례, logs/2026-06-11-cashnote)
@@ -40,4 +45,4 @@
 - 대시보드 차트: matplotlib는 한글 폰트 미설치 시 □□□. Plotly/Altair(브라우저 폰트) 권장.
 - 정렬: VBA xlPinYin vs Python 코드포인트 정렬 차이 가능 → 골든 파일 대조로 확인.
 
-_갱신: 2026-06-11 (숫자 ID 키 정규화 함정 추가 — 캐시노트 사례)_
+_갱신: 2026-06-11 (xlsx 외부링크 잔존 함정 추가 — 배민 양식 사례)_
