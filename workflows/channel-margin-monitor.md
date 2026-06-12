@@ -122,8 +122,8 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
   - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·**H=할인전단가=무늬용 가짜 정가(표준 FAKE_JEONG)**·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**. **할인전단가는 실제 가격 아님 — 마진/모니터는 판매단가(N)만 사용**, 양식 H는 listing 정가 보존이 아니라 매번 생성(식봄은 jeong_fake 없음 → 실제 정가 보존).
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + **_consolidate_parse(알리 다중시트 정제 — 보이는 시트·라벨조회·숫자ID 필터, 매크로 대체)** + parse_download(consolidate 분기·**include_row_if_col_value(지마켓 keep)·dedup_key(A 중복제거)**·missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + **_num(콤마 허용 '3,000'→3000·'무료'→0)** + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer + **seq_col 순번**, 식봄·캐시노트·올웨이즈·**ESM**)** + build_bulk_price_xlsx(스마트스토어) + **build_filter_price_xlsx(쿠팡, zip 수술·openpyxl 미사용, 출력 sharedStrings 정규화) + 수술 헬퍼(_sheet_part·_read_sst·_cell_text·_cell_in_row·_set_num_cell·_renumber_row·_col_letter·`_inline_cells_to_shared`(inlineStr→t=s))**.
-- `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출). **`multi_file` 채널(ESM)은 업로더 `accept_multiple_files=True` → 여러 배치 파일 parse·이어붙이기·`dedup_key` 교차 중복제거 후 전체교체/신규추가(multi는 raw 저장 생략=모니터전용)** → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config` — 배송비 출처에 ship_fee_policy 분기 포함).
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + **_consolidate_parse(알리 다중시트 정제 — 보이는 시트·라벨조회·숫자ID 필터, 매크로 대체)** + parse_download(consolidate 분기·**include_row_if_col_value(지마켓 keep)·dedup_key(A 중복제거)**·missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + **_num(콤마 허용 '3,000'→3000·'무료'→0)** + compute(n_source 분기) + **compute_listing(baseline_override 라이브 기준마진)** + run + **기준마진율 편집(parse_baseline_dict·propose_baseline·update_baseline_csv·_fmt_margin)** + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer + **seq_col 순번**, 식봄·캐시노트·올웨이즈·**ESM**)** + build_bulk_price_xlsx(스마트스토어) + **build_filter_price_xlsx(쿠팡, zip 수술·openpyxl 미사용, 출력 sharedStrings 정규화) + 수술 헬퍼(_sheet_part·_read_sst·_cell_text·_cell_in_row·_set_num_cell·_renumber_row·_col_letter·`_inline_cells_to_shared`(inlineStr→t=s))**.
+- `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출). **`multi_file` 채널(ESM)은 업로더 `accept_multiple_files=True` → 여러 배치 파일 parse·이어붙이기·`dedup_key` 교차 중복제거 후 전체교체/신규추가(multi는 raw 저장 생략=모니터전용)** → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config`). **하단 '🎯 기준마진율 설정' 섹션**(선택→현재 마진율을 그 채널 기준으로, 충돌 라디오·0.1%p반올림·offset 프리셋). baseline은 **GitHub 라이브 read**(`_load_baseline_text` 캐시)로 편집 즉시 반영(compute_listing override).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
 ## 검증
@@ -140,6 +140,16 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **배민상회 가격변경 양식**(end-to-end, 2026-06-11): 옵션번호/옵션명/수수료raw 캡처·라운드트립 보존. 표본 양식 — A상품번호·C옵션번호·D옵션명·E관리코드·G현재소비자가·I현재판매가·J변경판매가(권장가)·**H변경소비자가=표준 FAKE_JEONG(권장가+20~30% 랜덤)** 기입, 예시행 제거. (초기 gap유지 → 사용자 요청으로 전 채널 랜덤 표준화)
 - **배민상회 골든 대조** (배민결과페이지 395행, 2026-06-11): 골든∩계산 394/394. 입력 — 판매가 394/394·배송비 394/394·**수수료(상품별 BU/100+0.03) 394/394**·N 394/394·base 392/393(1 vintage). **정산가 394/394 일치**(정산식 동일, 실택배비만 표준차). run: 394건·미매칭0·미설정6·마진미달20·제한35·평균마진율 10.2%.
 - **배민 양식 외부링크 수정(2026-06-11)**: `baemin_price_template.xlsx`가 원본 마스터 통합문서를 가리키는 **고아 외부참조**(externalLinks)를 품어 출력 파일을 엑셀에서 열 때 '외부 연결 업데이트 불가' 경고(숫자는 리터럴이라 다 맞음). 템플릿 정리본 커밋 + **`_strip_external_links`**(zip레벨: externalLinks 파트·workbook `<externalReferences>`·rels·Content_Types 제거, 외부링크 없으면 no-op)를 **append/bulk/filter 3개 출력 빌더 전부**에 적용(방어). cashnote/sikbom 템플릿은 외부링크 0건이라 무영향. 검증: 템플릿 ext (2,T,T,T)→(0,F,F,F), 양식 출력 ext 0, 시트 보존.
+
+## 기준마진율 편집 (현재 마진율 → 기준, 전 채널 공통)
+- **목적**: 선택 상품의 현재 마진율을 그 채널의 기준마진율(baseline_margin)로 저장. 미달 상품을 목표로 인정 → 미달 해제. (ADR 0016)
+- **위치**: 모니터 페이지 하단, 표 다중선택(sel_pids) 재사용. offset 프리셋(현재 그대로/현재−1%p) → 미리보기(충돌 해결+기존→새) → 저장.
+- **충돌**: baseline 키=관리코드, 행=상품번호. 같은 관리코드 여러 상품번호가 현재마진 다르면 충돌 → 관리코드별 라디오로 사용자 선택(비충돌 자동). `propose_baseline`이 (proposals, conflicts) 분리.
+- **반올림**: round(현재−offset, 3) = 0.1%p (0.0917→0.092). `_fmt_margin` 저장표기(끝 0 제거).
+- **채널 컬럼만**: `update_baseline_csv`가 baseline_col 컬럼만 수정(타 채널·타 관리코드·헤더/열순서/BOM/CRLF 보존). 없는 관리코드 행 추가.
+- **즉시 반영**: baseline를 배포본 로컬(load_references) 대신 **GitHub 라이브**(`_load_baseline_text` @cache_data)로 읽어 `compute_listing(baseline_override=)` 주입 → 저장 시 cache clear+rerun, 재배포 불요. (기존엔 reference 로컬 read라 재배포 전 미반영)
+- **검증**: 미달 10(관리코드 유니크)→baseline=현재→전부 미달 해제, 전체 49→29. 구조·타채널 보존, override 즉시반영.
+- 향후: ②인라인 편집(data_editor) ③일괄 규칙(필터 전체=고정값). 1차는 선택→현재만.
 
 ## 채널 추가 레시피 (★앞으로 채널 다수 — 이 순서)
 새 채널 = 보통 **CHANNEL_CONFIG 한 세트** 만(정산식은 스마트스토어 표준 고정). 코드 4-tier·reference·페이지·listing 저장은 공통(수정 불필요).
@@ -181,3 +191,5 @@ _갱신: 2026-06-12 (ESM(G마켓) 채널 추가 — 모니터. 17.5% 단일·키
 _갱신: 2026-06-12 (ESM 다중파일 업로드 — multi_file·page accept_multiple_files. 배치 500상품 다운로드 한번에 병합(이어붙이기+A교차dedup), 수기병합 제거. core+page → Reboot)_
 
 _갱신: 2026-06-12 (ESM 가격변경(append) 추가 — B=사이트상품번호·C=권장가·A순번(seq_col), extra_cols 보존, jeong 없음. esm_price_template.xlsx. 양식 30표본 전건 일치 + **실업로드 성공 사용자 확인**. **8채널 모니터/7채널 가격변경.** core → Reboot)_
+
+_갱신: 2026-06-12 (기준마진율 편집(현재→기준) 추가 — 전 채널 공통. 선택→현재 마진율을 그 채널 baseline으로, 충돌 사용자선택·0.1%p반올림·baseline 라이브read 즉시반영. ADR 0016. core+page → Reboot)_
