@@ -24,6 +24,7 @@
 | esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
+| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 설계확정·미구현 | workflows/intelligence-layer.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -36,6 +37,7 @@
 - 없음. (B2 인프라 완료 — repo·PAT R/W·st.secrets 검증됨 2026-06-08.)
 
 ## 다음 한 수
+- **★ intelligence-layer(지능 레이어·이력엔진+두뇌) 설계확정·미구현(ADR 0018, 2026-06-12)**: 관찰↔실행 사이 두뇌(진단·추천·측정) 신설. 매일/3년 데이터를 private repo 이력으로 적립 → ①마진 침식·제시 ②입고·품절 예측 ③채널 가격 A/B. ★정산 진실=매출자료(EasyAdmin/erp 정산은 raw), 택배 실배분=송장번호 그룹(추정송장·k 대체), 매입가=master(수정로그). 데이터 카탈로그 9종·단계별 구현 = workflows/intelligence-layer.md. **첫 브릭=수정로그 3년 적재(매입가/매출가 변경 이력 소급). 직접 실행 다음 세션.**
 - **Phase 4 대시보드 점진 확장**: 매출집계·증분업로더·거래처그룹·구분분류·기간 날짜범위·일/월/연 추이·**이익 모드(택배비=ERP 00-12 라인, 3000/2500 보정 토글, 이익률=이익/매입가, 전체 거래처)** 배포 완료(decisions/0008). 다음 후보 — ① 물류량(수량÷박스내품) ② 이익/물류량 콤보(이중축). 상세 workflows/dashboard.md.
 - core/ 신규 모듈을 페이지가 import → 첫 배포 후 Reboot app 필요(pitfalls 모듈캐시).
 - **상품등록 운영 중**(챗 네이티브, ADR 0009): smartstore·esm·easyadmin. **멀티채널 배치 입력폼 v2**(`reference/product_input_form_v2.xlsx`, 대상 채널=스마트스토어/G마켓/둘 다) 배포 완료(2026-06-10) — smartstore·esm 공용, 구 v1 deprecated. 이미지확장자=URL 실검사 자동판별 확정. 미해결 — 결정적 엔진/캐시 미구현. 상세 workflows/product-registration-common.md·*-register.md.
@@ -54,3 +56,5 @@ _갱신: 2026-06-12 (기준마진율 편집 추가 — 현재 마진율→기준
 _갱신: 2026-06-12 (기준마진율 새 기준 인라인 편집(data_editor) — offset 라디오 제거, 기본값=현재·직접 수정. page만 → Reboot)_
 
 _갱신: 2026-06-12 (upload-monitor(업로드감시) 신규 워크플로우 설계확정·미구현 — base 정체 collapse·키=상품코드·재고금액 우선·L4 등록 인계. ADR 0017)_
+
+_갱신: 2026-06-12 (intelligence-layer 신규 워크플로우 설계확정 — 이력엔진+두뇌, 데이터 카탈로그 9종, 정산진실=매출자료·택배=송장. 첫 브릭=수정로그 적재. ADR 0018)_
