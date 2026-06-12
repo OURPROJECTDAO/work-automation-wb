@@ -25,6 +25,7 @@
 ## 변경
 - KB: workflows/intelligence-layer.md(신규), decisions/0018(신규), state.md(인덱스+다음한수), roadmap.md, INDEX.md, 본 로그.
 - 코드: 없음(설계만).
+- 추가(동일 세션): workflow doc §5.6 웹앱 통합(UI/페이지) — 적립 입력 페이지·알림 배너·두뇌 3종 탭/페이지·네비.
 
 ## 다음 · 상태
 - ⚠️ **미구현 — 직접 실행(코드/적재) 다음 세션.** 첫 작업 = `core/intelligence/price_history.py`(수정로그 파서·정규화·price_changes 파티션 PUT·as-of 재구성) + 사용자 3년치 수정로그 export 수령.
