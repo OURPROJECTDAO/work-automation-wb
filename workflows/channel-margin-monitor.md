@@ -5,7 +5,7 @@
 ## 요약
 - 판매 채널의 라이브 리스팅(상품관리 다운로드)을 받아 상품별 마진율을 계산 → 기준마진 대비 이탈 탐지 + 기준마진 달성 권장가를 역산하는 모니터.
 - 등록(신규)이 아니라 **운영 중 리스팅 점검**. 사용자 엑셀([1]마스터 수식 조인본) 대체.
-- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · 식봄(모니터+가격변경) · 캐시노트(모니터+가격변경) · 배민상회(모니터+가격변경; 상품별 수수료) · **쿠팡(모니터+가격변경, 2026-06-11; filter형 가격변경)** · **올웨이즈(올팜)(모니터+가격변경, 2026-06-12; append형)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
+- 상태: **운영중** — 스마트스토어(모니터+가격일괄변경) · 식봄(모니터+가격변경) · 캐시노트(모니터+가격변경) · 배민상회(모니터+가격변경; 상품별 수수료) · **쿠팡(모니터+가격변경, 2026-06-11; filter형 가격변경)** · **올웨이즈(올팜)(모니터+가격변경, 2026-06-12; append형)** · **알리(AliExpress)(모니터, 2026-06-12; 다중시트 자동정제)**. 타 채널은 레시피로 점진 추가(baseline_margin이 10채널 보유).
 - **표준 정산식 = 웹앱 스마트스토어형**(사용자 확정 2026-06-11). 새 채널은 골든이 다른 값을 쓰더라도 **스마트스토어 구조(2700 flat 실택배비·ceil 권장가)에 맞추고 수수료율만 채널별**로 둔다. 골든은 입력 검증용 참고(마진율/권장가는 골든과 의도적으로 다를 수 있음).
 
 ## 입력 (저장본 자동 로드, 갱신 시에만 업로드)
@@ -18,6 +18,7 @@
   - **배민상회** (`sheet1`): **r2=헤더, r3+=데이터**. A(1) 상품번호(키)·**V(22) 관리용 상품명(=관리코드)**·B(2) 상품명·**X(24) 판매가**·W(23) 소비자가(정가). **BU(73) 상품별 수수료(%) → 수수료 내장**(extra_cols 캡처). BH(60) 배송방법 → 배송비 조건부. **즉시할인·포인트·바코드 없음(식봄형).** 상품번호 숫자셀 → _pid. 암호 없음.
   - **쿠팡** (`data` 시트): **r3=헤더, r4+=데이터**. **C(3) 옵션ID(키 — 골든 조인·hapo키. 업체상품ID A는 multi-option)**·F(6) 업체상품코드(관리코드)·G(7) 쿠팡 노출 상품명·**J(10) 판매가격**·K(11) 할인율기준가(정가). 즉시할인·포인트·바코드 없음. 다운로드가 **조회(A~O)+변경요청(P~S) 컬럼형** — 가격변경에 재사용.
   - **올웨이즈(올팜)** (`…수정용` 단일 시트): **r1=헤더, r2=가이드, r3=예시, r4+=데이터**. **A(1) 상품 ID(ObjectId 문자열 키)**·E(5) 판매자상품코드(관리코드)·B(2) 상품명·**K(11) 팀구매가(=판매가)**·J(10) 개인구매가(=정가). 즉시할인·포인트·배송비·바코드 컬럼 없음(식봄형). ⚠️ D '일반 가격(팀구매가*1.1)' 헤더는 **거짓 라벨** — 실제 D=개인구매가.
+  - **알리(AliExpress)** (`ALIPRODUCT` 대량등록 export — **카테고리별 다중시트**): 커피음료·탄산수 등 25개 카테고리 시트 + 각 `*_hide`·`global_hide`(숨김) + 다단헤더(r1 그룹·**r2 라벨**·r3 옵션필수·r4~5 설명/예시). **보이는 시트만**(숨김 제외) 통합, r2 라벨로 **id(알리상품번호)·*제품 이름(상품명)·*제품 소매 가격(판매가)·SKU 코드(관리코드)** 추출. data r5+(예시 '--' 행은 숫자ID 필터 제거). 매크로(ALI상품매크로V2) 정제를 parse에서 자동화. 즉시할인·포인트·배송비·바코드·정가 없음.
 - listing CSV 컬럼 = 상품번호·코드·상품명·판매가·정가·배송비·즉시할인·포인트·바코드·**오퍼코드·옵션코드**(없는 채널은 0/공백). 배송비는 파싱 시점에 해소된 숫자로 저장(캐시노트 정책 조건부도 숫자로 baked). **오퍼코드(OFR)·옵션코드(SKU)** = 캐시노트 가격변경 양식 A/D용, 다운로드 Q(17)·R(18)에서 `extra_cols`로 캡처(listing에 보존, 양식 생성 시 다운로드 불필요).
 
 ## 마진 계산 (확정 공식 — 스마트스토어 표준)
@@ -32,7 +33,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 권장가    = ⌈ ((매입가 + 2700)/(1−확정마진율) − 배송비×0.967) / (1−수수료) ⌉   (100원 올림)
 ```
 - **실택배비 = 2700 단일·권장가 = 올림(ceil)** 이 표준(전 채널 공통). 합포 묶음 +700(3000/3700) 및 ROUND 반올림은 **채널 골든에 있어도 채택 안 함**(스마트스토어 기준).
-- 수수료율: 스마트스토어 6% · 식봄 7% · 캐시노트 6% · **쿠팡 12%** · **올웨이즈 10.5%**(단일). **배민상회는 상품별**(다운로드 BU/100 + 0.03) → `commission_source="download"`.
+- 수수료율: 스마트스토어 6% · 식봄 7% · 캐시노트 6% · **쿠팡 12%** · **올웨이즈 10.5%** · **알리 9%**(단일). **배민상회는 상품별**(다운로드 BU/100 + 0.03) → `commission_source="download"`.
 - **마진미달 판정**: `탐지 < MARGIN_UNDER_THRESHOLD`(= **-0.01**). 전 채널 공통 단일상수(core).
 
 ## 코드 해석 (매입가/재고/규격) — 4-tier (전 채널 공통, 불변)
@@ -70,8 +71,10 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **배민상회**: commission_source "download"·commission_field 수수료raw·div 100·add 0.03 · ship_fee_policy{col60(BH 배송방법),map{무료배송:0},default3000} · n_source "ref" · sheet sheet1 · header 2 · data 3 · cols{상품번호1(A),코드22(V),상품명2(B),판매가24(X),정가23(W)} · extra_cols{수수료raw:73,옵션번호:18,옵션명:21} · **price_form**(append, baemin_price_template.xlsx, '(배민)양식', data 2, J=변경판매가(권장가)·**H=변경소비자가=무늬용 가짜(표준 FAKE_JEONG)**·G/I=현재 소비자가/판매가·C=옵션번호·D=옵션명·E=관리코드). baseline_col 배민상회. bm_commission.csv(천년경영용)는 **미사용** — 다운로드 BU가 수수료 직접 보유.
 - **쿠팡**: commission 0.12 · ship_fee_const 0(배송비 항상 0) · n_source "ref"(옵션ID) · sheet data · header 3 · data 4 · cols{상품번호3(C 옵션ID),코드6(F),상품명7(G),판매가10(J),정가11(K)} · **`exclude_row_if_col_filled`:5(E열 바코드)** · **price_form{mode "filter", write{판매가16(P),정가17(Q)}}**. baseline_col 쿠팡.
 - **올웨이즈(올팜)**: commission **0.105**(10.5% 단일) · ship_fee_const **0** · n_source "ref"(올팜상품번호 ObjectId — 다운로드 바코드 없음) · sheet None(단일) · header 1 · data 4(r2가이드·r3예시 skip) · cols{상품번호1(A ObjectId 문자열),코드5(E 판매자상품코드),상품명2(B),**판매가11(K 팀구매가)**,**정가10(J 개인구매가)**} · 즉시할인·포인트·배송비·바코드 없음. baseline_col 올웨이즈. **extra_cols{카테고리코드3,판매상태4,옵션명1:6,옵션값1:7,재고수량12}**(2옵션·옵션ID는 항상공백→미캡처). **price_form**(append, allways_price_template.xlsx, '(올웨이즈)양식', data 4, **K팀구매가=권장가·J개인구매가=무늬용 가짜 FAKE_JEONG**, source{상품ID·상품명·카테고리코드·판매상태·관리코드·옵션명1·옵션값1·재고수량}, **int_fields[카테고리코드,재고수량]**).
+- **알리(AliExpress)**: commission **0.09**(9% 단일) · ship_fee_const **0** · n_source "ref"(알리상품번호 — 골든 N 677/677) · baseline_col 알리 · **`consolidate`{header_row 2, data_start 5, skip_sheets[지침], require_numeric_id True, labels{상품번호:id, 상품명:*제품 이름, 판매가:*제품 소매 가격, 코드:SKU 코드}}** (cols/sheet 미사용 — 다중시트 정제). 즉시할인·포인트·배송비·바코드·정가 없음. **가격변경 미구현**(AliExpress 가격/재고 업로드도 동일 다중시트 양식).
 - **`price_form.mode`**: `append`(템플릿에 선택행 기입 — 식봄/캐시노트/배민/**올웨이즈**) · **`filter`(원본 다운로드의 변경요청 컬럼에 기입, 선택만 남김 — 쿠팡 `build_filter_price_xlsx`, **zip레벨 수술로 네이티브 포맷 보존**)** · 없으면 smartstore(원본 판매가 직접 수정). filter/smartstore는 '전체 교체' 저장 원본(.xlsx) 필요(**쿠팡은 반드시 전체 교체 — 네이티브 raw**).
 - **`int_fields`**(신규 2026-06-12, append형): 지정 양식필드의 all-digit 문자열을 int 셀로 기입(올웨이즈 카테고리코드·재고수량 텍스트화 방지). 미설정 채널 무영향.
+- **`consolidate`**(신규 2026-06-12, 알리): 다중시트 export 정제 통합. {header_row, data_start, skip_sheets, require_numeric_id, labels{레코드필드:헤더라벨}}. parse_download가 `cfg.get('consolidate')`면 `_consolidate_parse`로 분기 — 보이는 시트(숨김 제외) 순회·라벨로 컬럼 조회·숫자ID 필터. cols/sheet 미사용. 매크로(VBA) 정제 대체.
 
 ## 전용 함정
 - 다운로드 가이드행 skip(채널별 header_row/data_start). 판매자상품코드 빈 행 존재.
@@ -99,7 +102,9 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **올웨이즈 상품ID=ObjectId 문자열(2026-06-12)**: 키 A열이 `64cb…` 24자리 hex 문자열 → 숫자키 아님(_pid 무해). hapo_multiplier에 이 ObjectId 332건 등록(채널열 공백·채널무관 조회) → N 748/748 재현. 다운로드에 합포/바코드 컬럼 없어 n_source=ref 필수.
 - **올웨이즈 데이터 r4 시작·헤더 거짓라벨(2026-06-12)**: r1=헤더·r2=가이드·r3=예시 → data_start 4. 배송비 컬럼 없음(상수 0; 골든 F 746/748=0, −700 2건 합포변칙 무시).
 - **올웨이즈 가격변경=append('(올웨이즈)양식')(2026-06-12)**: 양식이 다운로드와 컬럼 동일하나 별도 템플릿 → append 채택(스마트스토어 raw편집 아님). **전 컬럼 재업로드형**(필수 多)이라 카테고리코드·판매상태·1옵션명/값·재고를 extra_cols로 보존 후 재기입. K=권장가·J=FAKE_JEONG(골든 O 대응). 2옵션명/값·옵션ID는 선택+항상공백 → 미캡처(stale 가드 거짓경고 방지). 카테고리·재고는 int_fields. ⚠️ openpyxl inlineStr 저장 — 올웨이즈 실업로드 미검증(식봄/캐시노트/배민 동일·정상). 거부 시 쿠팡식 네이티브 수술 필요.
-- 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
+- **알리=다중시트 자동정제(consolidate)(2026-06-12)**: AliExpress 대량등록 export는 카테고리별 다중시트(+`_hide`·`global_hide` 숨김)+다단헤더. 매크로(ALI상품매크로V2 CopyDataFromAnotherWorkbook)를 `_consolidate_parse`로 흡수 — **보이는 시트만**(`sheet_state!="visible"` 제외, 매크로 xlSheetVisible 동치), r2 라벨로 id·*제품 이름·*제품 소매 가격·SKU 코드 추출, data r5+(예시'--' 행 require_numeric_id로 제거). 관리코드=SKU코드(G)·상품명=*제품 이름(B 한글 클린)·판매가=*제품 소매 가격(E 텍스트 '13400.00'→_num)·알리상품번호=id(A 16자리). 별도 정제 업무 불요. olevba 전수 — Module2(Sheet1 비우기)는 저장 아님, 숨은 SaveAs 없음.
+- **알리 '신규만 추가' raw append 스킵(2026-06-12)**: append_rows_to_raw가 cfg['cols']['상품번호'] 참조 → 알리(cols 없음=consolidate) KeyError → 페이지에서 consolidate 채널은 raw append 스킵(up_bytes 유지), CSV 머지(merge_listing)만. 알리 raw는 모니터에서 미사용. '전체 교체' 권장(주기적 전체 export).
+- - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
 ## 가격 일괄변경
 - **쿠팡** (filter형, 네이티브 수술 2026-06-11): 원본 다운로드(조회 A~O + 변경요청 P~S) 자체가 변경요청 컬럼형. `build_filter_price_xlsx`가 **openpyxl 저장 없이 zip레벨 수술** — 헤더행 보존, 선택 옵션ID(C열) 행만 남겨 연속 재번호, P(16)=권장가·Q(17)=가짜정가(`t`없는 숫자) 기입, sharedStrings 등 원본 포맷 보존. openpyxl 라운드트립은 inlineStr 변질로 쿠팡 업로드 실패(전용 함정 참조). 전제: raw 네이티브('전체 교체'). **★ filter형 채널은 '신규만 추가' 비활성(가드, 2026-06-11) — append가 raw를 inlineStr로 오염시키므로 '전체 교체'만 허용.** **★★ 수술이 남긴 행을 항상 sharedStrings로 정규화(2026-06-11) — raw가 inlineStr(오염·stale 캐시)이든 출력은 항상 네이티브(`_inline_cells_to_shared`+sst 재구성). 캐시/배포 타이밍 무관 업로드 성공. Reboot app 필요.**
@@ -110,7 +115,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
   - **캐시노트**: `cashnote_price_template.xlsx`('(캐시노트)양식', data 4, 헤더 r2·안내 r1/r3), **fixed{F변경타입='수정',L진열여부='Y',N재고수량=9999}**. A=오퍼코드(OFR)·D=옵션코드(SKU)·G=판매단가(권장가)·**H=할인전단가=무늬용 가짜 정가(표준 FAKE_JEONG)**·O=입점사 관리코드. (B상품명·C순서·E옵션명·P모델명 공백). **A/D는 다운로드 Q/R에만 있어 extra_cols로 listing 보존 필수**. **할인전단가는 실제 가격 아님 — 마진/모니터는 판매단가(N)만 사용**, 양식 H는 listing 정가 보존이 아니라 매번 생성(식봄은 jeong_fake 없음 → 실제 정가 보존).
 
 ## 코드 / 페이지
-- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + parse_download(missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어) + **build_filter_price_xlsx(쿠팡, zip 수술·openpyxl 미사용, 출력 sharedStrings 정규화) + 수술 헬퍼(_sheet_part·_read_sst·_cell_text·_cell_in_row·_set_num_cell·_renumber_row·_col_letter·`_inline_cells_to_shared`(inlineStr→t=s))**.
+- `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + **_consolidate_parse(알리 다중시트 정제 — 보이는 시트·라벨조회·숫자ID 필터, 매크로 대체)** + parse_download(consolidate 분기·missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + compute(n_source 분기) + run + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer, 식봄·캐시노트)** + build_bulk_price_xlsx(스마트스토어) + **build_filter_price_xlsx(쿠팡, zip 수술·openpyxl 미사용, 출력 sharedStrings 정규화) + 수술 헬퍼(_sheet_part·_read_sst·_cell_text·_cell_in_row·_set_num_cell·_renumber_row·_col_letter·`_inline_cells_to_shared`(inlineStr→t=s))**.
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출) → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config` — 배송비 출처에 ship_fee_policy 분기 포함).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 
@@ -122,6 +127,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **쿠팡 모니터 골든 대조**(쿠팡결과페이지 1989행, 2026-06-11): 골든∩계산 1989/1989(옵션ID). 판매가·배송비(0) 1989/1989·**정산가(판매가×0.88) 1831/1831**·N(옵션ID) 1989/1989. base 1815/1826(11 vintage). 미매칭 158(155 관리코드 빈값)=골든도 동일 미해결(정상).
 - **올웨이즈 모니터 골든 대조**(올팜결과페이지 748행 ↔ 다운로드 621행, 2026-06-12): 다운로드↔골든 ID조인 621/621(관리코드·판매가·정가). 입력 — **판매가 621/621**·**N(합포) 621/621**(hapo 올팜ObjectId 조회==골든 P열 748/748)·**정산액 617/619**(예외 2=−700 합포변칙). base 597/608(비CB; 11 불일치=소분 2원 반올림+vintage). 미매칭 2(`11-40-001-CB-…`)=골든도 #N/A 동치. run: 621건·미매칭2·미설정9·마진미달20·제한44·평균마진율 9.6%. 정산/마진율 2700표준이라 골든과 의도적 차(골든=base×N+700·실택배비3000).
 - **올웨이즈 가격변경 양식**(end-to-end, 2026-06-12): parse→CSV 라운드트립(extra_cols 보존)→compute→양식. 표본 3건 — C카테고리/L재고 int·D판매상태·E관리코드·F/G옵션=상품명·**J개인구매가=FAKE_JEONG>K팀구매가(권장가)**·H/I/M 공백·예시r3 보존·샘플행 제거·외부링크 0. K=모니터 권장가 일치. stale 가드 거짓경고 0. 페이지 무수정(mode append 자동분기).
+- **알리 모니터 + 자동정제**(ALIPRODUCT 25시트 → 정제 322 ↔ 골든 677, 2026-06-12): 정제 재현 322건(예시'--' 25 제거)·골든 교집합 322·정제전용 0. 입력 — 관리코드(SKU) **322/322**·상품명 **322/322**·판매가(소매가) **322/322**·N(hapo 알리상품번호==골든N) **322/322**(골든 677/677). 정산액==골든F 321/322(1 골든 중복ID 가격차)·base 314/320(6 vintage). 수수료 9%(F=판매가×0.91 322/322·배송0). run: 322건·미매칭1·미설정3·마진미달15·제한34·평균마진율 10.1%. VBA olevba 전수 — 숨은 저장 Sub 없음.
 - **쿠팡 가격변경 filter**(2026-06-11): 선택만 남김·P=권장가·Q=가짜(+20~30%)·R/S 공란·조회(J/K) 보존·preview=파일 일치.
 - **배민상회 가격변경 양식**(end-to-end, 2026-06-11): 옵션번호/옵션명/수수료raw 캡처·라운드트립 보존. 표본 양식 — A상품번호·C옵션번호·D옵션명·E관리코드·G현재소비자가·I현재판매가·J변경판매가(권장가)·**H변경소비자가=표준 FAKE_JEONG(권장가+20~30% 랜덤)** 기입, 예시행 제거. (초기 gap유지 → 사용자 요청으로 전 채널 랜덤 표준화)
 - **배민상회 골든 대조** (배민결과페이지 395행, 2026-06-11): 골든∩계산 394/394. 입력 — 판매가 394/394·배송비 394/394·**수수료(상품별 BU/100+0.03) 394/394**·N 394/394·base 392/393(1 vintage). **정산가 394/394 일치**(정산식 동일, 실택배비만 표준차). run: 394건·미매칭0·미설정6·마진미달20·제한35·평균마진율 10.2%.
@@ -130,6 +136,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 ## 채널 추가 레시피 (★앞으로 채널 다수 — 이 순서)
 새 채널 = 보통 **CHANNEL_CONFIG 한 세트** 만(정산식은 스마트스토어 표준 고정). 코드 4-tier·reference·페이지·listing 저장은 공통(수정 불필요).
 1. **다운로드 샘플 확보**(.xlsx 1개) — 컬럼 위치·헤더행·데이터행 채널마다 다름, 실물 필수.
+   - **정제형(알리 등)**: 원본이 다중시트·다단헤더·매크로 정제를 거치면, 매크로 VBA를 olevba로 전수 추출(숨은 저장 Sub 채집) 후 `consolidate` config로 흡수(별도 정제 업무 없이 parse 자동). 골든은 정제본 기준.
 2. **컬럼 매핑(cols)**: 상품번호·코드·상품명·판매가 (+ 있으면 배송비·즉시할인·포인트·바코드). 없으면 생략.
 3. **배송비**: 다운로드 숫자 있으면 cols['배송비'], 상수면 ship_fee_const, 컬럼값 조건부면 ship_fee_policy(예 캐시노트 배송정책코드).
 4. **N 출처**: 바코드 컬럼 있으면 "download", 없으면 "ref"(hapo_multiplier — 채널 무관 조회). **상품번호가 숫자셀이면 _pid가 처리(이미 적용)**.
@@ -158,3 +165,5 @@ _갱신: 2026-06-11 (쿠팡 수술 출력 sharedStrings 정규화 — raw inline
 _갱신: 2026-06-12 (올웨이즈(올팜) 채널 추가 — 모니터. 판매가=팀구매가·10.5%·배송비0·N=hapo(올팜ObjectId). 골든 판매가/N 621/621. 가격변경 미구현)_
 
 _갱신: 2026-06-12 (올웨이즈 가격변경(append) 추가 — K=권장가·J=FAKE_JEONG, extra_cols+int_fields. 6채널 전부 모니터+가격변경. 실업로드 미검증)_
+
+_갱신: 2026-06-12 (알리(AliExpress) 채널 추가 — 모니터 + 다중시트 자동정제(consolidate, 매크로 대체). 수수료9%·N=hapo. 골든 입력 322/322. 7채널)_
