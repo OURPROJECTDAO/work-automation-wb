@@ -18,7 +18,7 @@
 - logs/YYYY-MM/*.md — 작업 로그 (append-only, 1작업단위 1건)
 - decisions/NNNN-*.md — ADR (append-only)
 
-현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · channel-margin-monitor · upload-monitor (state.md 인덱스 참조).
+현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) (state.md 인덱스 참조).
 
 ## 읽기 규칙 (세션 시작 — 한 번에)
 - PAT는 프로젝트 지식 파일에서 읽는다(절대 repo에 두지 않음).
@@ -42,4 +42,4 @@
 - 부수효과·되돌릴 수 없는 동작(발송·삭제·결제·권한·외부쓰기)은 정확한 payload 보여주고 승인.
 - KB에 비밀·PII 금지(고객정보·자격증명·계좌·주문자정보). 식별자(주문번호/참조ID)만. PAT도 repo·KB에 금지.
 
-_갱신: 2026-06-12 (upload-monitor 워크플로우 추가 — 설계확정·미구현; patterns.md 분리 이력 유지)_
+_갱신: 2026-06-12 (intelligence-layer 워크플로우 추가 — 이력엔진+두뇌 설계확정; upload-monitor 이력 유지)_
