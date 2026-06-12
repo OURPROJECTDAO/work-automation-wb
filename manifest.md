@@ -7,9 +7,9 @@
 ## A. 공유 reference → 소비자 (영향범위) ★다중소비자 = 바꾸면 여러 곳 영향
 | 파일 | 위치 | 소비 워크플로우 | 편집 경로 | 비고 |
 |---|---|---|---|---|
-| `product_master.csv` | app `reference/` | logistics-order(재고 iloc14)·dashboard(중분류·박스내품)·smartstore/easyadmin/esm-register(매입가·박스내품·규격) | 연동데이터관리>상품관리 (매일 갱신·타임스탬프) | **연동데이터**(매일 변동). 컬럼 위치참조(iloc4=관리코드,14=박스재고) 깨지면 logistics 재고 오류 |
+| `product_master.csv` | app `reference/` | logistics-order(재고 iloc14)·dashboard(중분류·박스내품)·smartstore/easyadmin/esm-register(매입가·박스내품·규격)·**upload-monitor**(박스재고·매입가·상품코드 키) | 연동데이터관리>상품관리 (매일 갱신·타임스탬프) | **연동데이터**(매일 변동). 컬럼 위치참조(iloc4=관리코드,14=박스재고) 깨지면 logistics 재고 오류 |
 | `logistics_classification.csv` | app `reference/` | logistics-order(구분 GATE A)·cheonnyeon-upload(구분 룩업,읽기만)·dashboard(1차 구분) | 발주서출력업무 페이지 + 대시보드 🏷분류 도우미 | 코드 추가는 발주 GATE 줄이기만(안 깨짐). 단 발주 안 거치는 코드 오분류 시 그 분류로 처리 주의 |
-| `product_attributes.csv` | app `reference/` | dashboard(세분류=최종분류 차원 + 식품음료=구분 3차 fallback) | 합포데이터.xlsx(Drive 작성용)에서 추출 재커밋 | 관리코드 속성표(1,134). **4컬럼만**: 식품음료·합포수량·최종분류(ADR 0011, 브랜드·b2b·정제규격 폐기). PII 없음. 구분 source=logistics_classification 별도유지 |
+| `product_attributes.csv` | app `reference/` | dashboard(세분류=최종분류 차원 + 식품음료=구분 3차 fallback)·upload-monitor(합포수량=L4 prefill) | 합포데이터.xlsx(Drive 작성용)에서 추출 재커밋 | 관리코드 속성표(1,134). **4컬럼만**: 식품음료·합포수량·최종분류(ADR 0011, 브랜드·b2b·정제규격 폐기). PII 없음. 구분 source=logistics_classification 별도유지 |
 
 | `baseline_margin.csv` | app `reference/` | channel-margin-monitor(확정마진율, 채널별 열) | 추후 연동데이터 페이지 | 관리코드+10채널 확정마진율(1,229). 키에 박스/PC/소분/합포 혼재. **향후 전 채널 모니터 공용** |
 | `hapo_multiplier.csv` | app `reference/` | channel-margin-monitor(합포량 N, 바코드 없는 채널) | 상품몇개합포인지.xlsx에서 추출 재커밋 | 상품번호·합포량·채널(3,339). 골든 '마진율예외처리시트'. **상품번호 단일키**(채널무관), 미등록 N=1, 분수 가능. 스마트스토어 판매자바코드의 외부판 — **다중채널 공용**(ADR 0013) |
@@ -26,7 +26,7 @@
 | esm_category_food / esm_bulk_template | esm-register |
 | (easyadmin 양식 — **미보관, C 참조**) | easyadmin-register |
 | margin_floor / sobun | channel-margin-monitor |
-| `listing_<channel>.csv` (+meta) — 채널 상품관리 스냅샷, 페이지에서 교체/병합 | channel-margin-monitor |
+| `listing_<channel>.csv` (+meta) — 채널 상품관리 스냅샷, 페이지에서 교체/병합 | channel-margin-monitor (**upload-monitor 읽기 공유**) |
 | `sikbom_price_template.xlsx` — 식봄 '상품 일괄수정' 가격변경 양식 고정 템플릿(append) | channel-margin-monitor |
 | `cashnote_price_template.xlsx` — 캐시노트 '옵션 일괄수정' 가격변경 양식 고정 템플릿(append, (캐시노트)양식) | channel-margin-monitor |
 | `baemin_price_template.xlsx` — 배민상회 가격변경 양식 고정 템플릿(append, (배민)양식) | channel-margin-monitor |
@@ -42,6 +42,7 @@
 - **3 등록채널 ← product_master**: 매입가·박스내품·규격.
 - **channel-margin-monitor ← product_master·baseline_margin·sobun·hapo_multiplier**: product_master(매입가/재고/규격/박스내품, 코드 4-tier 해석)·baseline_margin(확정마진율 채널열)·sobun(소분 변환코드→원코드·내품나누기). 합포 -CB-는 코드파싱(reference 없음). 합포량 N(판매배수)은 바코드 없는 채널(식봄 등)에서 hapo_multiplier(상품번호) 조회 — 스마트스토어는 다운로드 바코드. ⚠️sobun ↔ logistics `unit_list` ↔ cheonnyeon `sub_list` 소분/낱개 개념 중복 — 통합 추후 검토.
 - **invoice-fill ← 송장 마스터(송장출력.xlsx)**: 세션 업로드(PII, 미저장). ⚠️openmarket-merge '송장출력' 시트 계열로 보이나 문서상 명시 연결 없음 — 확인 필요.
+- **upload-monitor ← product_master·listing_<channel>·sobun·resolve_code(채널마진모니터)·product_attributes**: 재고(박스[14])·박스매입가·상품코드 키. listing 8채널 스냅샷 공유(마진모니터 소유, **읽기**). resolve_code 4-tier 분류 재사용(`resolve_identity` 래퍼=상품코드 반환). sobun=소분 환원. product_attributes 합포수량=L4 등록 prefill. **→ register(product_input_form_v2.xlsx) 인계**(스마트스토어·ESM 자동폼, 6채널 CSV). (decisions/0017)
 
 ## C. 상품등록 채널 자산 위치 (챗 네이티브)
 > 양식·카테고리 = 거의 불변(정본 = app `reference/`). 소스·결과 = 배치별(Drive).
