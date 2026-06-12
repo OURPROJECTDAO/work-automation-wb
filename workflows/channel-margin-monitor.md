@@ -143,9 +143,9 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 
 ## 기준마진율 편집 (현재 마진율 → 기준, 전 채널 공통)
 - **목적**: 선택 상품의 현재 마진율을 그 채널의 기준마진율(baseline_margin)로 저장. 미달 상품을 목표로 인정 → 미달 해제. (ADR 0016)
-- **위치**: 모니터 페이지 하단, 표 다중선택(sel_pids) 재사용. offset 프리셋(현재 그대로/현재−1%p) → 미리보기(충돌 해결+기존→새) → 저장.
-- **충돌**: baseline 키=관리코드, 행=상품번호. 같은 관리코드 여러 상품번호가 현재마진 다르면 충돌 → 관리코드별 라디오로 사용자 선택(비충돌 자동). `propose_baseline`이 (proposals, conflicts) 분리.
-- **반올림**: round(현재−offset, 3) = 0.1%p (0.0917→0.092). `_fmt_margin` 저장표기(끝 0 제거).
+- **위치**: 모니터 페이지 하단, 표 다중선택(sel_pids) 재사용. 버튼 1개 → **새 기준 인라인 편집(st.data_editor)** → 저장. (offset 프리셋 폐기 2026-06-12)
+- **충돌**: baseline 키=관리코드, 행=상품번호. 같은 관리코드 여러 상품번호가 현재마진 다르면 → 표 '현재 마진율' 칸에 `5.3% / 6.8% ⚠️`로 후보 표시(기본=최저), 사용자가 **새 기준 칸에 직접 입력**(라디오 폐기). `propose_baseline`이 (proposals, conflicts) 분리.
+- **인라인 편집**: data_editor 새 기준(%) NumberColumn(percent·step 0.1·0~100), 기본값=현재 마진율(round 0.1%p). 저장 시 값/100→round(_,3). 빈 칸 행은 제외. `_fmt_margin` 저장표기(끝 0 제거).
 - **채널 컬럼만**: `update_baseline_csv`가 baseline_col 컬럼만 수정(타 채널·타 관리코드·헤더/열순서/BOM/CRLF 보존). 없는 관리코드 행 추가.
 - **즉시 반영**: baseline를 배포본 로컬(load_references) 대신 **GitHub 라이브**(`_load_baseline_text` @cache_data)로 읽어 `compute_listing(baseline_override=)` 주입 → 저장 시 cache clear+rerun, 재배포 불요. (기존엔 reference 로컬 read라 재배포 전 미반영)
 - **검증**: 미달 10(관리코드 유니크)→baseline=현재→전부 미달 해제, 전체 49→29. 구조·타채널 보존, override 즉시반영.
