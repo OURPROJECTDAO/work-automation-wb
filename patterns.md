@@ -29,6 +29,7 @@
 - **download_button 클릭 = rerun → 실행 블록 안 위젯 소멸**: `if st.button("실행"):` 블록 안에서 결과·다운로드 버튼을 그리면, 다운로드 버튼 하나를 누르는 순간 rerun되어 실행버튼이 False → 블록 전체가 사라짐(여러 산출물 중 하나만 받고 끝남). 해결: 처리 결과를 st.session_state에 저장하고 download_button은 실행 블록 **밖**에서 session_state 기반으로 렌더(버튼마다 고유 key). (openmarket 결과/송장 2버튼 사례 — logs/2026-06-02-openmarket-download-persist)
 
 - **st.dataframe 헤더 정렬은 컬럼 dtype 기준**: 숫자를 보기 좋게 `f"{v:,.0f}"` 문자열로 변환해 넣으면 컬럼이 object가 되어 헤더 클릭 정렬이 **사전식(문자열)**으로 동작 → 962·916·5,625·27,999처럼 첫 글자순 정렬. 숫자는 numeric(int/float)으로 유지하고 `st.column_config.NumberColumn(format="localized")`(천단위 콤마)·`"%.2f"` 등 **표시 포맷만** 입힐 것. (대시보드 거래처 이익 표 송장 정렬 — logs/2026-06-08-dashboard-table-sort-fix)
+- **★ st.dataframe 다중행 선택 인덱스 stale → IndexError(positional indexers out-of-bounds)**: `st.dataframe(on_select="rerun", selection_mode="multi-row")`의 `event.selection.rows`는 **위치 인덱스**다. 위젯 key가 데이터 행 수를 안 보면, 선택해둔 상태에서 rerun으로 필터 결과 행 수가 줄 때(예: 기준마진 변경으로 '미달만' 행 감소, 데이터 갱신) 위젯이 **옛 위치를 복원** → `view.iloc[sel_rows]`가 범위 초과로 크래시. 해결 ①선택 인덱스 클램프: `sel_rows=[i for i in event.selection.rows if 0<=i<len(view_reset)]` ②key에 `len(view_reset)` 포함(행 수 바뀌면 위젯 리셋). 둘 다 적용. (channel-margin-monitor, logs/2026-06-12-dataframe-selection-oob)
 
 ### 기준데이터 편집표 (st.data_editor — 전 ref 페이지 공통)
 - **st.data_editor는 height 윈도우만 렌더+스크롤. 게다가 셀 편집 시 스크롤이 top으로 리셋됨(streamlit #10181)** → 수백 행 표에서 아래쪽 행 편집이 사실상 불가. `head(N)` 미리보기+업로드교체-only인 표는 N행 이후 아예 손도 못 댐(천년경영 소분목록 356행이 head(50)이던 사례).
@@ -57,4 +58,4 @@
 - requirements에 `msoffcrypto-tool` 추가 필수(Streamlit Cloud). (cheonnyeon-upload 사례)
 - 헤더가 1행이 아닐 수 있음: 안내문 행(r1) 다음 r2가 헤더, r3+ 데이터 (스스주문). read_only 차원 오인 가능 → 비 read_only로 calculate_dimension 확인.
 
-_갱신: 2026-06-09 (pitfalls에서 분리 신설)_
+_갱신: 2026-06-12 (st.dataframe 다중선택 인덱스 stale IndexError 방어 추가)_
