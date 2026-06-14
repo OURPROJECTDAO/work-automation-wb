@@ -3,7 +3,7 @@
     "updated": "2026-06-15",
     "source": "work-automation-wb",
     "schema": "ADR 0019",
-    "renderer": "outputs/system-map.html (+ 인앱 페이지 예정)"
+    "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
   },
   "assets": [
     {
