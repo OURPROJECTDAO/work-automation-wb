@@ -1,0 +1,592 @@
+{
+  "meta": {
+    "updated": "2026-06-15",
+    "source": "work-automation-wb",
+    "schema": "ADR 0019",
+    "renderer": "outputs/system-map.html (+ 인앱 페이지 예정)"
+  },
+  "assets": [
+    {
+      "id": "product_master",
+      "label": "product_master",
+      "consumers": [
+        "logistics-order",
+        "dashboard",
+        "smartstore-register",
+        "esm-register",
+        "easyadmin-register",
+        "channel-margin-monitor",
+        "upload-monitor"
+      ],
+      "note": "상품관리(매일 갱신) · 상품코드 키 · 재고·매입가·규격·박스내품 — 최대 허브"
+    },
+    {
+      "id": "logistics_classification",
+      "label": "logistics_classification",
+      "consumers": [
+        "logistics-order",
+        "cheonnyeon-upload",
+        "dashboard"
+      ],
+      "note": "관리코드→구분. 발주서출력업무가 소유·편집, 대시보드 분류도우미도 씀"
+    },
+    {
+      "id": "product_attributes",
+      "label": "product_attributes",
+      "consumers": [
+        "dashboard",
+        "upload-monitor"
+      ],
+      "note": "식품음료·합포수량·최종분류 4컬럼. 대시보드 세분류 + 업로드감시 L4 prefill"
+    },
+    {
+      "id": "baseline_margin",
+      "label": "baseline_margin",
+      "consumers": [
+        "channel-margin-monitor"
+      ],
+      "note": "관리코드+10채널 확정마진율"
+    },
+    {
+      "id": "hapo_multiplier",
+      "label": "hapo_multiplier",
+      "consumers": [
+        "channel-margin-monitor"
+      ],
+      "note": "상품번호·합포량 N(채널무관)"
+    },
+    {
+      "id": "listing_x8",
+      "label": "listing_<channel> x8",
+      "consumers": [
+        "channel-margin-monitor",
+        "upload-monitor"
+      ],
+      "note": "채널 상품관리 스냅샷. 마진모니터 소유, 업로드감시 읽기 공유"
+    },
+    {
+      "id": "product_input_form_v2",
+      "label": "product_input_form_v2",
+      "consumers": [
+        "smartstore-register",
+        "esm-register",
+        "upload-monitor"
+      ],
+      "note": "멀티채널 배치 입력폼. 업로드감시 L4가 이걸로 인계"
+    },
+    {
+      "id": "sales_parquet",
+      "label": "sales_*.parquet",
+      "consumers": [
+        "dashboard",
+        "intelligence-layer"
+      ],
+      "note": "매출 정산 진실(private). 3년 42만행 — 마진의 진실원천"
+    }
+  ],
+  "clusters": [
+    {
+      "id": "fulfillment",
+      "num": "01",
+      "label": "수주 · 출고",
+      "flow": "발주 → 정제 → 업로드 → 송장"
+    },
+    {
+      "id": "registration",
+      "num": "02",
+      "label": "상품 등록",
+      "flow": "공통 개념 → 채널별 양식"
+    },
+    {
+      "id": "intelligence",
+      "num": "03",
+      "label": "분석 · 지능",
+      "flow": "관찰 → 두뇌(진단·추천)"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "openmarket-merge",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "오픈마켓 합포·도서산간",
+      "line": "HTML-xls 발주 정제 → 송장 + 합포/지역/미배송/필터 시트",
+      "consumes": [
+        "dosan_list",
+        "filter_list",
+        "undelivered_list"
+      ],
+      "produces": [
+        "송장출력",
+        "확인 5시트"
+      ],
+      "feeds": [],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": []
+    },
+    {
+      "id": "onnuri-order",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "온누리 발주서 (제이티)",
+      "line": "발주서 합계=공급가×수량+배송비 역기입 → (확인).xlsx (zipfile 패치)",
+      "consumes": [
+        "sku_list"
+      ],
+      "produces": [
+        "발주서 (확인).xlsx"
+      ],
+      "feeds": [],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "빈 G셀 회귀 fixture / pytest",
+          "detail": "합포·N제품 결합배송 케이스 — zipfile 패치 빈셀 회귀"
+        }
+      ]
+    },
+    {
+      "id": "logistics-order",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "발주서 출력업무",
+      "line": "매출통계 → 물류팀 시트 + 품절목록 + 발주자료 아카이브 (2-phase+게이트)",
+      "consumes": [
+        "product_master",
+        "logistics_classification",
+        "unit_list",
+        "spec_master"
+      ],
+      "produces": [
+        "발주자료 아카이브",
+        "물류팀 시트",
+        "품절목록"
+      ],
+      "feeds": [
+        "cheonnyeon-upload"
+      ],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "다른상품 합포 회귀 fixture",
+          "detail": "split_multiproduct(대괄호·N개) 골든 테스트 추가"
+        }
+      ]
+    },
+    {
+      "id": "cheonnyeon-upload",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "천년경영 업로드",
+      "line": "발주자료 + 배송비 → 마켓별 업로드 양식 27시트(전체/낱개)",
+      "consumes": [
+        "logistics_classification",
+        "bm_commission",
+        "sub_list"
+      ],
+      "produces": [
+        "27 마켓 업로드 시트",
+        "erp입력자료"
+      ],
+      "feeds": [
+        "intelligence-layer"
+      ],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": []
+    },
+    {
+      "id": "invoice-fill",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "송장처리 (4채널)",
+      "line": "송장 마스터 → 채널 양식에 송장번호 채움(식봄·올웨이즈·배민·캐시노트)",
+      "consumes": [
+        "송장출력 마스터(세션·PII)"
+      ],
+      "produces": [
+        "채널별 송장 양식"
+      ],
+      "feeds": [],
+      "page": "app/pages/5_송장처리.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "채널 추가(요청 시)",
+          "detail": "쿠팡·G마켓 등 — CHANNEL_CONFIG 한 세트, 처리전 샘플 받으면"
+        }
+      ]
+    },
+    {
+      "id": "product-registration-common",
+      "cluster": "registration",
+      "status": "concept",
+      "label": "등록 공통 개념",
+      "line": "낱개/박스·합포N·판매가 공식·상품명 정제·카테고리·서식 일치 (3채널 상속)",
+      "consumes": [
+        "product_master"
+      ],
+      "produces": [
+        "공통 규칙"
+      ],
+      "feeds": [
+        "smartstore-register",
+        "esm-register",
+        "easyadmin-register"
+      ],
+      "page": "(개념 — KB)",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "결정적 엔진 + 캐시",
+          "detail": "관리코드→{정제명, 카테고리코드} 채널별 축적 → 재등록 자동화율↑"
+        }
+      ]
+    },
+    {
+      "id": "smartstore-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "스마트스토어 등록",
+      "line": "10열 입력시트 → 일괄등록 양식 13컬럼. 수수료6% (챗 네이티브)",
+      "consumes": [
+        "product_master",
+        "smartstore_category_food",
+        "smartstore_bulk_template",
+        "product_input_form_v2"
+      ],
+      "produces": [
+        "일괄등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "면세 케이스 검증",
+          "detail": "J='면세상품' 미검증(미발생)"
+        }
+      ]
+    },
+    {
+      "id": "esm-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "ESM(G마켓) 등록",
+      "line": "NEW일반상품 양식 15컬럼. 수수료17%·분모0.747 (챗 네이티브)",
+      "consumes": [
+        "product_master",
+        "esm_category_food",
+        "esm_bulk_template",
+        "product_input_form_v2"
+      ],
+      "produces": [
+        "ESM 일괄등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": []
+    },
+    {
+      "id": "easyadmin-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "이지어드민 등록",
+      "line": "정산 채널 필수 경유. 명칭·공급처·합포 7컬럼만",
+      "consumes": [
+        "product_master"
+      ],
+      "produces": [
+        "이지어드민 등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "양식 보관처 확보 + 이지어드민 workflow",
+          "detail": "빈 양식 Drive 경로 미기록 — 다음 배치 때 확보"
+        }
+      ]
+    },
+    {
+      "id": "dashboard",
+      "cluster": "intelligence",
+      "status": "live",
+      "label": "영업이익 대시보드",
+      "line": "3년 매출 parquet → 매출/이익 KPI·피벗·추이. 온라인 상품마진(추정)",
+      "consumes": [
+        "sales_parquet",
+        "logistics_classification",
+        "product_master",
+        "product_attributes"
+      ],
+      "produces": [
+        "KPI·차트",
+        "store_groups"
+      ],
+      "feeds": [
+        "intelligence-layer"
+      ],
+      "page": "app/pages/3_대시보드.py",
+      "roadmap": [
+        {
+          "tier": "planned",
+          "title": "물류량 차트",
+          "detail": "수량 ÷ 박스내품"
+        },
+        {
+          "tier": "planned",
+          "title": "이익/물류량 콤보(이중축)",
+          "detail": "물류량 vs 이익/물류량 한 차트"
+        },
+        {
+          "tier": "planned",
+          "title": "온라인 상품마진 실측화",
+          "detail": "추정송장·k → 지능 레이어 송장 실배분으로 교체",
+          "cross": "intelligence-layer"
+        }
+      ]
+    },
+    {
+      "id": "channel-margin-monitor",
+      "cluster": "intelligence",
+      "status": "live",
+      "label": "채널 가격·마진 모니터",
+      "line": "8채널 리스팅 → 마진율·기준 이탈·권장가. 7채널 가격일괄변경",
+      "consumes": [
+        "product_master",
+        "baseline_margin",
+        "hapo_multiplier",
+        "listing_x8",
+        "sobun",
+        "margin_floor"
+      ],
+      "produces": [
+        "resolve_code 4-tier",
+        "listing 스냅샷",
+        "가격변경 양식"
+      ],
+      "feeds": [
+        "upload-monitor",
+        "intelligence-layer"
+      ],
+      "page": "app/pages/6_채널마진모니터.py",
+      "roadmap": [
+        {
+          "tier": "next",
+          "title": "알리 가격변경",
+          "detail": "AliExpress 다중시트 양식 (모니터는 완료, 가격변경만 남음)"
+        },
+        {
+          "tier": "planned",
+          "title": "baseline↔product_master 조인 갭",
+          "detail": "미해결 · sobun↔unit_list↔sub_list 개념 중복 통합 검토"
+        }
+      ]
+    },
+    {
+      "id": "upload-monitor",
+      "cluster": "intelligence",
+      "status": "partial",
+      "star": true,
+      "label": "업로드 감시",
+      "line": "박스재고 있는데 미업로드 탐지(8채널 매트릭스). 코어/페이지 운영, L4 대기",
+      "consumes": [
+        "product_master",
+        "listing_x8",
+        "sobun",
+        "product_attributes"
+      ],
+      "produces": [
+        "갭 매트릭스",
+        "skip 관리",
+        "이미지 XLSX"
+      ],
+      "feeds": [
+        "smartstore-register",
+        "esm-register",
+        "intelligence-layer"
+      ],
+      "page": "app/pages/7_업로드감시.py",
+      "roadmap": [
+        {
+          "tier": "next",
+          "title": "L4 등록 핸드오프",
+          "detail": "미업로드 상품 → product_input_form_v2 prefill(박스·합포·과세+이미지URL) / 6채널 CSV",
+          "star": true
+        },
+        {
+          "tier": "planned",
+          "title": "제외목록 편집 UI",
+          "detail": "upload_monitor_exclude 인앱 편집"
+        },
+        {
+          "tier": "later",
+          "title": "L5 채널 확장",
+          "detail": "11번가·셀러허브·자사몰·토마토 (listing 파서 추가)"
+        },
+        {
+          "tier": "later",
+          "title": "재고금액×예상마진 우선순위",
+          "detail": "baseline_margin 연계 정렬"
+        }
+      ]
+    },
+    {
+      "id": "intelligence-layer",
+      "cluster": "intelligence",
+      "status": "design",
+      "star": true,
+      "brain": true,
+      "label": "지능 레이어 (두뇌)",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진 2층 + 마진/재고/A/B",
+      "consumes": [
+        "sales_parquet",
+        "product_master",
+        "listing_x8"
+      ],
+      "produces": [
+        "마진 추이",
+        "품절 예측",
+        "가격 A/B"
+      ],
+      "feeds": [],
+      "page": "(신규 페이지 · 기존 탭 확장)",
+      "roadmap": [
+        {
+          "tier": "next",
+          "phase": "P1·1a",
+          "title": "수정로그 3년 적재",
+          "detail": "★ 첫 브릭 — 매입가/매출가 변경 이력 소급 · core/intelligence/price_history.py",
+          "star": true
+        },
+        {
+          "tier": "next",
+          "phase": "P1·1b",
+          "title": "상품관리 스냅샷 적립",
+          "detail": "덮어쓰기 직전 박스재고·매입가 날짜본 → 입고/품절 전이 탐지"
+        },
+        {
+          "tier": "planned",
+          "phase": "P1·1c",
+          "title": "리드타임 산출",
+          "detail": "발주 ⨯ 매입현황 입고일 조인 → 소진 예측 입력"
+        },
+        {
+          "tier": "planned",
+          "phase": "P1·1d",
+          "title": "listing 스냅샷 보관",
+          "detail": "마진모니터 listing 갱신 시 날짜본 → 가격 이력(A/B 기반)"
+        },
+        {
+          "tier": "planned",
+          "phase": "P1·1e",
+          "title": "행사 로깅 시작",
+          "detail": "가격변경·행사 이벤트 기록(백필 불가, forward only)"
+        },
+        {
+          "tier": "planned",
+          "phase": "P2",
+          "title": "송장 실배분 → 진짜 마진",
+          "detail": "EasyAdmin 송장그룹으로 박스당 택배비 배분 · 대시보드 추정송장·k 대체"
+        },
+        {
+          "tier": "planned",
+          "phase": "두뇌①",
+          "title": "마진 침식 탐지·가격 제시",
+          "detail": "판매가 정체+매입가↑ 경보 → 마진모니터 '마진 추이' 탭"
+        },
+        {
+          "tier": "planned",
+          "phase": "두뇌②",
+          "title": "입고·품절 예측",
+          "detail": "재고 스냅샷+실입고+velocity → 소진·재발주 시점 → 업로드감시 확장"
+        },
+        {
+          "tier": "planned",
+          "phase": "두뇌③",
+          "title": "채널 가격 A/B",
+          "detail": "EasyAdmin 채널별 가격·velocity 준실험 → 신규 '가격 A/B' 페이지"
+        },
+        {
+          "tier": "planned",
+          "phase": "UI",
+          "title": "이력 적립 페이지 + 알림 배너",
+          "detail": "연동데이터관리 그룹 · 입고/품절/마진 침식 요약 배너(스케줄러 없음 대응)"
+        },
+        {
+          "tier": "later",
+          "phase": "P3",
+          "title": "시장 지능(경쟁가)",
+          "detail": "네이버 최저가·쿠팡 크롤링 + 퍼지 매칭 (net-new, 브리틀)"
+        },
+        {
+          "tier": "later",
+          "phase": "P4",
+          "title": "퍼널(조회·전환)",
+          "detail": "리스팅 통계 캡처(주는 채널만) → 단위경제"
+        }
+      ]
+    }
+  ],
+  "backlog": [
+    {
+      "node": null,
+      "title": "Phase 3 나머지 템플릿 이관",
+      "detail": "업무의 1/10 미만만 이관됨 — 다수 남음. 사용자 실물 파일 제공 대기"
+    },
+    {
+      "node": null,
+      "title": "인프라 — 동료 접근 확대 / Railway 이전",
+      "detail": "Streamlit Cloud RAM 1GB·스케줄러 없음 대비"
+    }
+  ],
+  "edges": [
+    {
+      "from": "logistics-order",
+      "to": "cheonnyeon-upload"
+    },
+    {
+      "from": "cheonnyeon-upload",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "channel-margin-monitor",
+      "to": "upload-monitor"
+    },
+    {
+      "from": "upload-monitor",
+      "to": "smartstore-register"
+    },
+    {
+      "from": "upload-monitor",
+      "to": "esm-register"
+    },
+    {
+      "from": "dashboard",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "channel-margin-monitor",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "upload-monitor",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "smartstore-register"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "esm-register"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "easyadmin-register"
+    }
+  ]
+}
