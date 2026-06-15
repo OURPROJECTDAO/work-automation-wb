@@ -89,9 +89,10 @@
    "id": "easyadmin_orders",
    "label": "easyadmin_*.parquet",
    "consumers": [
-    "intelligence-layer"
+    "intelligence-layer",
+    "dashboard"
    ],
-   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션. PII제거. 두뇌③·P2 토대"
+   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·2026 1~5월 51,641행. P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
   }
  ],
  "clusters": [
@@ -325,12 +326,13 @@
    "cluster": "intelligence",
    "status": "live",
    "label": "영업이익 대시보드",
-   "line": "3년 매출 parquet → 매출/이익 KPI·피벗·추이. 온라인 상품마진(추정)",
+   "line": "3년 매출 parquet → 매출/이익 KPI·피벗·추이. 온라인 상품마진(실측·EA 송장그룹+00-12 정합)",
    "consumes": [
     "sales_parquet",
     "logistics_classification",
     "product_master",
-    "product_attributes"
+    "product_attributes",
+    "easyadmin_orders"
    ],
    "produces": [
     "KPI·차트",
@@ -467,7 +469,9 @@
     "easyadmin_*.parquet (주문·velocity·송장그룹·private)",
     "상품별·채널별 실현마진(P2 송장 실배분·EA 송장그룹÷매출낱개·00-12 정합·private)"
    ],
-   "feeds": [],
+   "feeds": [
+    "dashboard"
+   ],
    "page": "app/pages/8_마진침식.py (두뇌①) + 3_대시보드.py 온라인마진 탭(P2 실측) + 신규/확장 예정",
    "roadmap": [
     {
@@ -596,6 +600,10 @@
   {
    "from": "product-registration-common",
    "to": "easyadmin-register"
+  },
+  {
+   "from": "intelligence-layer",
+   "to": "dashboard"
   }
  ]
 }
