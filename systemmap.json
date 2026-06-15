@@ -375,7 +375,7 @@
       "page": "app/pages/6_채널마진모니터.py",
       "roadmap": [
         {
-          "tier": "next",
+          "tier": "planned",
           "title": "알리 가격변경",
           "detail": "AliExpress 다중시트 양식 (모니터는 완료, 가격변경만 남음)"
         },
