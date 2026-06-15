@@ -1,49 +1,32 @@
 # 로드맵 / 백로그
 
+> **상세 우선순위·노드별 로드맵 정본 = `systemmap.json`** (ADR 0019). 이 파일은 큰 그림(완료 이정표·다음 초점·나중)만 둔다.
+
 ## 완료
-- KB 기억 시스템 구축. 2026-05-31. (decisions/0001)
-- 아키텍처 확정: Streamlit + Python + Community Cloud. 2026-06-01. (decisions/0002)
-- **Phase 1 완료**: 오픈마켓합포도서산간확인V7 Python 재구현 + pytest PASSED. 2026-06-01.
-- **Phase 2 완료**: Streamlit 앱 배포 + 기준 데이터 관리 UI. 2026-06-01.
-- **Phase 3 4종 완료**:
-  - 온누리양식_발주서 (onnuri-order). 2026-06-01.
-  - 발주서출력업무 (logistics-order) — 2-phase+게이트, 프린트 디자인, 골든 테스트. 2026-06-02. (decisions/0003)
-  - 천년경영업로드 (cheonnyeon-upload) — logistics 체인·분류표 공유, 배송비 조인, 낱개 분해, 골든 27시트 0 불일치. 2026-06-04. (decisions/0005)
-  - 송장처리 (invoice-fill) — 식봄·올웨이즈·배민상회·캐시노트 4채널, 송장형식 채널별, 배송상태 변환. 2026-06-05.
-- **KB 구조 재편**: 워크플로우 전용 함정·상태를 workflows/<name>.md로 분리. 2026-06-02. (decisions/0004)
-- **Phase 4 설계 확정**: 대시보드 데이터 계층·수집 아키텍처(calamine→월 parquet 파티션·날짜구간 교체·@st.cache_data·거래처 그룹 기준표·물류량=수량÷박스내품). 2026-06-08. (decisions/0006)
-- **Phase 4 데이터계층 코어 구현**: sales_data + 테스트 8 + 조인검증(실5월) + 분류(A)·저장소(B2) 확정. 2026-06-08.
-- **smartstore-register 워크플로우 정립**: 스마트스토어 상품 등록 — 2모드·판매가공식·합포배송비·상품명정제(AI)·카테고리(AI+검색)·셀서식 일치. 챗 네이티브 운영. 글로벌하베스트 배치 생성. 2026-06-09. (decisions/0009)
+- KB 기억 시스템 구축 / 아키텍처 확정(Streamlit+Python+Community Cloud). 2026-05-31~06-01. (0001·0002)
+- **Phase 1**: 오픈마켓합포도서산간확인V7 Python 재구현 + pytest PASSED. 2026-06-01.
+- **Phase 2**: Streamlit 앱 배포 + 기준 데이터 관리 UI. 2026-06-01.
+- **Phase 3 4종**: onnuri-order · logistics-order(0003·2-phase 게이트·프린트·골든) · cheonnyeon-upload(0005·분류표 공유·골든 27시트 0불일치) · invoice-fill(식봄·올웨이즈·배민상회·캐시노트 4채널). ~2026-06-05.
+- **KB 구조 재편**: 전용 함정·상태를 workflows/<name>.md로 분리. 2026-06-02. (0004)
+- **smartstore-register**: 챗 네이티브 상품등록(2모드·판매가공식·합포배송비·AI 상품명/카테고리·셀서식 일치). 2026-06-09. (0009)
+- **Phase 4 대시보드 운영**: 3년 매출 parquet → KPI·피벗·추이·거래처그룹·상품분류. 온라인 상품마진(P2 송장 실배분·EA 송장그룹÷매출낱개·00-12 정합). 2026-06.
+- **channel-margin-monitor 운영**: 8채널 리스팅 마진·기준 이탈·권장가 + 7채널 가격 일괄변경.
+- **upload-monitor 운영**: 박스재고 있는데 채널 미업로드 탐지(8채널 갭 매트릭스·이미지 XLSX·skip 관리). 설계 0017. L4 등록 핸드오프=후순위.
+- **intelligence-layer 이력엔진 완성**: 가격이력(수정로그·1년 롤링·역재생)·재고 스냅샷(forward)·**주문 398K(2023-03~2026-05)**·**매입현황 66K(2022-01~2026-05)**·판매가 3중 검증·P2 송장 실배분. 설계 0018. 모두 관리코드/일자 조인. (1a·1b·P2·주문/매입 적재 완료)
+- **두뇌① 마진 침식 강화**: 3렌즈(이미침식·곧침식2C·실판매이상) + velocity 월손실액. margin_erosion.py +5함수·8_마진침식.py 3탭. 2026-06-15. (0020)
 
-## 다음 (우선순위)
-1. ~~Phase 1~~ ✅
-2. ~~Phase 2~~ ✅
-3. **Phase 3 계속**: 나머지 템플릿 1종씩 Python 이관.
-   - 온누리양식_발주서 ✅ / 발주서출력업무 ✅ / 천년경영업로드 ✅ / 송장처리 ✅
-   - 다음 템플릿: 사용자 실물 파일 제공 대기. (업무의 1/10 미만 이관됨 — 다수 남음)
-4. **Phase 4 대시보드** (진행 중):
-   - ✅ 데이터 계층 코어(sales_data: parse·월파티션·날짜구간교체·구분2단·물류량) + 테스트 8 + 조인검증.
-   - ✅ 분류(A 2단)·저장소(B2 private data repo) 확정.
-   - ⏳ B2 인프라(사용자 수동: repo 생성·PAT권한·st.secrets) → 저장어댑터 → 부트스트랩 업로더 → 대시보드 페이지 + 거래처 그룹 관리 탭.
-
-5. **upload-monitor (업로드감시)** — 설계확정(ADR 0017, 미구현). 박스재고 있는데 채널 미업로드 탐지(코드기반 base collapse·키=상품코드·재고금액 desc) → 등록(스마트스토어·ESM 자동폼/6채널 CSV) 인계 + 대시보드 커버리지(건수). 코어(`resolve_identity`+갭빌더)부터.
-
-6. **intelligence-layer (지능 레이어 — 이력엔진+두뇌)** — 설계확정(ADR 0018, 미구현). 관찰↔실행 사이 두뇌. 매일/3년 데이터를 private repo 이력 적립 → 마진 침식·제시 / 입고·품절 예측 / 채널 A/B. 정산진실=매출자료·택배=송장(추정송장·k 대체)·매입가=master(수정로그). 첫 브릭=수정로그 3년 적재. 데이터 카탈로그·구현=workflows/intelligence-layer.md.
+## 다음 (초점) — 상세·순서 정본 = systemmap.json
+- **intelligence-layer 두뇌 신호결합 단계** (데이터 backbone 완성, 0020 재배열):
+  1. ✅ 두뇌① 강화(3렌즈+velocity) — 2026-06-15
+  2. **두뇌② 입고·품절 예측** [next] — 현재고(product_master)+소진율(velocity)+리드타임(1c 발주⨯매입현황 입고일). upload-monitor 반응형→예방형 확장 또는 신규 '재고 지능' 페이지.
+  3. 두뇌③ 채널 가격 A/B(실현마진×velocity 단위경제) → 상품 360도 카드(통합 뷰). [planned]
+- **Phase 3 나머지 템플릿**: 1종씩 Python 이관 — 업무의 1/10 미만 이관됨(다수 남음), 사용자 실물 파일 제공 대기.
 
 ## 나중
-- 입력 자동 수집 (API/크롤링) — ERP API 연동은 현재 불가 확인(0006).
-- 대시보드 미분류 코드 분류 UI (사용자가 구분 값 배정) — 추후.
-- 동료 접근 확대 / 필요 시 Railway 이전 (RAM 1GB 한계 대비).
-- 상품등록: 결정적 엔진 추출(채널 config 구동) + 관리코드→{상품명,카테고리} 캐시 → 캐시 성숙 후 재업로드 Streamlit/API 분리 검토. 채널 7~8개 확대.
+- 입력 자동 수집(API/크롤링) — ERP API 연동 현재 불가 확인(0006).
+- 대시보드 미분류 코드 분류 UI(사용자가 구분 값 배정).
+- 동료 접근 확대 / 필요 시 Railway 이전(Streamlit Cloud RAM 1GB·스케줄러 없음 대비).
+- 상품등록: 결정적 엔진 추출 + 관리코드→{상품명,카테고리} 캐시 성숙 후 재업로드 Streamlit/API 분리 검토. 채널 7~8개 확대.
+- intelligence-layer later 묶음(systemmap 참조): listing 스냅샷·행사 로깅·시장지능(경쟁가)·퍼널·세트 보정·상품택배비 실측·2023 여름 갭 백필·데이터현황 2단계 업로드.
 
-_갱신: 2026-06-09 (smartstore-register 워크플로우 정립 — 챗 네이티브, ADR 0009)_
-
-_갱신: 2026-06-12 (upload-monitor 설계확정 — 박스재고↔채널 등록 갭 탐지, ADR 0017)_
-
-_갱신: 2026-06-12 (intelligence-layer 설계확정 — 이력엔진+두뇌, 데이터 9종, 정산진실=매출자료. ADR 0018)_
-
-_갱신: 2026-06-15 (intelligence-layer velocity 갈림길 해소 — 확정 순서 ① P2 송장 실배분(진짜 마진, 최우선) → ② 2025 주문 백필(EasyAdmin 확장주문검색) → ③ 두뇌③ 가격 A/B, velocity 가중=후순위. 1a·1b·두뇌① 이미 완료. 우선순위 정본=systemmap.json)_
-
-_갱신: 2026-06-15 (upload-monitor L4 등록 핸드오프 후순위 — 일괄 업로드 가능 채널 프로세스 완비 후 재논의. 지금 만들 단계 아님)_
-
-_갱신: 2026-06-15 (로드맵 재배열 ADR 0020 — 데이터 backbone 완성. intelligence-layer 두뇌 순서: ① 강화(2C 조기경보+velocity 가중, next1) → ② 입고·품절 예측(승격 next2) → ③ 채널 가격 A/B(실현마진×velocity, planned) → 상품 360도 카드(신규 planned). 정본=systemmap.json)_
+_갱신: 2026-06-15 (roadmap.md 표류 정리 — 본문이 dashboard·upload-monitor·intelligence-layer를 '미구현'으로 적은 구식 상태였음. systemmap.json 정본 체제(ADR 0019)에 맞춰 완료 이정표 현행화 + 상세는 systemmap 포인터로 슬림화. 두뇌① 강화 완료 반영)_
