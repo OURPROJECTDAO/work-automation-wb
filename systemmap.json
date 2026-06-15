@@ -84,6 +84,14 @@
         "intelligence-layer"
       ],
       "note": "매출 정산 진실(private). 3년 42만행 — 마진의 진실원천"
+    },
+    {
+      "id": "easyadmin_orders",
+      "label": "easyadmin_*.parquet",
+      "consumers": [
+        "intelligence-layer"
+      ],
+      "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션. PII제거. 두뇌③·P2 토대"
     }
   ],
   "clusters": [
@@ -443,7 +451,7 @@
       "star": true,
       "brain": true,
       "label": "지능 레이어 (두뇌)",
-      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진(가격이력 ✅·재고 스냅샷 ✅·1년) + 두뇌① 마진 침식 ✅(최근 매입↑×채널 기준미달 8채널 통합). 재고/A/B 예정",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격이력·재고스냅샷·주문/velocity 2026~) + 두뇌① 마진 침식 ✅(매입↑×채널 미달 8채널). 재고/A/B 예정",
       "consumes": [
         "sales_parquet",
         "product_master",
@@ -455,7 +463,8 @@
         "stock_*.parquet (재고 스냅샷·private)",
         "마진 침식 경보(두뇌①·8채널)",
         "품절 예측",
-        "가격 A/B"
+        "가격 A/B",
+        "easyadmin_*.parquet (주문·velocity·송장그룹·private)"
       ],
       "feeds": [],
       "page": "app/pages/8_마진침식.py (두뇌①) + 신규/확장 예정",
