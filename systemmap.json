@@ -92,7 +92,7 @@
     "intelligence-layer",
     "dashboard"
    ],
-   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·2026 1~5월 51,641행 + 2025 7~12월 70,455행(누적 122,096). P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
+   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·**2023-03~2026-05 연속 36파티션·398,873행**(2023 여름 06~08 갭). P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
   }
  ],
  "clusters": [
@@ -453,7 +453,7 @@
    "star": true,
    "brain": true,
    "label": "지능 레이어 (두뇌)",
-   "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 122K행 2026 1~5월+2025 하반기·판매가 검증✅) + 두뇌① 마진 침식 ✅ + **P2 송장 실배분(진짜 마진)✅**. 다음=2025 상반기 백필→두뇌③ 가격 A/B",
+   "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·**주문 398K행 2023-03~2026-05 연속**·판매가 검증✅) + 두뇌① 마진 침식 ✅ + **P2 송장 실배분(진짜 마진)✅**. 다음=두뇌③ 가격 A/B",
    "consumes": [
     "sales_parquet",
     "product_master",
@@ -476,16 +476,10 @@
    "roadmap": [
     {
      "tier": "next",
-     "phase": "주문백필",
-     "title": "EasyAdmin 주문 2025 상반기 백필",
-     "detail": "★1순위 · 하반기(7~12월 70,455행) 적재 완료(2026-06-15) → 상반기(01~06) 남음 · 확장주문검색 .xls 추가적재 → orders/easyadmin_2025-*.parquet · velocity·송장 실측 이력 과거 확장 · 컨테이너(Streamlit 1GB 회피·<tr> 스트리밍 파싱)",
-     "star": true
-    },
-    {
-     "tier": "next",
      "phase": "두뇌③",
      "title": "채널 가격 A/B",
-     "detail": "2순위(2025 백필 다음) · EasyAdmin 채널별 가격·velocity 준실험 + 가격변경 전후 → 신규 '가격 A/B' 페이지"
+     "detail": "★1순위(주문 백필 완료) · EasyAdmin 채널별 가격·velocity 준실험 + 가격변경 전후 → 신규 '가격 A/B' 페이지 · 채널명 정규화(raw 'G마켓'·'쿠팡(자동)'…→baseline 채널) 선행",
+     "star": true
     },
     {
      "tier": "later",
@@ -540,6 +534,18 @@
      "phase": "보정",
      "title": "세트/번들 판매가 listing 보정",
      "detail": "EasyAdmin 고가 세트 판매가 과소(스팸세트 등) → velocity/A/B에서 listing 보정. 숫자 이상 시(사용자 보류)"
+    },
+    {
+     "tier": "later",
+     "phase": "P2+",
+     "title": "상품택배비 컬럼 실측 검토",
+     "detail": "과거 통파일 export에 '상품 택배비' 컬럼 존재 → P2 송장 실배분(추정) 대체 가능성 검토. 최근 .xls엔 없어 전기간 일관 불가"
+    },
+    {
+     "tier": "later",
+     "phase": "백필",
+     "title": "2023 여름 갭(06~08) 보충",
+     "detail": "export 누락(20230531→20230923 점프) — 해당 구간 .xls 받으면 적재"
     }
    ]
   }
