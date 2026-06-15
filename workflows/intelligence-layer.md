@@ -73,7 +73,7 @@
 - 대시보드 parquet 패턴 재사용(token/repo 인자 주입, 페이지가 st.secrets). 신규 파티션(제안):
   - `history/price_changes.parquet`(또는 연파티션) — 수정로그 누적(상품코드·수정항목·수정전·수정후·일시).
   - `snapshots/stock_YYYY-MM.parquet` — 상품관리 일자 스냅샷(스냅샷일자·상품코드·관리코드·박스재고·박스매입단가·매입단가·매익률·매출단가). **✅ 적립 구현(1b)**, dedup키=(일자·상품코드).
-  - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거: 관리코드·판매처·주문수량·판매가·주문일·송장그룹키·상태). ~8.6K행/월.
+  - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거·19컬럼·송장그룹 해시·**기준일=발주일 우선**). **✅ 적재 시작(2026 3~5월 25,821행)**, ~8.5K행/월. core `orders.py`. 멱등=기준일 구간교체. 다음=Jan-Feb·2025 백필.
   - `purchases/buyin_YYYY-MM.parquet` — 유형별매입현황(관리코드·일자·수량·단가·거래처코드).
   - `derived/lead_time.csv` — 거래처/상품 리드타임(발주⨯입고).
 - 매입가/거래처/매출 = 영업기밀 → public app repo 금지, private data repo.
@@ -141,6 +141,7 @@
 - logs/2026-06/2026-06-15-price-history-ingest.md · 2026-06-15-price-history-reconstruct.md (1a)
 - logs/2026-06/2026-06-15-stock-snapshot-ingest.md (1b)
 - logs/2026-06/2026-06-15-margin-erosion-brain1.md (두뇌①)
+- logs/2026-06/2026-06-15-easyadmin-orders-ingest.md (주문 적재 1차)
 - dashboard.md(온라인 상품마진 탭=추정, 본 워크플로우가 실측 대체) · channel-margin-monitor.md · upload-monitor.md
 
 _갱신: 2026-06-12 (설계확정·미구현 — 이력 엔진 2층+두뇌 3종, 데이터 카탈로그 9종, 정산진실=매출자료·택배실배분=송장. 첫 브릭=수정로그 적재. 직접 실행 다음 세션)_
@@ -150,3 +151,5 @@ _갱신: 2026-06-12 (§5.6 웹앱 통합 추가 — 적립 입력 UI·알림 배
 _갱신: 2026-06-15 (1b 상품관리 스냅샷 적립 완료 — 업로드 훅·snapshots/stock_YYYY-MM.parquet·dedup 멱등·전이탐지. core/intelligence/stock_history.py. Reboot app 필요. forward 축적)_
 
 _갱신: 2026-06-15 (두뇌① 마진 침식 v1 — 채널 baseline 기준·최근 3개월 매입인상∩미달·8채널 통합·권장가(cmm 재사용). 신규 8_마진침식.py + margin_erosion.py. status design→partial. Reboot 필요)_
+
+_갱신: 2026-06-15 (EasyAdmin 주문 적재 1차 — orders/easyadmin_2026-{03,04,05}.parquet 25,821행·PII제거·송장그룹·발주일기준. core orders.py. 다음 Jan-Feb로 2026 완료. velocity→두뇌①정렬·③A/B·P2 토대)_
