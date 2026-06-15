@@ -451,7 +451,7 @@
       "star": true,
       "brain": true,
       "label": "지능 레이어 (두뇌)",
-      "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 51K행 2026 1~5월·판매가 신뢰도 검증✅) + 두뇌① 마진 침식 ✅. velocity 활용·재고/A/B 예정",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 51K행 2026 1~5월·판매가 신뢰도 검증✅) + 두뇌① 마진 침식 ✅. 다음=P2 송장 실배분(진짜 마진, 최우선)→2025백필→두뇌③",
       "consumes": [
         "sales_parquet",
         "product_master",
@@ -471,9 +471,34 @@
       "roadmap": [
         {
           "tier": "next",
+          "phase": "P2",
+          "title": "송장 실배분 → 진짜 마진",
+          "detail": "★1순위(최우선) · EasyAdmin 송장그룹으로 박스당 택배비 실배분 → 상품별·채널별 실현마진 · 대시보드 추정송장·k 대체 · core ship_alloc.py · 데이터 준비됨",
+          "star": true
+        },
+        {
+          "tier": "next",
+          "phase": "주문백필",
+          "title": "EasyAdmin 주문 2025 백필",
+          "detail": "2순위(P2 다음) · 확장주문검색 .xls 2025치 추가적재 → orders/easyadmin_2025-*.parquet · velocity 이력 과거 확장 · 컨테이너(Streamlit 1GB 회피)"
+        },
+        {
+          "tier": "next",
+          "phase": "두뇌③",
+          "title": "채널 가격 A/B",
+          "detail": "3순위(2025 백필 다음) · EasyAdmin 채널별 가격·velocity 준실험 + 가격변경 전후 → 신규 '가격 A/B' 페이지"
+        },
+        {
+          "tier": "later",
           "phase": "두뇌①+",
           "title": "velocity 가중 정렬",
-          "detail": "마진침식 정렬에 EasyAdmin velocity 결합(침식×판매량=월 손실액). 작고 즉시·데이터 준비됨"
+          "detail": "후순위(사용자 보류 2026-06-15) · 마진침식 정렬에 velocity 결합(침식×판매량=월 손실액). 지금 불요"
+        },
+        {
+          "tier": "planned",
+          "phase": "두뇌②",
+          "title": "입고·품절 예측",
+          "detail": "재고 스냅샷+실입고+velocity → 소진·재발주 시점 → 업로드감시 확장"
         },
         {
           "tier": "planned",
@@ -492,24 +517,6 @@
           "phase": "P1·1e",
           "title": "행사 로깅 시작",
           "detail": "가격변경·행사 이벤트 기록(백필 불가, forward only)"
-        },
-        {
-          "tier": "next",
-          "phase": "P2",
-          "title": "송장 실배분 → 진짜 마진",
-          "detail": "EasyAdmin 송장그룹으로 박스당 택배비 배분 · 대시보드 추정송장·k 대체"
-        },
-        {
-          "tier": "planned",
-          "phase": "두뇌②",
-          "title": "입고·품절 예측",
-          "detail": "재고 스냅샷+실입고+velocity → 소진·재발주 시점 → 업로드감시 확장"
-        },
-        {
-          "tier": "next",
-          "phase": "두뇌③",
-          "title": "채널 가격 A/B",
-          "detail": "EasyAdmin 채널별 가격·velocity 준실험 → 신규 '가격 A/B' 페이지"
         },
         {
           "tier": "planned",
