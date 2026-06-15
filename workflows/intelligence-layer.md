@@ -72,7 +72,7 @@
 ## 4. 저장 설계 (private repo work-automation-data)
 - 대시보드 parquet 패턴 재사용(token/repo 인자 주입, 페이지가 st.secrets). 신규 파티션(제안):
   - `history/price_changes.parquet`(또는 연파티션) — 수정로그 누적(상품코드·수정항목·수정전·수정후·일시).
-  - `snapshots/stock_YYYY-MM.parquet` — 상품관리 일자 스냅샷(관리코드·박스재고·박스매입가·매입단가·매익률).
+  - `snapshots/stock_YYYY-MM.parquet` — 상품관리 일자 스냅샷(스냅샷일자·상품코드·관리코드·박스재고·박스매입단가·매입단가·매익률·매출단가). **✅ 적립 구현(1b)**, dedup키=(일자·상품코드).
   - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거: 관리코드·판매처·주문수량·판매가·주문일·송장그룹키·상태). ~8.6K행/월.
   - `purchases/buyin_YYYY-MM.parquet` — 유형별매입현황(관리코드·일자·수량·단가·거래처코드).
   - `derived/lead_time.csv` — 거래처/상품 리드타임(발주⨯입고).
@@ -81,7 +81,7 @@
 ## 5. 구현 단계 (세부)
 ### Phase 1 — 이력 토대 (대부분 보유 데이터/조인)
 - **[첫 브릭] 1a 수정로그 적재 — ✅ 완료(2026-06-15)**: 파서(openpyxl, read_only 금지) → 매입단가·매출단가 행 필터(2,567건=매입2009/매출558) → 정규화(상품코드 NFC 문자열키·수정전/후 콤마제거 float·수정일자 datetime, **처리자 PII 제외**) → `work-automation-data:history/price_changes.parquet` PUT. **dedup키=(상품코드·수정항목·수정일자), 중복0·멱등.** 3년 backfill 불가(1년 롤링) → **월 누적으로 전진 축적.** 역재생 `as_of_value`+`current_purchase_price` 결선 — **앵커=낱개 매입단가[8] 확정(95.4%, 880/922; 박스=낱개×박스내품 917/917).** 실증 OK(코카콜라제로 18변경 as-of: 변경전=최초수정전·현재=최신수정후 일치). 다음=1b 상품관리 스냅샷. core: `core/intelligence/price_history.py`.
-- **1b 상품관리 스냅샷**: 업로드 훅(`app/pages/3_연동데이터관리/1_상품관리.py`)에서 product_master 덮어쓰기 직전 stock 파티션 적립. 입고/품절 전이 탐지(박스재고 0↔양수).
+- **1b 상품관리 스냅샷 — ✅ 완료(2026-06-15)**: 상품관리 업로드 훅(`app/pages/3_연동데이터관리/1_상품관리.py` `_accumulate_snapshot`)이 **새 업로드 df를 날짜본으로 적립**(비차단·st.toast·master 저장과 독립). 스냅샷일자=파일명 `Exp{YYMMDD}` 추출일(없으면 당일). 파티션=`snapshots/stock_YYYY-MM.parquet` 7컬럼(스냅샷일자·상품코드·관리코드·박스재고·박스매입단가·매입단가·매익률·매출단가 = 위치 [3][4][14][9][8][12][10]). dedup키=(스냅샷일자·상품코드) keep=last 멱등. 전이 `detect_transitions`(박스재고 0이하↔양수=품절/입고). core: `core/intelligence/stock_history.py`(price_history 동형). **골든: 실 product_master 4340→4340·키중복0·결측0·parquet 라운드트립·dedup 멱등·전이 정확.** ⚠️ core 신규 import → 첫 배포 후 **Reboot app** 1회. **forward 축적**(과거 소급 불가); 첫 업로드=스냅샷#1, 둘째부터 전이. 다음=두뇌① 마진 침식 or 1c 리드타임.
 - **1c 리드타임**: 발주(3.7)⨯매입현황(3.3) 조인 → lead_time. 소진 예측 입력.
 - **1d 채널 listing 스냅샷 보관**: 마진모니터 listing CSV 갱신 시 날짜본 적립 → 채널 가격 이력(A/B 기반). (현재도 덮어쓰는 중 — 상품관리와 동일)
 - **1e 행사 로깅 시작(forward only)**: 가격변경/행사 이벤트 기록 테이블 신설(백필 불가, 지금부터만).
@@ -138,8 +138,12 @@
 ## 9. 관련
 - decisions/0018-intelligence-layer.md
 - logs/2026-06/2026-06-12-intelligence-layer-design.md
+- logs/2026-06/2026-06-15-price-history-ingest.md · 2026-06-15-price-history-reconstruct.md (1a)
+- logs/2026-06/2026-06-15-stock-snapshot-ingest.md (1b)
 - dashboard.md(온라인 상품마진 탭=추정, 본 워크플로우가 실측 대체) · channel-margin-monitor.md · upload-monitor.md
 
 _갱신: 2026-06-12 (설계확정·미구현 — 이력 엔진 2층+두뇌 3종, 데이터 카탈로그 9종, 정산진실=매출자료·택배실배분=송장. 첫 브릭=수정로그 적재. 직접 실행 다음 세션)_
 
 _갱신: 2026-06-12 (§5.6 웹앱 통합 추가 — 적립 입력 UI·알림 배너·두뇌 3종 페이지/탭·네비. 어느 페이지에 어떻게 보이나 명시)_
+
+_갱신: 2026-06-15 (1b 상품관리 스냅샷 적립 완료 — 업로드 훅·snapshots/stock_YYYY-MM.parquet·dedup 멱등·전이탐지. core/intelligence/stock_history.py. Reboot app 필요. forward 축적)_
