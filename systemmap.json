@@ -448,6 +448,7 @@
         "listing_x8"
       ],
       "produces": [
+        "price_changes.parquet (가격이력·private)",
         "마진 추이",
         "품절 예측",
         "가격 A/B"
