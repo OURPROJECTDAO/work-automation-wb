@@ -24,7 +24,7 @@
 | esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
-| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문적재(전기간 2023-03~2026-05)·판매가검증·**P2 송장실배분** 완료) | workflows/intelligence-layer.md |
+| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문적재(전기간 2023-03~2026-05)·판매가검증·P2 송장실배분·**매입현황 전기간 적재(2022-01~2026-05)** 완료) | workflows/intelligence-layer.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -94,3 +94,5 @@ _갱신: 2026-06-15 (EasyAdmin 주문 과거 백필 완료 — 통파일 .xlsx 2
 _갱신: 2026-06-15 (데이터현황 페이지 1단계 — 통합 데이터 관리, 시계열 누적 자료 적재 범위/갭 한눈에. core coverage.py(디렉토리목록만)+2_데이터현황.py+nav. 재고스냅샷=현황만, 매입/발주=예정. ⚠️Reboot. 다음=2단계 업로드)_
 
 _갱신: 2026-06-15 (데이터현황 후속 — 가격이력 타임라인 포함(single 1파일 range read)·x축 YYYY-MM. 2단계 업로드=나중에 일괄(매입현황 등 적재 후) 결정. 다음=두뇌③)_
+
+_갱신: 2026-06-15 (유형별매입현황 전기간 적재 — 통파일 72컬럼 헤더명 매핑·53파티션 2022-01~2026-05·65,999행·합계액=진실·PII0·멱등. core purchases.py(orders 동형). 거래처코드 2025+ 편중(리드타임 과거 위주)·2C/입고신호 전기간. 다음=두뇌③ A/B)_
