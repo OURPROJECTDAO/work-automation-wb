@@ -43,7 +43,8 @@
       "id": "baseline_margin",
       "label": "baseline_margin",
       "consumers": [
-        "channel-margin-monitor"
+        "channel-margin-monitor",
+        "intelligence-layer"
       ],
       "note": "관리코드+10채널 확정마진율"
     },
@@ -60,7 +61,8 @@
       "label": "listing_<channel> x8",
       "consumers": [
         "channel-margin-monitor",
-        "upload-monitor"
+        "upload-monitor",
+        "intelligence-layer"
       ],
       "note": "채널 상품관리 스냅샷. 마진모니터 소유, 업로드감시 읽기 공유"
     },
@@ -437,25 +439,26 @@
     {
       "id": "intelligence-layer",
       "cluster": "intelligence",
-      "status": "design",
+      "status": "partial",
       "star": true,
       "brain": true,
       "label": "지능 레이어 (두뇌)",
-      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진 2층(가격이력 ✅·재고 스냅샷 적립 ✅·1년 2,567건) + 마진/재고/A/B 두뇌",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진(가격이력 ✅·재고 스냅샷 ✅·1년) + 두뇌① 마진 침식 ✅(최근 매입↑×채널 기준미달 8채널 통합). 재고/A/B 예정",
       "consumes": [
         "sales_parquet",
         "product_master",
-        "listing_x8"
+        "listing_x8",
+        "baseline_margin"
       ],
       "produces": [
         "price_changes.parquet (가격이력·private)",
         "stock_*.parquet (재고 스냅샷·private)",
-        "마진 추이",
+        "마진 침식 경보(두뇌①·8채널)",
         "품절 예측",
         "가격 A/B"
       ],
       "feeds": [],
-      "page": "(신규 페이지 · 기존 탭 확장)",
+      "page": "app/pages/8_마진침식.py (두뇌①) + 신규/확장 예정",
       "roadmap": [
         {
           "tier": "planned",
@@ -480,13 +483,6 @@
           "phase": "P2",
           "title": "송장 실배분 → 진짜 마진",
           "detail": "EasyAdmin 송장그룹으로 박스당 택배비 배분 · 대시보드 추정송장·k 대체"
-        },
-        {
-          "tier": "next",
-          "phase": "두뇌①",
-          "title": "마진 침식 탐지·가격 제시",
-          "detail": "판매가 정체+매입가↑ 경보 → 마진모니터 '마진 추이' 탭",
-          "star": true
         },
         {
           "tier": "planned",
