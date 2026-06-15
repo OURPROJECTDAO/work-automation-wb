@@ -73,7 +73,7 @@
 - 대시보드 parquet 패턴 재사용(token/repo 인자 주입, 페이지가 st.secrets). 신규 파티션(제안):
   - `history/price_changes.parquet`(또는 연파티션) — 수정로그 누적(상품코드·수정항목·수정전·수정후·일시).
   - `snapshots/stock_YYYY-MM.parquet` — 상품관리 일자 스냅샷(스냅샷일자·상품코드·관리코드·박스재고·박스매입단가·매입단가·매익률·매출단가). **✅ 적립 구현(1b)**, dedup키=(일자·상품코드).
-  - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거·19컬럼·송장그룹 해시·**기준일=발주일 우선**). **✅ 2026 적재 완료(1~5월 51,641행)** + **2025 하반기 적재 완료(7~12월 70,455행, 누적 122,096)**, ~8.5K행/월. core `orders.py`. 멱등=기준일 구간교체. **86MB는 <tr> 스트리밍 파싱(read_html DOM 메모리 회피)·컨테이너.** 다음=2025 상반기(01~06).
+  - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거·19컬럼·송장그룹 해시·**기준일=발주일 우선**). **✅ 백필 완료 — 2023-03~2026-05 연속 36파티션·398,873행**(2023 여름 06~08 갭). 2026 1~5월 51,641 + 2025 7~12월 70,455(개별 .xls) + 2023-03~2025-06 276,777(통파일 .xlsx 헤더명 매핑). core `orders.py`. 멱등=기준일 구간교체. **개별 .xls(86MB)=<tr> 스트리밍·통파일 .xlsx(60MB)=openpyxl read_only+tuple(peak 517MB)·둘 다 컨테이너.** 다음=두뇌③.
   - `purchases/buyin_YYYY-MM.parquet` — 유형별매입현황(관리코드·일자·수량·단가·거래처코드).
   - `derived/lead_time.csv` — 거래처/상품 리드타임(발주⨯입고).
 - 매입가/거래처/매출 = 영업기밀 → public app repo 금지, private data repo.
@@ -122,6 +122,7 @@
 
 ## 7. 전용 함정
 - EasyAdmin .xls = HTML(read_html), 헤더 첫 행(컬럼 숫자로 잡히면 header=0/행탐색). PII 제거 필수(3.5 목록).
+- **EasyAdmin export 2형식 주의**: ① 개별 .xls=HTML 위장·**위치인덱스** 42컬럼(orders.py _KEEP). ② 병합 통파일 .xlsx(Power Query)=진짜 xlsx·**Source.Name 0번 추가로 전 컬럼 +1 시프트**·상품택배비 추가·옵션추가항목1/선결제금액 잘림 → **위치인덱스 불가, 헤더명 매핑 필수**(옵션추가항목1 빈값). openpyxl read_only iter_rows+tuple 추출. (logs/2026-06-15-easyadmin-orders-past-backfill)
 - **정산 raw 혼동 금지** — 매출자료(3.4)가 정산 진실. EasyAdmin/erp 정산은 raw.
 - 매입가 두 출처(2C) 구분 — 마진모니터=master.
 - 재고 절대값은 흐름누적 오차(이월·조정·누락) → 상품관리 스냅샷 앵커.
@@ -146,6 +147,7 @@
 - logs/2026-06/2026-06-15-easyadmin-orders-ingest.md (주문 적재 1차)
 - logs/2026-06/2026-06-15-ship-alloc-p2.md (P2 송장 실배분·실측 마진)
 - logs/2026-06/2026-06-15-easyadmin-orders-2025h2-backfill.md (2025 하반기 백필)
+- logs/2026-06/2026-06-15-easyadmin-orders-past-backfill.md (과거 백필 2023-03~2025-06·백필 완료)
 - dashboard.md(온라인 상품마진 탭=✅실측 교체 완료) · channel-margin-monitor.md · upload-monitor.md
 
 _갱신: 2026-06-12 (설계확정·미구현 — 이력 엔진 2층+두뇌 3종, 데이터 카탈로그 9종, 정산진실=매출자료·택배실배분=송장. 첫 브릭=수정로그 적재. 직접 실행 다음 세션)_
@@ -161,3 +163,5 @@ _갱신: 2026-06-15 (EasyAdmin 주문 적재 1차 — orders/easyadmin_2026-{03,
 _갱신: 2026-06-15 (P2 송장 실배분 완료 — EA 송장그룹 박스배분÷매출낱개 강도 + (상호명,월) 00-12 정합, 대시보드 온라인마진 실측 교체. core ship_alloc.py. ⚠️Reboot. 단위정정=매출낱개≠EA판매단위. 골든 reconcile 채널 총택배==00-12 정확. 다음=2025 백필)_
 
 _갱신: 2026-06-15 (EasyAdmin 주문 2025 하반기 백필 — 7~12월 70,455행, 누적 122K. <tr> 스트리밍 파싱(86MB·컨테이너). 헤더 위치 2026과 100% 동일. 다음=2025 상반기)_
+
+_갱신: 2026-06-15 (EasyAdmin 주문 과거 백필 완료 — 통파일 .xlsx 2023-03~2025-06 276,777행·헤더명 매핑(Source.Name 시프트·상품택배비). 전기간 2023-03~2026-05·398,873행. §7 export 2형식 함정 추가. 다음=두뇌③)_
