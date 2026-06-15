@@ -473,7 +473,7 @@
     "price_changes.parquet (가격이력·private)",
     "stock_*.parquet (재고 스냅샷·private)",
     "마진 침식 경보(두뇌①·8채널·2C예방·실판매이상·velocity 월손실액)",
-    "당일 마진 이상치(탭D·천년경영 net매출+송장 실박스 택배·역마진/미달·당일 트립와이어)",
+    "당일 마진 이상치(탭D·천년경영 net매출+송장 단위 택배배분·역마진/미달·당일 트립와이어)",
     "품절 예측",
     "가격 A/B",
     "easyadmin_*.parquet (주문·velocity·송장그룹·private)",
