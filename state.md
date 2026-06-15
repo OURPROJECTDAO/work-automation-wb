@@ -37,7 +37,7 @@
 - 없음. (B2 인프라 완료 — repo·PAT R/W·st.secrets 검증됨 2026-06-08.)
 
 ## 다음 한 수
-- **★ intelligence-layer(지능 레이어·이력엔진+두뇌) 설계확정·미구현(ADR 0018, 2026-06-12)**: 관찰↔실행 사이 두뇌(진단·추천·측정) 신설. 매일/3년 데이터를 private repo 이력으로 적립 → ①마진 침식·제시 ②입고·품절 예측 ③채널 가격 A/B. ★정산 진실=매출자료(EasyAdmin/erp 정산은 raw), 택배 실배분=송장번호 그룹(추정송장·k 대체), 매입가=master(수정로그). 데이터 카탈로그 9종·단계별 구현 = workflows/intelligence-layer.md. **첫 브릭=수정로그 3년 적재(매입가/매출가 변경 이력 소급). 직접 실행 다음 세션.**
+- **★ intelligence-layer(지능 레이어·이력엔진+두뇌) 설계확정·미구현(ADR 0018, 2026-06-12)**: 관찰↔실행 사이 두뇌(진단·추천·측정) 신설. 매일/3년 데이터를 private repo 이력으로 적립 → ①마진 침식·제시 ②입고·품절 예측 ③채널 가격 A/B. ★정산 진실=매출자료(EasyAdmin/erp 정산은 raw), 택배 실배분=송장번호 그룹(추정송장·k 대체), 매입가=master(수정로그). 데이터 카탈로그 9종·단계별 구현 = workflows/intelligence-layer.md. **이력 엔진 1a(수정로그 가격이력 적재+역재생)·1b(상품관리 재고 스냅샷 적립) 완료(2026-06-15).** 1b=업로드 훅이 새 업로드 df를 날짜본으로 `snapshots/stock_YYYY-MM.parquet` 적립(dedup 멱등·전이탐지 0↔양수), core `stock_history.py`, **forward 축적**(과거 소급 불가), ⚠️core→Reboot. 다음 ★=두뇌① 마진 침식 경보(매입가↑+판매가 정체) or 1c 리드타임. 운영=월1회 수정로그 재수신 ingest 누적.
 - **Phase 4 대시보드 점진 확장**: 매출집계·증분업로더·거래처그룹·구분분류·기간 날짜범위·일/월/연 추이·**이익 모드(택배비=ERP 00-12 라인, 3000/2500 보정 토글, 이익률=이익/매입가, 전체 거래처)** 배포 완료(decisions/0008). 다음 후보 — ① 물류량(수량÷박스내품) ② 이익/물류량 콤보(이중축). 상세 workflows/dashboard.md.
 - core/ 신규 모듈을 페이지가 import → 첫 배포 후 Reboot app 필요(pitfalls 모듈캐시).
 - **상품등록 운영 중**(챗 네이티브, ADR 0009): smartstore·esm·easyadmin. **멀티채널 배치 입력폼 v2**(`reference/product_input_form_v2.xlsx`, 대상 채널=스마트스토어/G마켓/둘 다) 배포 완료(2026-06-10) — smartstore·esm 공용, 구 v1 deprecated. 이미지확장자=URL 실검사 자동판별 확정. 미해결 — 결정적 엔진/캐시 미구현. 상세 workflows/product-registration-common.md·*-register.md.
@@ -64,3 +64,5 @@ _갱신: 2026-06-15 (systemmap.json 신설 — 지도+로드맵 단일 진실원
 _갱신: 2026-06-15 (intelligence-layer 첫 브릭 — 수정로그 가격이력 적재 완료. 2,567건(매입2009/매출558)·**1년 롤링(3년 소급 불가 정정)**·dedup키 중복0. work-automation-data:history/price_changes.parquet + core/intelligence/price_history.py(파서+dedup적재+역재생). 다음=역재생 앵커 확정. ADR 0018)_
 
 _갱신: 2026-06-15 (intelligence-layer 역재생 결선 — 수정로그 '매입단가' 앵커=product_master 낱개[8] 확정(95.4%). current_purchase_price+as_of_value 실증 완료(as-of 매입가). 1a 완료, 다음=1b 상품관리 스냅샷. ADR 0018)_
+
+_갱신: 2026-06-15 (intelligence-layer 1b 상품관리 재고 스냅샷 적립 완료 — 업로드 훅·stock_history.py·dedup 멱등·전이탐지. core→Reboot. 다음=두뇌① 마진 침식)_
