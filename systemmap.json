@@ -487,10 +487,11 @@
           "detail": "EasyAdmin 송장그룹으로 박스당 택배비 배분 · 대시보드 추정송장·k 대체"
         },
         {
-          "tier": "planned",
+          "tier": "next",
           "phase": "두뇌①",
           "title": "마진 침식 탐지·가격 제시",
-          "detail": "판매가 정체+매입가↑ 경보 → 마진모니터 '마진 추이' 탭"
+          "detail": "판매가 정체+매입가↑ 경보 → 마진모니터 '마진 추이' 탭",
+          "star": true
         },
         {
           "tier": "planned",
