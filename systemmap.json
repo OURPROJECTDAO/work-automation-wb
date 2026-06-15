@@ -92,7 +92,7 @@
     "intelligence-layer",
     "dashboard"
    ],
-   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·2026 1~5월 51,641행. P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
+   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·2026 1~5월 51,641행 + 2025 7~12월 70,455행(누적 122,096). P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
   }
  ],
  "clusters": [
@@ -453,7 +453,7 @@
    "star": true,
    "brain": true,
    "label": "지능 레이어 (두뇌)",
-   "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 51K행 2026 1~5월·판매가 검증✅) + 두뇌① 마진 침식 ✅ + **P2 송장 실배분(진짜 마진)✅**. 다음=2025 주문 백필→두뇌③ 가격 A/B",
+   "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 122K행 2026 1~5월+2025 하반기·판매가 검증✅) + 두뇌① 마진 침식 ✅ + **P2 송장 실배분(진짜 마진)✅**. 다음=2025 상반기 백필→두뇌③ 가격 A/B",
    "consumes": [
     "sales_parquet",
     "product_master",
@@ -477,8 +477,8 @@
     {
      "tier": "next",
      "phase": "주문백필",
-     "title": "EasyAdmin 주문 2025 백필",
-     "detail": "★1순위(최우선·P2 완료 후) · 확장주문검색 .xls 2025치 추가적재 → orders/easyadmin_2025-*.parquet · velocity·송장 실측 이력 과거 확장 · 컨테이너(Streamlit 1GB 회피)",
+     "title": "EasyAdmin 주문 2025 상반기 백필",
+     "detail": "★1순위 · 하반기(7~12월 70,455행) 적재 완료(2026-06-15) → 상반기(01~06) 남음 · 확장주문검색 .xls 추가적재 → orders/easyadmin_2025-*.parquet · velocity·송장 실측 이력 과거 확장 · 컨테이너(Streamlit 1GB 회피·<tr> 스트리밍 파싱)",
      "star": true
     },
     {
