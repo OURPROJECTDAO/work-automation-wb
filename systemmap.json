@@ -404,7 +404,7 @@
    "status": "partial",
    "star": true,
    "label": "업로드 감시",
-   "line": "박스재고 있는데 미업로드 탐지(8채널 매트릭스). 코어/페이지 운영, L4 대기",
+   "line": "박스재고 있는데 미업로드 탐지(8채널 매트릭스). 코어/페이지 운영. L4 핸드오프=후순위(채널 일괄업로드 완비 후)",
    "consumes": [
     "product_master",
     "listing_x8",
@@ -424,9 +424,9 @@
    "page": "app/pages/7_업로드감시.py",
    "roadmap": [
     {
-     "tier": "next",
+     "tier": "later",
      "title": "L4 등록 핸드오프",
-     "detail": "미업로드 상품 → product_input_form_v2 prefill(박스·합포·과세+이미지URL) / 6채널 CSV",
+     "detail": "후순위(사용자 2026-06-15) · 일괄 업로드 가능 채널 프로세스 완비 후 재논의(미장착 채널 多, 지금 만들 단계 아님) · 미업로드 상품 → product_input_form_v2 prefill(박스·합포·과세+이미지URL) / 6채널 CSV",
      "star": true
     },
     {
