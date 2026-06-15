@@ -451,7 +451,7 @@
       "star": true,
       "brain": true,
       "label": "지능 레이어 (두뇌)",
-      "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 51K행 2026 1~5월) + 두뇌① 마진 침식 ✅(매입↑×채널 미달 8채널). 재고/A/B 예정",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 51K행 2026 1~5월·판매가 신뢰도 검증✅) + 두뇌① 마진 침식 ✅. velocity 활용·재고/A/B 예정",
       "consumes": [
         "sales_parquet",
         "product_master",
@@ -469,6 +469,12 @@
       "feeds": [],
       "page": "app/pages/8_마진침식.py (두뇌①) + 신규/확장 예정",
       "roadmap": [
+        {
+          "tier": "next",
+          "phase": "두뇌①+",
+          "title": "velocity 가중 정렬",
+          "detail": "마진침식 정렬에 EasyAdmin velocity 결합(침식×판매량=월 손실액). 작고 즉시·데이터 준비됨"
+        },
         {
           "tier": "planned",
           "phase": "P1·1c",
@@ -488,7 +494,7 @@
           "detail": "가격변경·행사 이벤트 기록(백필 불가, forward only)"
         },
         {
-          "tier": "planned",
+          "tier": "next",
           "phase": "P2",
           "title": "송장 실배분 → 진짜 마진",
           "detail": "EasyAdmin 송장그룹으로 박스당 택배비 배분 · 대시보드 추정송장·k 대체"
@@ -500,7 +506,7 @@
           "detail": "재고 스냅샷+실입고+velocity → 소진·재발주 시점 → 업로드감시 확장"
         },
         {
-          "tier": "planned",
+          "tier": "next",
           "phase": "두뇌③",
           "title": "채널 가격 A/B",
           "detail": "EasyAdmin 채널별 가격·velocity 준실험 → 신규 '가격 A/B' 페이지"
@@ -522,6 +528,12 @@
           "phase": "P4",
           "title": "퍼널(조회·전환)",
           "detail": "리스팅 통계 캡처(주는 채널만) → 단위경제"
+        },
+        {
+          "tier": "later",
+          "phase": "보정",
+          "title": "세트/번들 판매가 listing 보정",
+          "detail": "EasyAdmin 고가 세트 판매가 과소(스팸세트 등) → velocity/A/B에서 listing 보정. 숫자 이상 시(사용자 보류)"
         }
       ]
     }
