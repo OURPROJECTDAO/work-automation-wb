@@ -24,7 +24,7 @@
 | esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
-| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 설계확정·미구현 | workflows/intelligence-layer.md |
+| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌① 운영) | workflows/intelligence-layer.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -37,7 +37,7 @@
 - 없음. (B2 인프라 완료 — repo·PAT R/W·st.secrets 검증됨 2026-06-08.)
 
 ## 다음 한 수
-- **★ intelligence-layer(지능 레이어·이력엔진+두뇌) 설계확정·미구현(ADR 0018, 2026-06-12)**: 관찰↔실행 사이 두뇌(진단·추천·측정) 신설. 매일/3년 데이터를 private repo 이력으로 적립 → ①마진 침식·제시 ②입고·품절 예측 ③채널 가격 A/B. ★정산 진실=매출자료(EasyAdmin/erp 정산은 raw), 택배 실배분=송장번호 그룹(추정송장·k 대체), 매입가=master(수정로그). 데이터 카탈로그 9종·단계별 구현 = workflows/intelligence-layer.md. **이력 엔진 1a(수정로그 가격이력 적재+역재생)·1b(상품관리 재고 스냅샷 적립) 완료(2026-06-15).** 1b=업로드 훅이 새 업로드 df를 날짜본으로 `snapshots/stock_YYYY-MM.parquet` 적립(dedup 멱등·전이탐지 0↔양수), core `stock_history.py`, **forward 축적**(과거 소급 불가), ⚠️core→Reboot. 다음 ★=두뇌① 마진 침식 경보(매입가↑+판매가 정체) or 1c 리드타임. 운영=월1회 수정로그 재수신 ingest 누적.
+- **★ intelligence-layer(지능 레이어·이력엔진+두뇌) 설계확정·미구현(ADR 0018, 2026-06-12)**: 관찰↔실행 사이 두뇌(진단·추천·측정) 신설. 매일/3년 데이터를 private repo 이력으로 적립 → ①마진 침식·제시 ②입고·품절 예측 ③채널 가격 A/B. ★정산 진실=매출자료(EasyAdmin/erp 정산은 raw), 택배 실배분=송장번호 그룹(추정송장·k 대체), 매입가=master(수정로그). 데이터 카탈로그 9종·단계별 구현 = workflows/intelligence-layer.md. **이력 엔진 1a(수정로그 가격이력 적재+역재생)·1b(상품관리 재고 스냅샷 적립) 완료(2026-06-15).** 1b=업로드 훅이 새 업로드 df를 날짜본으로 `snapshots/stock_YYYY-MM.parquet` 적립(dedup 멱등·전이탐지 0↔양수), core `stock_history.py`, **forward 축적**(과거 소급 불가), ⚠️core→Reboot. **두뇌① 마진 침식 v1 완료(2026-06-15)** — 신규 `8_마진침식.py`+`margin_erosion.py`. **채널 baseline 기준**(매익률=오프라인이라 폐기, 사용자 확정)·최근 3개월 매입인상∩채널 미달·이미 재설정분 자동제외·8채널 통합·권장가(cmm 재사용). 검증 89관리코드 인상→침식 50건(게토레이 4채널·동원참치 +30%). 한계=합성코드 미조인. ⚠️core→Reboot. 다음 후보=두뇌②(입고/품절 예측, 1b+1c) · 두뇌③(가격 A/B, EasyAdmin 적재) · 1c 리드타임. 운영=월1회 수정로그 재수신 ingest 누적(침식 정확도).
 - **Phase 4 대시보드 점진 확장**: 매출집계·증분업로더·거래처그룹·구분분류·기간 날짜범위·일/월/연 추이·**이익 모드(택배비=ERP 00-12 라인, 3000/2500 보정 토글, 이익률=이익/매입가, 전체 거래처)** 배포 완료(decisions/0008). 다음 후보 — ① 물류량(수량÷박스내품) ② 이익/물류량 콤보(이중축). 상세 workflows/dashboard.md.
 - core/ 신규 모듈을 페이지가 import → 첫 배포 후 Reboot app 필요(pitfalls 모듈캐시).
 - **상품등록 운영 중**(챗 네이티브, ADR 0009): smartstore·esm·easyadmin. **멀티채널 배치 입력폼 v2**(`reference/product_input_form_v2.xlsx`, 대상 채널=스마트스토어/G마켓/둘 다) 배포 완료(2026-06-10) — smartstore·esm 공용, 구 v1 deprecated. 이미지확장자=URL 실검사 자동판별 확정. 미해결 — 결정적 엔진/캐시 미구현. 상세 workflows/product-registration-common.md·*-register.md.
@@ -66,3 +66,5 @@ _갱신: 2026-06-15 (intelligence-layer 첫 브릭 — 수정로그 가격이력
 _갱신: 2026-06-15 (intelligence-layer 역재생 결선 — 수정로그 '매입단가' 앵커=product_master 낱개[8] 확정(95.4%). current_purchase_price+as_of_value 실증 완료(as-of 매입가). 1a 완료, 다음=1b 상품관리 스냅샷. ADR 0018)_
 
 _갱신: 2026-06-15 (intelligence-layer 1b 상품관리 재고 스냅샷 적립 완료 — 업로드 훅·stock_history.py·dedup 멱등·전이탐지. core→Reboot. 다음=두뇌① 마진 침식)_
+
+_갱신: 2026-06-15 (두뇌① 마진 침식 v1 — 채널 baseline·최근3개월 매입인상∩미달·8채널 통합·권장가. 신규 8_마진침식.py+margin_erosion.py. intelligence-layer status→진행중. Reboot 필요)_
