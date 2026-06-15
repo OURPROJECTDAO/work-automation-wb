@@ -62,3 +62,5 @@ _갱신: 2026-06-12 (intelligence-layer 신규 워크플로우 설계확정 — 
 _갱신: 2026-06-15 (systemmap.json 신설 — 지도+로드맵 단일 진실원천. 스키마 계약·권한 경계(JSON=상태/로드맵/연결 정본·.md=디테일/서사)·갱신 트리거·검증3종. ADR 0019. 렌더러=outputs/system-map.html, 인앱 페이지 예정)_
 
 _갱신: 2026-06-15 (intelligence-layer 첫 브릭 — 수정로그 가격이력 적재 완료. 2,567건(매입2009/매출558)·**1년 롤링(3년 소급 불가 정정)**·dedup키 중복0. work-automation-data:history/price_changes.parquet + core/intelligence/price_history.py(파서+dedup적재+역재생). 다음=역재생 앵커 확정. ADR 0018)_
+
+_갱신: 2026-06-15 (intelligence-layer 역재생 결선 — 수정로그 '매입단가' 앵커=product_master 낱개[8] 확정(95.4%). current_purchase_price+as_of_value 실증 완료(as-of 매입가). 1a 완료, 다음=1b 상품관리 스냅샷. ADR 0018)_
