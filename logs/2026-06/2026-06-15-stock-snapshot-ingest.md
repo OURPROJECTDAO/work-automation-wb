@@ -24,6 +24,6 @@
 ## 다음 / 상태
 - ⚠️ **core 신규 import(`core.intelligence.stock_history`) → 첫 배포 후 Reboot app 1회** 필요(모듈 캐시).
 - 적립은 **forward**(훅 이후 업로드부터). 과거 소급 불가(상품관리 일자본 미보관). 첫 실업로드=스냅샷#1, 두 번째부터 전이 탐지.
-- (선택) 현재 product_master.csv를 스냅샷#1로 시드하면 다음 업로드부터 즉시 전이 탐지·write 경로 실검증. 일자=product_master_updated.txt 파싱. 외부쓰기라 사용자 승인 후.
+- ✅ **시드 완료(사용자 승인)**: 현재 product_master.csv(4,340행)를 스냅샷#1로 적립 — `snapshots/stock_2026-06.parquet`, 일자 2026-06-14(updated.txt 기준). 읽기재검증 4340·키중복0·멱등 재실행 added 0. **리부트 완료** → 다음 상품관리 업로드=스냅샷#2부터 전이 탐지.
 - 다음 ★ = 두뇌① 마진 침식 경보(매입가↑+판매가 정체, 1a 역재생 활용) or 1c 리드타임. 두뇌② 입고/품절 예측은 1b 스냅샷+1c 리드타임 위에.
 - 지능 레이어 status=design 유지(적립=infra·passive; 사용자向 진단/추천 UI는 두뇌부터).
