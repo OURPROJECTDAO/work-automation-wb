@@ -73,7 +73,7 @@
 - 대시보드 parquet 패턴 재사용(token/repo 인자 주입, 페이지가 st.secrets). 신규 파티션(제안):
   - `history/price_changes.parquet`(또는 연파티션) — 수정로그 누적(상품코드·수정항목·수정전·수정후·일시).
   - `snapshots/stock_YYYY-MM.parquet` — 상품관리 일자 스냅샷(스냅샷일자·상품코드·관리코드·박스재고·박스매입단가·매입단가·매익률·매출단가). **✅ 적립 구현(1b)**, dedup키=(일자·상품코드).
-  - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거·19컬럼·송장그룹 해시·**기준일=발주일 우선**). **✅ 적재 시작(2026 3~5월 25,821행)**, ~8.5K행/월. core `orders.py`. 멱등=기준일 구간교체. 다음=Jan-Feb·2025 백필.
+  - `orders/easyadmin_YYYY-MM.parquet` — EasyAdmin 주문(PII 제거·19컬럼·송장그룹 해시·**기준일=발주일 우선**). **✅ 2026 적재 완료(1~5월 51,641행)**, ~8.5K행/월(1월 14K=일괄입력 덩어리). core `orders.py`. 멱등=기준일 구간교체. 다음=2025 백필.
   - `purchases/buyin_YYYY-MM.parquet` — 유형별매입현황(관리코드·일자·수량·단가·거래처코드).
   - `derived/lead_time.csv` — 거래처/상품 리드타임(발주⨯입고).
 - 매입가/거래처/매출 = 영업기밀 → public app repo 금지, private data repo.
@@ -129,6 +129,7 @@
 - 스케줄러 없음(2E) → 알림은 Actions cron 또는 인앱 diff.
 - 매입현황 일자 stray값(파싱 이상치 1건 확인) 검증.
 - 매입단가 소수 정상(예 1521.5833); 키 매칭 시 상품코드 NFC·정수 ID float→int(전역 pitfalls).
+- **EasyAdmin 주문 ≠ 매출자료 100% 정합 안 됨(사용자 명시)** — ① 발주 후 ERP 일괄입력 timing ② 취소돼 안 나간 송장을 채널 00-12에서 미차감(송장 과대). EasyAdmin=velocity·송장그룹 전용, 정산 진실=매출자료(§2A). **일별 velocity 덩어리짐 → 월/주 단위 사용.** P2 송장배분 시 phantom 송장은 매출 조인에서 탈락 처리.
 
 ## 8. 의존 / 공유 (manifest)
 - ← 3.1~3.9 데이터 소스(대부분 웹앱 추출, 적립 안 됨). 기보유 = 3.4(대시보드 parquet).
