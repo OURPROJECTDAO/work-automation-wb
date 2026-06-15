@@ -441,7 +441,7 @@
       "star": true,
       "brain": true,
       "label": "지능 레이어 (두뇌)",
-      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진 2층(가격이력 적재+역재생 ✅·1년 2,567건) + 마진/재고/A/B",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진 2층(가격이력 ✅·재고 스냅샷 적립 ✅·1년 2,567건) + 마진/재고/A/B 두뇌",
       "consumes": [
         "sales_parquet",
         "product_master",
@@ -449,6 +449,7 @@
       ],
       "produces": [
         "price_changes.parquet (가격이력·private)",
+        "stock_*.parquet (재고 스냅샷·private)",
         "마진 추이",
         "품절 예측",
         "가격 A/B"
@@ -456,12 +457,6 @@
       "feeds": [],
       "page": "(신규 페이지 · 기존 탭 확장)",
       "roadmap": [
-        {
-          "tier": "next",
-          "phase": "P1·1b",
-          "title": "상품관리 스냅샷 적립",
-          "detail": "덮어쓰기 직전 박스재고·매입가 날짜본 → 입고/품절 전이 탐지"
-        },
         {
           "tier": "planned",
           "phase": "P1·1c",
