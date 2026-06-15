@@ -441,7 +441,7 @@
       "star": true,
       "brain": true,
       "label": "지능 레이어 (두뇌)",
-      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진 2층 + 마진/재고/A/B",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력 엔진 2층(가격 이력 적재 시작·1년 2,567건) + 마진/재고/A/B",
       "consumes": [
         "sales_parquet",
         "product_master",
@@ -457,9 +457,9 @@
       "roadmap": [
         {
           "tier": "next",
-          "phase": "P1·1a",
-          "title": "수정로그 3년 적재",
-          "detail": "★ 첫 브릭 — 매입가/매출가 변경 이력 소급 · core/intelligence/price_history.py",
+          "phase": "P1·1a-2",
+          "title": "역재생 검증·앵커 확정",
+          "detail": "현재 매입가 앵커(product_master 낱개/박스) 실데이터 확정 → as-of 매입가/마진",
           "star": true
         },
         {
