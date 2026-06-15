@@ -80,7 +80,7 @@
 
 ## 5. 구현 단계 (세부)
 ### Phase 1 — 이력 토대 (대부분 보유 데이터/조인)
-- **[첫 브릭] 1a 수정로그 적재 — ✅ 완료(2026-06-15)**: 파서(openpyxl, read_only 금지) → 매입단가·매출단가 행 필터(2,567건=매입2009/매출558) → 정규화(상품코드 NFC 문자열키·수정전/후 콤마제거 float·수정일자 datetime, **처리자 PII 제외**) → `work-automation-data:history/price_changes.parquet` PUT. **dedup키=(상품코드·수정항목·수정일자), 중복0·멱등.** 3년 backfill 불가(1년 롤링) → **월 누적으로 전진 축적.** 역재생 `as_of_value` 구현(현재 매입가 앵커는 호출자 공급) — **앵커=product_master 낱개[8] vs 박스[9] 매입단가 실데이터 확정이 다음 수.** core: `core/intelligence/price_history.py`.
+- **[첫 브릭] 1a 수정로그 적재 — ✅ 완료(2026-06-15)**: 파서(openpyxl, read_only 금지) → 매입단가·매출단가 행 필터(2,567건=매입2009/매출558) → 정규화(상품코드 NFC 문자열키·수정전/후 콤마제거 float·수정일자 datetime, **처리자 PII 제외**) → `work-automation-data:history/price_changes.parquet` PUT. **dedup키=(상품코드·수정항목·수정일자), 중복0·멱등.** 3년 backfill 불가(1년 롤링) → **월 누적으로 전진 축적.** 역재생 `as_of_value`+`current_purchase_price` 결선 — **앵커=낱개 매입단가[8] 확정(95.4%, 880/922; 박스=낱개×박스내품 917/917).** 실증 OK(코카콜라제로 18변경 as-of: 변경전=최초수정전·현재=최신수정후 일치). 다음=1b 상품관리 스냅샷. core: `core/intelligence/price_history.py`.
 - **1b 상품관리 스냅샷**: 업로드 훅(`app/pages/3_연동데이터관리/1_상품관리.py`)에서 product_master 덮어쓰기 직전 stock 파티션 적립. 입고/품절 전이 탐지(박스재고 0↔양수).
 - **1c 리드타임**: 발주(3.7)⨯매입현황(3.3) 조인 → lead_time. 소진 예측 입력.
 - **1d 채널 listing 스냅샷 보관**: 마진모니터 listing CSV 갱신 시 날짜본 적립 → 채널 가격 이력(A/B 기반). (현재도 덮어쓰는 중 — 상품관리와 동일)
