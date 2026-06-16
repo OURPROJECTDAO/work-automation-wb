@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16b",
+  "updated": "2026-06-16c",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -102,6 +102,14 @@
     "dashboard"
    ],
    "note": "유형별매입현황(실입고·실매입가·private). 일자 파티션·PII제거·**2022-01~2026-05 연속 53파티션·65,999행**. 합계액=진실(공급+부가세). 2C 매입가 교차검증·두뇌② 입고신호·1c 리드타임. 거래처코드 2025+ 편중(과거만)"
+  },
+  {
+   "id": "hapo_175_190",
+   "label": "hapo_175_190",
+   "consumers": [
+    "intelligence-layer"
+   ],
+   "note": "175~200ml 30개입 합포가능 60종(관리코드). 탭D 택배 합포 배분(시나리오2·ceil(팩/3)) 소유 + (예정)ship_alloc 과거 합포박스키 정밀화 공유. ADR 0021/합포 2시나리오(2026-06-16)"
   }
  ],
  "clusters": [
