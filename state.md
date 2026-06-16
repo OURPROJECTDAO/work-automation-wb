@@ -38,7 +38,7 @@
 - 없음. (B2 인프라 완료 — repo·PAT R/W·st.secrets 검증됨 2026-06-08.)
 
 ## 다음 한 수
-- **★ 시장 지능(경쟁가) — 로컬 수집기 방향 확정(2026-06-16, ADR 0025).** nadl.kr(사람검수 B2B몰·행사 근사최저가·중복없음) 1순위. **클라우드(Streamlit/Actions=해외IP) 지오펜스+robots로 도달 불가** → KR 로컬 수집기(회사 PC·Windows 스케줄러·주1회·저속) → parquet push(work-automation-data) → 두뇌① 시장대비 권장가. 네이버 쇼핑 API=클라우드 보완 후순위. **막힘=nadl 행사 페이지 실물 1장 대기(파서 작성용).** 상세 ADR 0025·logs/2026-06/2026-06-16-market-intel-nadl-feasibility.md.
+- **★★ 다음 세션 최우선 착수 — 시장 지능(경쟁가) nadl 로컬 수집기 (2026-06-16, ADR 0025).** nadl.kr(사람검수 B2B몰·행사 근사최저가·중복없음) 1순위. **클라우드(Streamlit/Actions=해외IP) 지오펜스+robots로 도달 불가** → KR 로컬 수집기(회사 PC·Windows 스케줄러·주1회·저속) → parquet push(work-automation-data) → 두뇌① 시장대비 권장가. 네이버 쇼핑 API=클라우드 보완 후순위. **막힘=nadl 행사 페이지 실물 1장 대기(파서 작성용).** 상세 ADR 0025·logs/2026-06/2026-06-16-market-intel-nadl-feasibility.md.
 - **★★ 세션 클로즈 (2026-06-16): 데일리 대시보드 품절 알림판 + 품절목록 cadence 완성.** 이번 세션 완료 — ①품절 알림판 v1(ADR 0024: 발주 품절목록 자동등록·박스재고>0 재입고 입고로그+자동삭제·수동삭제·영속) ②품절목록 E/F/G(최근입고일·평균매입주기·입고횟수 **1년 윈도우**·logistics generate_result_xlsx·purchases.cadence_by_code) ③매입현황 2026-06(1~15일) 적재(개별 export 742행·54파티션·66,741행·거래처관리코드 alias로 거래처 78% 보존) ④품절 알림판 표에도 E/F/G 표시(board_to_frame cadence·최근 13개월 로드). **⚠️ 미적용 = Reboot app 1회 필요** (이번 세션 core 변경분: daily_inbox·stockout_board·purchases·logistics_order). **재배포(1~2분)+Reboot 후 테스트**: (a)파일처리 실행→데일리 대시보드 자동 인계 (b)발주 Phase2→품절 알림판 자동등록 + 물류팀 품절목록 E/F/G (c)상품관리 갱신(재고>0)→알림판 재입고 자동삭제+입고로그 (d)알림판 표 최근입고·평균주기·입고(1년) 표시. ⚠️ 최근입고일 상한=적재된 매입현황 최신(~2026-06-15) — 월1회 개별 export 적재 운영. **다음 한 수=데일리 대시보드 확장판**(추가 데일리 인사이트 — 사용자와 설계). 로그 logs/2026-06/: daily-dashboard-v1·stockout-board·stockout-list-cadence(+window)·buyin-2026-06-ingest·board-cadence-cols.
 - **★ 데일리 대시보드 품절 알림판 v1(2026-06-16, ADR 0024)** — 발주(Phase2) 품절목록을 알림판에 자동 등록(시작일=그날·전건) → 상품관리 갱신 후 **박스재고>0 재입고 시 입고로그+자동삭제**·수동 1클릭 삭제(로그없음)·'MM월DD일부터 N일째' 표시. 영속(history/stockout_board.json·restock_log.csv·비-PII). 신규 core stockout_board.py·수정 0b/1_파일처리. **새 core→Reboot 1회.** 다음=확장판(추가 데일리 인사이트). 상세 workflows/daily-dashboard.md.
 - **★ 데일리 대시보드 v1 완료(2026-06-16, ADR 0023)** — 당일 점검(구 마진침식 탭D)을 독립 페이지로 승격(네비 첫 그룹·지도·로드맵 아래) + **세션 자동 파일 인계**(파일처리 오픈마켓→송장출력·천년경영→output을 daily_inbox 세션 인박스에 push → 재업로드 불요·슬롯별 수동 갱신 override). 상품관리=reference 라이브. 인박스=세션 휘발성(송장 PII로 미저장). 마진침식 3탭 축소. 신규 0b_데일리대시보드.py+core daily_inbox.py·수정 1_파일처리/8_마진침식/streamlit_app. **새 core(daily_inbox) → 안 보이면 Reboot 1회.** 다음=**확장판**(추가 데일리 인사이트 — 사용자와 설계). 상세 workflows/daily-dashboard.md.
@@ -143,3 +143,5 @@ _갱신: 2026-06-16 (유형별매입현황 2026-06(1~15일) 적재 — 개별 ex
 _세션 클로즈: 2026-06-16 (품절 알림판+품절목록 cadence(E/F/G 1년)+매입현황 6월 적재+알림판 cadence 표시. core 4종 변경→Reboot 1회 대기. 다음=데일리 확장판)_
 
 _갱신: 2026-06-16 (시장지능 nadl 로컬 수집기 방향 확정 — 클라우드 지오펜스로 KR 머신 수집→push. ADR 0025·systemmap 2026-06-16s. 막힘=행사 샘플 대기)_
+
+_갱신: 2026-06-16 (시장지능 nadl 로컬 수집기 = 다음 세션 최우선. 막힘=행사 샘플 페이지 대기)_
