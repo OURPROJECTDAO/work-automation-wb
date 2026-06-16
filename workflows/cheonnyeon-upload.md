@@ -5,7 +5,7 @@
 ## 요약
 - 원본 `천년경영업로드자동화V15.xlsm` (36시트, VBA 2631줄, OC_CheonnyeonFullRun 37단계 + 저장)을 Python 재구현.
 - 발주자료 + 배송비(배민·스마트스토어)를 마켓플레이스별 업로드 양식(전체/낱개)으로 변환.
-- Phase 3 (4번째 템플릿). 운영 중. 골든 27시트(14 전체 + 13 낱개) 전 항목 0 불일치 · pytest 29 passed.
+- Phase 3 (4번째 템플릿). 운영 중. 골든 27시트(14 전체 + 13 낱개) 전 항목 0 불일치 · pytest 29 passed(+ 박스코드 이상 탐지 2건).
 - **logistics-order(발주서출력업무)와 체인**: logistics 발주자료 아카이브 → 천년경영 입력. 멸치쇼핑 분류표 공유. (decisions/0005)
 
 ## 입력 (매 실행 3개 업로드)
@@ -16,14 +16,15 @@
 ## 기준데이터 (reference/, 고정)
 - `logistics_classification.csv` — 멸치쇼핑 분류표(관리코드→구분 식품/음료/선물세트). **발주서출력업무와 공유**. 천년경영은 읽기만. 관리는 발주서출력업무 페이지에서.
 - `bm_commission.csv` — 배민상회 수수료율(관리코드→수수료율, 첫 출현 우선). 골든 내장 781행에서 추출.
-- `sub_list.csv` — 소분목록(낱개코드→낱개개수·원코드, 첫 출현 우선). 골든 내장 357행에서 추출.
+- `sub_list.csv` — 소분목록(낱개코드→낱개개수·원코드, 첫 출현 우선). 골든 내장 357행에서 추출. **전체↔낱개 분기의 유일한 근거**(멤버십).
 
 ## 코드 / UI
 - `core/workflows/cheonnyeon_upload.py` (함수형 — logistics_order.py와 동일 패턴, @register 안 씀)
   - `run(baeju_bytes, baemin_bytes, sss_bytes, run_date=None)` → (출력 xlsx bytes, stats, sheets, units)
   - `process(...)` 메인 파이프라인 / `parse_baeju` / `open_baemin` / `open_sss`(복호화 robust) / `process_baemin` / `process_smartstore` / `generate_output_xlsx`
+  - `detect_box_anomalies(sheets)` → 전체(박스) 시트 잔류 행 중 '박스 코드 아님' 탐지(비차단 검수). list[dict]{시트·관리코드·상품명·신호·확신}. ★아래 "검수 장치" 참조.
   - 로더: `load_classification` / `load_commission` / `load_sub_list` (fixture 주입 가능 → 테스트 결정적)
-- `app/pages/1_파일처리.py` — "🏪 천년경영 업로드" 탭(3파일 업로드→run→{yymmdd}.xlsx 다운로드).
+- `app/pages/1_파일처리.py` — "🏪 천년경영 업로드" 탭(3파일 업로드→run→{yymmdd}.xlsx 다운로드). **출력 후 detect_box_anomalies 결과를 메트릭↔다운로드 사이에 경고 표로 표시 + 소분목록 등록 유도.**
 - `app/pages/2_기준데이터관리/4_천년경영업로드.py` — 수수료율·소분목록 view+교체업로드(GitHub 커밋). 분류표는 발주서출력업무와 공유 안내.
 - 테스트: `tests/test_cheonnyeon_upload.py`, fixtures `tests/fixtures/cheonnyeon/`.
 
@@ -40,6 +41,7 @@
 8. 낱개 이동: 전체시트 B가 소분목록에 있으면 13개 낱개시트로 이동(전체에서 제거). 멸치식품·멸치음료→멸치낱개.
 9. 낱개 변환: B=원코드(소분목록), I=개당수량(소분목록), J=★기입수량=D×I, K=★낱개단가=H×D/J.
 10. 빈 상품명 행 제거.
+11. (검수, 비차단) detect_box_anomalies — 전체 시트 잔류 행 중 박스코드 아님 경고.
 
 ## 마켓별 실제기입단가 H 수식
 | 시트 | G(전체) 소스 | H 수식 |
@@ -53,20 +55,31 @@
 | 대용량전체 | 선결제비 | (F×0.93 + G×0.967)/D |
 | 배민상회전체 | 배송비AL (없으면 선결제비) | (F×(1−I−0.03) + G×0.967)/D, I=수수료율(빈칸→0) |
 
+## 검수 장치 — 박스(전체) 시트 박스코드 이상 (detect_box_anomalies)
+- **목적**: 소분목록에 아직 등록 안 된 **낱개성 코드가 전체 시트에 잔류**(박스로 오업로드)하는 것을 업로드 전에 잡음. 파이프라인은 sub_list 멤버십만 보므로 미등록 낱개는 못 봄 → 파이프라인이 안 쓰는 독립 신호로 검출.
+- **신호 A(코드형태·주신호)**: 관리코드에 **영문자 포함**(`[A-Za-z]`). 박스 코드는 전부 숫자-하이픈. 근거 — product_master 4,227 관리코드 중 영문 포함 5개뿐(PC·BT·CMN·MGG·IMADE, 전부 특수 낱개성). 트레일링점(`29-30.`) 등 잡티는 안 걸려 안전.
+- **신호 B(상품명·보조)**: 상품명에 `[낱개` 태그(`\[\s*낱개`). "30개입" 같은 박스 설명어는 제외(대괄호 태그만).
+- 하나=검토, 둘 다=높음. **비차단 경고**(차단 아님, 사용자 판단). 전체 14시트만 검사(낱개는 정상 이동분).
+- **마스터 `박스`/`낱개` 컬럼은 재고 수량이지 타입 플래그 아님** → 판별에 못 씀.
+- 검증: 0615 실데이터 = PC005875 1건(높음)·오탐 0. 합성/스모크 테스트.
+- 향후: 영문 정상박스 5개 화이트리스트·출력 xlsx 검수 시트·낱개 시트 박스코드 역검출(미구현).
+
 ## 전용 함정
 - **스스주문 암호 1323**: msoffcrypto-tool로 복호화. `open_sss`는 is_encrypted() 확인 후 암호본/평문 자동 분기(평문 업로드도 허용). requirements에 `msoffcrypto-tool` 필요. (전역 패턴은 pitfalls.md)
 - **배송비 조인 순서**: 전체시트 dedup(상품명 합산)이 배송비 조인보다 **먼저**. 조인은 dedup 후 첫 출현 관리코드(B)에 매칭. 순서 바꾸면 합산·매칭 어긋남.
 - **NO_G 시트 G열 빈칸+0 동작**: dedup 시 병합된 행은 G=0(빈칸+빈칸=0, VBA 산술), 미병합 행은 빈칸 유지. 골든 ESM전체에서 확인됨 — None을 0으로 일괄 치환하면 미병합 행 불일치.
+- **소분목록 미등록 = 낱개가 전체로 새어 들어감**: 전체↔낱개 분기는 sub_list 멤버십이 유일 근거. 낱개로 파는 상품인데 sub_list에 없으면 전체 시트에 박스로 잔류 → 오업로드. (실사례 PC005875/0615, 사용자가 사후 등록). detect_box_anomalies가 이를 검수.
 - **logistics 체인**: 발주자료는 logistics 아카이브 앞 7열. 멸치쇼핑 분류표는 logistics_classification.csv 공유(골든 worksheet 215코드 100% 일치 검증). 분류표 변경은 발주서출력업무 페이지에서만.
 - **첫 출현 우선**: 수수료율·소분목록 모두 같은 코드가 여러 행이면 첫 행 채택(VBA Exit For). 로더 dict 구성 시 첫 출현만 등록.
 - **출력 범위**: 앱은 마켓 전체/낱개 27시트만 생성(원본 36시트의 합포데이터·재고관리 등 비파이프라인 시트는 미생성 — 업로드에 불필요). 대용량전체 골든 H1 헤더 #VALUE!는 빈시트 템플릿 artifact라 무시.
 
 ## 검증 (골든 대조)
 - 실물 raw(배민주문·스스주문 암호본) + 역산 발주자료로 **end-to-end 0 불일치** (14 전체 + 13 낱개 = 27시트, B/C/D/E/F/G/H, 낱개 I/J/K 직접 비교).
-- pytest 29 passed (`tests/test_cheonnyeon_upload.py`): 14 전체 + 13 낱개 파라미터화 + 배송비조인 + 낱개수식 단위.
+- pytest 29 passed + detect_box_anomalies 합성/스모크 2건 (`tests/test_cheonnyeon_upload.py`).
 - fixtures는 **PII 제거**: raw 주문번호/수취인 정보 미커밋, 파이프라인 사용 컬럼만 추출한 슬림 픽스처(배민 Z/AL, 스스 AJ/AL/AO). 기준데이터 fixture 주입으로 라이브 reference와 무관하게 결정적.
 - 이날 실데이터: ESM34·스마트35·식봄35·배민상회11·올웨이즈9·캐시노트19·쿠팡8·알리27 / 스마트낱개7·ESM낱개3·올웨이즈낱개2·캐시노트낱개1·쿠팡낱개7·알리낱개1. (멸치·11번가·대용량·셀러허브·제이티·식봄낱개 등은 이날 0행 — 코드 경로는 검증됨.)
 
 ## 관련 로그 / 결정
 - decisions/0005-cheonnyeon-logistics-chain.md
 - logs/2026-06/2026-06-04-cheonnyeon-upload.md
+- logs/2026-06/2026-06-16-cheonnyeon-box-anomaly-check.md
