@@ -22,6 +22,15 @@
 - ★ **인박스 = 세션(st.session_state)·휘발성·in-memory.** 송장출력에 PII(수령자·주소·송장번호)가 있어 **디스크/repo 미저장**(전역 보안 규칙). → 같은 작업 세션이면 자동, **리부트/새 세션이면 인박스 비워짐 → 수동 업로드**. (cross-session은 후순위·비-PII 처리본만 영속 검토)
 - 단일 진실원천(슬롯 키) = `daily_inbox.SLOT_CHEONNYEON`/`SLOT_INVOICE` — 생산처(1_파일처리)·소비처(0b) 공유로 키 드리프트 방지.
 
+## 품절 알림판 (ADR 0024) — 발주 품절목록 → 재입고 자동/수동 해제
+- **무엇**: 매일 발주작업(품절목록)에 뜬 상품을 알림판에 띄워놓고, 상품관리 갱신 후 **박스재고가 양수로 들어오면 입고로그 남기고 자동 삭제**. 안 들어오면 "MM월DD일부터 N일째 품절" 유지. 수동 1클릭 삭제(로그 없음).
+- **저장(영속·비-PII)**: private data repo — `history/stockout_board.json`(현재 알림판 {관리코드:{상품명,since,발주수량,seed현재고}}) + `history/restock_log.csv`(입고로그 append: 관리코드·상품명·품절시작일·입고일·품절일수·입고시박스재고). 세션 휘발 아님(인박스와 다름).
+- **등록(seeding)**: 발주서출력업무 **Phase2 품절목록 생성 시 자동**(1_파일처리 `_seed_stockout_board(stockout_df)`). 품절목록 컬럼=관리코드·상품명·발주수량·현재고(run_phase2가 rename). 없는 코드만 추가·**품절시작일=그날**(이미 있으면 유지). 전건.
+- **재입고 reconcile**: 데일리 대시보드 열 때 알림판 각 항목의 **현재 박스재고**(product_master '박스' 컬럼, 라이브)를 확인 → **> 0(양수)** 이면 회복 → 입고로그 append + 알림판 제거. (현 품절건 박스재고 다 음수라 양수 전환이 깔끔한 신호·사용자 확정. 0=재고없음→유지.) `🔄 상품관리 다시 읽기` 버튼=cache clear(최신 product_master 반영).
+- **수동 삭제**: 항목별 🗑 버튼 1클릭 제거(입고로그 안 남김·사용자 확정).
+- **★ 박스재고 = product_master '박스' 컬럼**(박스내품 아님). 품절목록 현재고 = 박스재고 − 발주수량(박스단위) — 즉 품절목록은 "오늘 발주 대비 부족"이라 절대 0 아님. 회복 신호는 박스재고 양수 전환.
+- core: `core/intelligence/stockout_board.py` (read/write_board·read/append_log·seed_from_stockout·reconcile·manual_remove·board_to_frame). 페이지: 0b 상단 섹션.
+
 ## 코드
 - `app/pages/0b_데일리대시보드.py` — 인박스 상태 표시 + 슬롯 수동 갱신(`_slot_ui`) + 당일 마진 표/메트릭/XLSX. 헬퍼(_master_lookup·_pc_lookup·_hapo_codes·_baseline_dict·_to_xlsx)는 8_마진침식과 동형(현재 복제).
 - `core/intelligence/daily_inbox.py` — push/get + 슬롯 상수. (st.session_state를 인자로 받음 — core는 streamlit 비의존)
@@ -41,3 +50,5 @@
 - intelligence-layer.md §6①(탭D 원설계·daily_margin) · logs/2026-06-15-daily-margin-tabd.md · 2026-06-16-daily-margin-hapo-shipping.md
 
 _갱신: 2026-06-16 (신규 — 당일 점검 탭D를 독립 페이지로 승격 + 천년경영/송장출력 세션 자동 인계(재업로드 불요)·수동 갱신 override. 상품관리=reference 라이브. ADR 0023)_
+
+_갱신: 2026-06-16 (품절 알림판 추가 — 발주 품절목록 자동 등록·박스재고>0 재입고 입고로그+자동삭제·수동삭제·영속(stockout_board.json/restock_log.csv). ADR 0024. 새 core→Reboot 1회)_
