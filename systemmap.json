@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16j",
+  "updated": "2026-06-16k",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -369,12 +369,6 @@
      "tier": "planned",
      "title": "이익/물류량 콤보(이중축)",
      "detail": "물류량 vs 이익/물류량 한 차트"
-    },
-    {
-     "tier": "planned",
-     "title": "온라인 상품마진 실측화",
-     "detail": "추정송장·k → 지능 레이어 송장 실배분으로 교체",
-     "cross": "intelligence-layer"
     }
    ]
   },
@@ -502,12 +496,6 @@
      "phase": "P1·1c",
      "title": "리드타임 산출 (두뇌② 입력)",
      "detail": "발주(3.7) ⨯ **매입현황 입고일(✅적재)** 조인 → 진짜 발주→입고 lead_time → 두뇌②(현재 입고 cadence proxy) 재발주 시점 정밀화. 거래처 차원은 2022~23만(거래처코드 편중)."
-    },
-    {
-     "tier": "planned",
-     "phase": "P1·1f",
-     "title": "채널 내 고객키 + 합포박스키 적재 (ADR 0021)",
-     "detail": "✅ 적재 완료(2026-06-16) — 통파일(36개월)+개별.xls(2023여름 갭) 재처리·39개월 430,592행·고객키 99.9%/합포박스키 100%. robust 키(이름 끝1자제외·전화뒤4·주소 시군구+도로명·안심번호 채널 전화제외) 충돌검증(키당신원 p50=1·전화포함 채널 깔끔·안심채널 꼬리=저신뢰 플래그). orders.py 키 생성 추가(salt=st.secrets)·적재값과 100% 정합. **✅ ship_alloc 연동 완료(2026-06-16)** — 175~200 합포품목 ceil(팩/3) 물리박스 교정(블랭킷 swap 금지·B2B 과대병합 방지). 채널총 불변·합포품목 택배 -3.8%. 고카디널리티 고객키 저신뢰 가중은 두뇌③ 시."
     },
     {
      "tier": "done",
