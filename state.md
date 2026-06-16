@@ -25,7 +25,7 @@
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
 | intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문 39개월·판매가검증·P2·매입현황·탭D·두뇌②·고객키/합포박스키 적재·**ship_alloc 합포 ceil(팩/3) 교정**·**두뇌③ A/B v1**(서술+마진율별판매량 탄력성)·**상품360카드 v1** 완료) 두뇌3종+통합카드 완성·다음=사용자선택 | workflows/intelligence-layer.md |
-| daily-dashboard (데일리 대시보드) | — | 진행중 (당일점검+세션인계+품절 알림판[cadence]+채널요약+가격변동알림) | workflows/daily-dashboard.md |
+| daily-dashboard (데일리 대시보드) | — | 진행중 (당일점검+세션인계+품절알림판+채널요약+가격변동알림+이상치→가격변경시트) | workflows/daily-dashboard.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -147,3 +147,5 @@ _갱신: 2026-06-16 (시장지능 nadl 로컬 수집기 방향 확정 — 클라
 _갱신: 2026-06-16 (시장지능 nadl 로컬 수집기 = 다음 세션 최우선. 막힘=행사 샘플 페이지 대기)_
 
 _갱신: 2026-06-17 (데일리 대시보드 확장판① — 채널별 요약(당일 매출·마진율) + 가격 변동 알림(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교 detect_price_changes). 0b page + core stock_history. ⚠️ core→Reboot 1회. forward 적립이라 가격 이력 2026-06-15~ 누적. 다음=확장판② 후보 or 시장지능 nadl)_
+
+_갱신: 2026-06-17 (데일리 확장판② — 이상치 표 권장가(채널기준·판매가) + 체크박스 선택→단일채널 가격변경 시트 다운로드(cmm 빌더 재사용·알리 미지원·listing 최신 의존). page-only Reboot 불요 예상. 다음=실사용 확인/추가 인사이트)_
