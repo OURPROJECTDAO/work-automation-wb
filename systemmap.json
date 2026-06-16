@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16k",
+  "updated": "2026-06-16l",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -362,11 +362,6 @@
    "roadmap": [
     {
      "tier": "planned",
-     "title": "물류량 차트",
-     "detail": "수량 ÷ 박스내품"
-    },
-    {
-     "tier": "planned",
      "title": "이익/물류량 콤보(이중축)",
      "detail": "물류량 vs 이익/물류량 한 차트"
     }
@@ -397,11 +392,6 @@
    ],
    "page": "app/pages/6_채널마진모니터.py",
    "roadmap": [
-    {
-     "tier": "planned",
-     "title": "알리 가격변경",
-     "detail": "AliExpress 다중시트 양식 (모니터는 완료, 가격변경만 남음)"
-    },
     {
      "tier": "planned",
      "title": "baseline↔product_master 조인 갭",
