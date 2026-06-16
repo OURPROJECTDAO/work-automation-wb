@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16o",
+  "updated": "2026-06-16p",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -99,7 +99,8 @@
    "label": "buyin_*.parquet",
    "consumers": [
     "intelligence-layer",
-    "dashboard"
+    "dashboard",
+    "logistics-order"
    ],
    "note": "유형별매입현황(실입고·실매입가·private). 일자 파티션·PII제거·**2022-01~2026-05 연속 53파티션·65,999행**. 합계액=진실(공급+부가세). 2C 매입가 교차검증·두뇌② 입고신호·1c 리드타임. 거래처코드 2025+ 편중(과거만)"
   },
@@ -179,12 +180,13 @@
    "cluster": "fulfillment",
    "status": "live",
    "label": "발주서 출력업무",
-   "line": "매출통계 → 물류팀 시트 + 품절목록 + 발주자료 아카이브 (2-phase+게이트)",
+   "line": "매출통계 → 물류팀 시트 + 품절목록 + 발주자료 아카이브 (2-phase+게이트) · 품절목록 E/F=최근입고일·평균매입주기(매입현황 cadence)",
    "consumes": [
     "product_master",
     "logistics_classification",
     "unit_list",
-    "spec_master"
+    "spec_master",
+    "buyin_purchases"
    ],
    "produces": [
     "발주자료 아카이브",
