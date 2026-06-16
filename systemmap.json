@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16",
+  "updated": "2026-06-16b",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -490,6 +490,12 @@
      "phase": "P1·1c",
      "title": "리드타임 산출 (두뇌② 입력)",
      "detail": "발주(3.7) ⨯ **매입현황 입고일(✅적재)** 조인 → 진짜 발주→입고 lead_time → 두뇌②(현재 입고 cadence proxy) 재발주 시점 정밀화. 거래처 차원은 2022~23만(거래처코드 편중)."
+    },
+    {
+     "tier": "planned",
+     "phase": "P1·1f",
+     "title": "채널 내 고객키 + 합포박스키 적재 (ADR 0021)",
+     "detail": "원본 .xls 재처리로 비-PII 해시키 박제(고객키=수령자명+전화·합포박스키=수령자명+주소+발주일). robust=보이는 최소공통분모(이름앞·전화뒤4·주소 시군구+도로명) — 시기별 마스킹 급변(2026-03 51%→05 0%) 대응. 채널별 레시피(안심번호 G마켓/옥션/쿠팡=전화제외). 합포박스키→ship_alloc 과거 합포 정밀화→두뇌③ 단위경제. 다음 세션: 과거 통파일 받아 전구간 마스킹→충돌검증→orders.py→재적재. 받은 파일=최근 3개월."
     },
     {
      "tier": "next",
