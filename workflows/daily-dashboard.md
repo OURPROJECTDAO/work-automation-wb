@@ -29,6 +29,7 @@
 - **재입고 reconcile**: 데일리 대시보드 열 때 알림판 각 항목의 **현재 박스재고**(product_master '박스' 컬럼, 라이브)를 확인 → **> 0(양수)** 이면 회복 → 입고로그 append + 알림판 제거. (현 품절건 박스재고 다 음수라 양수 전환이 깔끔한 신호·사용자 확정. 0=재고없음→유지.) `🔄 상품관리 다시 읽기` 버튼=cache clear(최신 product_master 반영).
 - **수동 삭제**: 항목별 🗑 버튼 1클릭 제거(입고로그 안 남김·사용자 확정).
 - **★ 박스재고 = product_master '박스' 컬럼**(박스내품 아님). 품절목록 현재고 = 박스재고 − 발주수량(박스단위) — 즉 품절목록은 "오늘 발주 대비 부족"이라 절대 0 아님. 회복 신호는 박스재고 양수 전환.
+- **알림판 표시 컬럼(2026-06-16 추가)**: 관리코드·상품명·품절(MM월DD일부터 N일째)·현재박스재고에 더해 **최근입고일·평균매입주기·입고횟수(1년)** 표시(품절목록 E/F/G와 동일, 발주일 기준 1년·매입현황 cadence). 0b `_buyin_cadence()`(data repo 최근 13개월 파티션·`cadence_by_code(months=12)`·ttl30분) → `board_to_frame(..., cadence=...)`. 보기 편하게 한 화면에서 "이 품절건 마지막 입고·보통 며칠마다·1년간 몇 번" 확인.
 - core: `core/intelligence/stockout_board.py` (read/write_board·read/append_log·seed_from_stockout·reconcile·manual_remove·board_to_frame). 페이지: 0b 상단 섹션.
 
 ## 코드
@@ -52,3 +53,5 @@
 _갱신: 2026-06-16 (신규 — 당일 점검 탭D를 독립 페이지로 승격 + 천년경영/송장출력 세션 자동 인계(재업로드 불요)·수동 갱신 override. 상품관리=reference 라이브. ADR 0023)_
 
 _갱신: 2026-06-16 (품절 알림판 추가 — 발주 품절목록 자동 등록·박스재고>0 재입고 입고로그+자동삭제·수동삭제·영속(stockout_board.json/restock_log.csv). ADR 0024. 새 core→Reboot 1회)_
+
+_갱신: 2026-06-16 (품절 알림판에 최근입고일·평균매입주기·입고횟수(1년) 컬럼 추가 — 매입현황 cadence(최근13개월·1년윈도우)·board_to_frame cadence 인자. core→Reboot)_
