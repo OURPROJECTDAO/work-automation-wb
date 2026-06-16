@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16m",
+  "updated": "2026-06-16n",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -465,7 +465,7 @@
     "price_changes.parquet (가격이력·private)",
     "stock_*.parquet (재고 스냅샷·private)",
     "마진 침식 경보(두뇌①·8채널·2C예방·실판매이상·velocity 월손실액)",
-    "당일 마진 이상치(탭D·천년경영 net매출+물리박스 택배배분[합포2시나리오: 250/355 H열다품목 전체추출 + 175~200ml 30개입 수령자 ceil(팩/3)·hapo_175_190.csv]·역마진/미달·당일 트립와이어)",
+    "당일 마진 이상치(**데일리 대시보드**로 승격 2026-06-16·0b_데일리대시보드.py·천년경영 net매출+물리박스 택배배분[합포2시나리오: 250/355 H열다품목 전체추출 + 175~200ml 30개입 수령자 ceil(팩/3)·hapo_175_190.csv]·역마진/미달·당일 트립와이어)",
     "품절·재발주 예측(두뇌②·9_재고지능·현재고÷소진율·private)",
     "채널 가격 A/B v1(가격 A/B 페이지·관리코드×채널 실현마진[분모 매입가]·낱개이익·판매량·정산단가net·EA노출가gross·실측/추정 택배·private·서술)",
     "easyadmin_*.parquet (주문·velocity·송장그룹·private)",
@@ -479,7 +479,7 @@
    "feeds": [
     "dashboard"
    ],
-   "page": "app/pages/8_마진침식.py (두뇌① 4탭·탭D) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰)",
+   "page": "app/pages/8_마진침식.py (두뇌① 3탭·탭D→데일리 대시보드 승격) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰)",
    "roadmap": [
     {
      "tier": "done",
@@ -535,6 +535,38 @@
      "phase": "P2+",
      "title": "상품택배비 컬럼 실측 검토",
      "detail": "과거 통파일 '상품 택배비' 컬럼 → P2 추정 대체 가능성. 최근 .xls엔 없어 전기간 일관 불가."
+    }
+   ]
+  },
+  {
+   "id": "daily-dashboard",
+   "cluster": "intelligence",
+   "status": "partial",
+   "star": true,
+   "label": "데일리 대시보드",
+   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. 확장판(추가 데일리 인사이트) 예정.",
+   "consumes": [
+    "product_master",
+    "baseline_margin",
+    "hapo_175_190",
+    "sales_parquet"
+   ],
+   "produces": [
+    "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
+    "세션 파일 인박스(파일처리→데일리, 휘발성·PII 미저장)"
+   ],
+   "feeds": [],
+   "page": "app/pages/0b_데일리대시보드.py (+ core/intelligence/daily_inbox.py 세션 인계)",
+   "roadmap": [
+    {
+     "tier": "planned",
+     "title": "확장판 — 추가 데일리 인사이트",
+     "detail": "당일 점검 외 매일 반복 업무 자료(품절/발주/업로드감시/채널 등)를 한 화면 데일리 인사이트로 결합. 사용자: '마진침식 당일점검의 확장판'."
+    },
+    {
+     "tier": "later",
+     "title": "세션 넘어 영속(비-PII 처리본)",
+     "detail": "현재 인박스=세션 휘발성(송장 PII로 디스크/repo 미저장). 필요 시 비-PII 처리 결과(관리코드·매출·마진)만 날짜본 영속 검토."
     }
    ]
   }
@@ -599,6 +631,14 @@
   {
    "from": "intelligence-layer",
    "to": "dashboard"
+  },
+  {
+   "from": "openmarket-merge",
+   "to": "daily-dashboard"
+  },
+  {
+   "from": "cheonnyeon-upload",
+   "to": "daily-dashboard"
   }
  ]
 }
