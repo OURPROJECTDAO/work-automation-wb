@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16l",
+  "updated": "2026-06-16m",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -481,12 +481,6 @@
    ],
    "page": "app/pages/8_마진침식.py (두뇌① 4탭·탭D) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰)",
    "roadmap": [
-    {
-     "tier": "planned",
-     "phase": "P1·1c",
-     "title": "리드타임 산출 (두뇌② 입력)",
-     "detail": "발주(3.7) ⨯ **매입현황 입고일(✅적재)** 조인 → 진짜 발주→입고 lead_time → 두뇌②(현재 입고 cadence proxy) 재발주 시점 정밀화. 거래처 차원은 2022~23만(거래처코드 편중)."
-    },
     {
      "tier": "done",
      "phase": "두뇌③",
