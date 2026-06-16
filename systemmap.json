@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16q",
+  "updated": "2026-06-16r",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -100,7 +100,8 @@
    "consumers": [
     "intelligence-layer",
     "dashboard",
-    "logistics-order"
+    "logistics-order",
+    "daily-dashboard"
    ],
    "note": "유형별매입현황(실입고·실매입가·private). 일자 파티션·PII제거·**2022-01~2026-06 연속 54파티션·66,741행**(2026-06=1~15일·개별 export). 합계액=진실(공급+부가세). 2C 매입가 교차검증·두뇌② 입고신호·품절목록 cadence(최근입고/평균주기/입고횟수 1년). 거래처코드=통파일 2025+ 결측이나 개별 export는 보존(거래처관리코드 alias·2026-06 78%)"
   },
@@ -552,7 +553,8 @@
     "baseline_margin",
     "hapo_175_190",
     "sales_parquet",
-    "logistics_order_품절목록"
+    "logistics_order_품절목록",
+    "buyin_purchases"
    ],
    "produces": [
     "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
