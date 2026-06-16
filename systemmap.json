@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-17a",
+  "updated": "2026-06-17b",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -547,14 +547,15 @@
    "status": "partial",
    "star": true,
    "label": "데일리 대시보드",
-   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). 확장판 추가 중.",
+   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용). 확장판 추가 중.",
    "consumes": [
     "product_master",
     "baseline_margin",
     "hapo_175_190",
     "sales_parquet",
     "logistics_order_품절목록",
-    "buyin_purchases"
+    "buyin_purchases",
+    "listing_x8"
    ],
    "produces": [
     "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
@@ -573,6 +574,11 @@
      "tier": "done",
      "title": "확장판① 채널 요약 + 가격 변동 알림",
      "detail": "✅ 2026-06-17. 채널별 당일 매출·마진율 요약(groupby) + 가격 변동 알림(전체 상품 직전 대비 ±N% 매입가/판매가 인상/인하, 1b 스냅샷 detect_price_changes·재고 전이탐지 자매). page 0b + core stock_history. forward 적립(2026-06-15~)."
+    },
+    {
+     "tier": "done",
+     "title": "확장판② 이상치→권장가+가격변경 시트",
+     "detail": "✅ 2026-06-17. 당일 이상치 표에 권장가(채널 기준마진 달성 판매가·cmm compute) 컬럼 + 체크박스 선택→단일채널 가격변경 시트 다운로드(channel-margin-monitor 빌더 append/filter/smartstore 재사용). 알리 미지원·쿠팡/스마트스토어 raw 필요·listing 최신 의존. page-only."
     },
     {
      "tier": "planned",
@@ -658,6 +664,10 @@
   },
   {
    "from": "logistics-order",
+   "to": "daily-dashboard"
+  },
+  {
+   "from": "channel-margin-monitor",
    "to": "daily-dashboard"
   }
  ]
