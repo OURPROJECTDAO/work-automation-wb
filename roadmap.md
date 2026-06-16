@@ -21,9 +21,9 @@
 
 ## 다음 (초점) — 상세·순서 정본 = systemmap.json
 - **두뇌 3종(①침식 ②재고 ③A/B) + 통합 상품360 카드 v1 전부 완성. 데이터 backbone(이력엔진·주문/매입 적재·고객키·송장 실배분) 완성.** 다음 한 수 = **사용자 선택**(아래 후보):
-  1. intelligence-layer 정밀화 — **1c 진짜 리드타임**(발주 ⨯ 매입현황 입고일 조인 → 두뇌② 재발주 정밀화·거래처 차원은 2022~23) · listing 스냅샷 보관(두뇌③ 가격변경 전후) · 행사 로깅(forward only).
-  2. channel-margin-monitor — **알리 가격변경**(AliExpress 다중시트 양식. 모니터는 완료, 가격변경만 남음).
-  3. dashboard — **물류량 차트**(수량÷박스내품) · 이익/물류량 콤보(이중축).
+  1. **[착수] intelligence-layer 1c 진짜 리드타임** — 발주 ⨯ 매입현황 입고일 조인 → 발주→입고 lead_time → 두뇌②(현재 입고 cadence proxy) 재발주 정밀화. 거래처 차원은 2022~23만(거래처코드 편중).
+  2. intelligence-layer 정밀화(잔여) — listing 스냅샷 보관(두뇌③ 가격변경 전후) · 행사 로깅(forward only).
+  3. dashboard — 이익/물류량 콤보(이중축).
   4. upload-monitor — 재고금액×예상마진 우선순위(두뇌② 품절예측 매트릭스 결합) · 제외목록 편집 UI · L4 등록 핸드오프(채널 일괄업로드 완비 후).
 - **Phase 3 나머지 템플릿**: 1종씩 Python 이관 — 업무의 1/10 미만 이관됨(다수 남음), 사용자 실물 파일 제공 대기.
 
@@ -39,3 +39,5 @@ _갱신: 2026-06-15 (roadmap.md 표류 정리 — systemmap.json 정본 체제(A
 _갱신: 2026-06-16 (두뇌③ A/B v1 서술+탄력성·상품360 카드 v1 완료 — 완료 이정표 반영)_
 
 _갱신: 2026-06-16 (충족 항목 정리 — planned 2건 삭제: dashboard '온라인 상품마진 실측화'(✅P2 실측 교체 완료)·intelligence-layer 1f '고객키/합포박스키 적재'(✅적재+ship_alloc 연동 완료). 둘 다 systemmap 노드 line/produces에 이미 박제 → planned 표류 제거. 고객키/두뇌③/상품360 완료 이정표로 이동. systemmap.json 정본 동반 갱신(meta 2026-06-16k))_
+
+_갱신: 2026-06-16 (충족·불요 항목 추가 정리 — 삭제: dashboard '물류량 차트'(사용자 불요)·channel-margin-monitor '알리 가격변경'(당장 계획 없음). 1c 진짜 리드타임 착수. systemmap d27bc0d)_
