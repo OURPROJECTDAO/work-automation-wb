@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16n",
+  "updated": "2026-06-16o",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -544,20 +544,27 @@
    "status": "partial",
    "star": true,
    "label": "데일리 대시보드",
-   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. 확장판(추가 데일리 인사이트) 예정.",
+   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). 확장판 추가 예정.",
    "consumes": [
     "product_master",
     "baseline_margin",
     "hapo_175_190",
-    "sales_parquet"
+    "sales_parquet",
+    "logistics_order_품절목록"
    ],
    "produces": [
     "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
-    "세션 파일 인박스(파일처리→데일리, 휘발성·PII 미저장)"
+    "세션 파일 인박스(파일처리→데일리, 휘발성·PII 미저장)",
+    "품절 알림판(history/stockout_board.json)·입고로그(restock_log.csv·비-PII·영속)"
    ],
    "feeds": [],
    "page": "app/pages/0b_데일리대시보드.py (+ core/intelligence/daily_inbox.py 세션 인계)",
    "roadmap": [
+    {
+     "tier": "done",
+     "title": "품절 알림판",
+     "detail": "✅ 2026-06-16(ADR 0024). 발주 Phase2 품절목록→자동 등록(시작일=그날·전건)·상품관리 갱신 후 박스재고>0 재입고→입고로그+자동삭제·수동삭제(로그없음)·'MM월DD일부터 N일째' 표시. core stockout_board.py. data repo history/stockout_board.json + restock_log.csv 영속."
+    },
     {
      "tier": "planned",
      "title": "확장판 — 추가 데일리 인사이트",
@@ -638,6 +645,10 @@
   },
   {
    "from": "cheonnyeon-upload",
+   "to": "daily-dashboard"
+  },
+  {
+   "from": "logistics-order",
    "to": "daily-dashboard"
   }
  ]
