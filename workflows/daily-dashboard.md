@@ -32,9 +32,17 @@
 - **알림판 표시 컬럼(2026-06-16 추가)**: 관리코드·상품명·품절(MM월DD일부터 N일째)·현재박스재고에 더해 **최근입고일·평균매입주기·입고횟수(1년)** 표시(품절목록 E/F/G와 동일, 발주일 기준 1년·매입현황 cadence). 0b `_buyin_cadence()`(data repo 최근 13개월 파티션·`cadence_by_code(months=12)`·ttl30분) → `board_to_frame(..., cadence=...)`. 보기 편하게 한 화면에서 "이 품절건 마지막 입고·보통 며칠마다·1년간 몇 번" 확인.
 - core: `core/intelligence/stockout_board.py` (read/write_board·read/append_log·seed_from_stockout·reconcile·manual_remove·board_to_frame). 페이지: 0b 상단 섹션.
 
+## 채널별 요약 + 가격 변동 알림 (확장판①, 2026-06-17)
+- **채널별 요약(당일)**: 당일 마진 점검 `ddf`를 채널 groupby → 매출(net)·원가·택배·마진·마진율(Σ마진÷Σ매출)·품목수. 메트릭 아래·이상치 표 위. page-only(daily_margin 재사용·새 의존 없음).
+- **가격 변동 알림(±N%)**: 1b 스냅샷(`stock_history`) 연속 비교로 **매입단가·매출단가** ±N%(기본 2%·1~20% 슬라이더) 변동 탐지 → 구분(매입가/판매가)·방향(인상/인하)·전일가→금일가·변동률·변동일. 최근 N일(기본 7) 윈도우·구분 필터·XLSX. 품절 알림판 자매(품절 board 뒤·당일 마진 앞).
+  - core `stock_history.detect_price_changes(snaps, threshold, fields)` — `detect_transitions`(재고) 자매. 상품코드별 연속 스냅샷 shift 비교·**직전 결측(신규 등재)/직전 0이하 제외**·구분·방향·변동률(%). 페이지 `_price_changes(days, threshold)`(data repo 최근 3개월 파티션·ttl30분·🔄 cache clear).
+  - ★ 1b 스냅샷 **forward 적립(2026-06-15~)** → 가격 이력 현재 얕음, 상품관리 업로드일마다 누적. 업로드 sparse여도 "직전 기록 대비"라 자동 대응.
+  - ★ 분모 주의: 채널 마진율 = Σ마진÷Σ매출(net) — 당일 마진 점검(이익÷매출)과 동일. 실현마진(÷매입가)인 두뇌③/상품360과 분모 다름.
+
 ## 코드
 - `app/pages/0b_데일리대시보드.py` — 인박스 상태 표시 + 슬롯 수동 갱신(`_slot_ui`) + 당일 마진 표/메트릭/XLSX. 헬퍼(_master_lookup·_pc_lookup·_hapo_codes·_baseline_dict·_to_xlsx)는 8_마진침식과 동형(현재 복제).
 - `core/intelligence/daily_inbox.py` — push/get + 슬롯 상수. (st.session_state를 인자로 받음 — core는 streamlit 비의존)
+- `core/intelligence/stock_history.py` — `detect_price_changes`(가격 변동 알림·1b 스냅샷 연속 비교).
 - `core/intelligence/daily_margin.py` — parse_invoice_shipping·parse_cheonnyeon_sales·compute_daily_margin (변경 없음).
 - 생산 훅: `app/pages/1_파일처리.py` (tab_basic 오픈마켓·tab_cy 천년경영) — `import core.intelligence.daily_inbox as _inbox` + 결과 생성 직후 push.
 - 네비: `app/streamlit_app.py` 첫 그룹, 지도·로드맵 다음.
@@ -55,3 +63,5 @@ _갱신: 2026-06-16 (신규 — 당일 점검 탭D를 독립 페이지로 승격
 _갱신: 2026-06-16 (품절 알림판 추가 — 발주 품절목록 자동 등록·박스재고>0 재입고 입고로그+자동삭제·수동삭제·영속(stockout_board.json/restock_log.csv). ADR 0024. 새 core→Reboot 1회)_
 
 _갱신: 2026-06-16 (품절 알림판에 최근입고일·평균매입주기·입고횟수(1년) 컬럼 추가 — 매입현황 cadence(최근13개월·1년윈도우)·board_to_frame cadence 인자. core→Reboot)_
+
+_갱신: 2026-06-17 (확장판① — 채널별 요약(당일 매출·마진율) + 가격 변동 알림(1b 스냅샷 ±N% 매입가/판매가·detect_price_changes). core stock_history→Reboot 1회)_
