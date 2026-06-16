@@ -41,6 +41,14 @@
 - **재고 계산**: 재고 = 박스재고(상품관리) − 필요수량(낱개는 총수량×배수). 음수 = 품절목록. round 후 int.
 - **GATE A/B UI 어드민옵션 슬라이스 — NaN 방어**: `unmatched` 행은 `df[...][['erp관리코드','어드민옵션']].to_dict('records')` 산출. 어드민옵션이 빈값이면 **float NaN** → `row.get('어드민옵션','')[:30]`이 `TypeError: 'float' object is not subscriptable`로 크래시(2026-06-10 발생). UI(1_파일처리.py)에서 `('' if pd.isna(v) else str(v))[:30]`로 방어. GATE B(335줄 f-string)도 nan 표시 방지 동일 처리.
 
+## 품절목록 E/F — 최근입고일·평균매입주기 (2026-06-16)
+- 품절목록 시트에 **E열 "최근 입고일" · F열 "평균매입주기(일)"** 추가 — 발주 담당이 "이거 언제 마지막 들어왔고 보통 며칠마다 들어오나" 즉시 파악.
+- 출처 = **매입현황(buyin) cadence** (`core/intelligence/purchases.cadence_by_code`): 실입고(합계액>0 & 수량>0)·입고일 distinct 기준, 관리코드별 {최근입고일, 평균주기=연속 입고일 간격 평균(일), 입고횟수}. 입고 1회면 평균주기 공백.
+- 주입: `1_파일처리.py` 발주서출력업무가 `_buyin_cadence()`(data repo `read_all` 캐시 ttl 30분)로 cadence를 받아 `generate_result_xlsx(p2_df, so_df, cadence=...)`에 전달. 매칭키=관리코드 NFC.
+- 검증(2026-06-16, 실데이터 65,999행): 0616 품절 5건 전부 산출 OK(예 31-03-05 평균 4일·364회·최근 2026-05-29 · 31-03-02 26일 · 39-91 16일).
+- ⚠️ **최근입고일은 적재된 매입현황 기준**(현재 ~2026-05까지). 당월 입고는 그 달 매입현황 적재 후 반영. 1800개 관리코드 cadence 보유.
+- ⚠️ core(logistics_order.py·purchases.py) 수정 → **Reboot app 1회**.
+
 ## 출력 디자인 (프린트용 — 물류팀 전달)
 - 타이틀 바: 남색(2F5496) 배경 + 흰 글씨, 날짜 "YYYY년 M월 D일 X요일".
 - 섹션 헤더: 연파랑(D9E1F2) + 남색 글씨.
@@ -73,3 +81,5 @@
 - logs/2026-06/2026-06-04-logistics-multiproduct-fix.md (다른 상품 합포 버그픽스 — 숫자코드)
 - logs/2026-06/2026-06-08-logistics-multiproduct-bracket-fix.md (합포 감지 대괄호 기준 교체 — 영문/PC코드·N개)
 - logs/2026-06/2026-06-09-refdata-editor-search-mergeback.md (기준데이터 편집표 검색+merge-back — 낱개목록·분류표 등 전역)
+
+_갱신: 2026-06-16 (품절목록 E열 최근입고일·F열 평균매입주기 추가 — 매입현황 cadence(purchases.cadence_by_code) 주입. 실데이터 검증 OK. core→Reboot)_
