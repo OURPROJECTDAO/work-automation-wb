@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16s",
+  "updated": "2026-06-16t",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -519,7 +519,7 @@
      "tier": "planned",
      "phase": "P3",
      "title": "시장 지능(경쟁가) — nadl 로컬 수집기",
-     "detail": "**아키텍처 확정(2026-06-16, ADR 0025).** 1순위 소스 nadl.kr(사람검수 B2B몰·행사 근사최저가·중복없음·매칭쉬움). **클라우드(Streamlit/Actions=해외IP)에서 지오펜스+robots로 도달 불가** → KR 로컬 수집기(회사 PC·Windows 스케줄러·주1회·저속) → parquet push(work-automation-data) → 두뇌① 시장대비 권장가. 네이버 쇼핑 API=클라우드 보완 후순위·다나와=소매노이즈 후순위. **구현 막힘=nadl 행사 페이지 실물 대기(파서 작성용).**"
+     "detail": "**[다음 세션 최우선]** **아키텍처 확정(2026-06-16, ADR 0025).** 1순위 소스 nadl.kr(사람검수 B2B몰·행사 근사최저가·중복없음·매칭쉬움). **클라우드(Streamlit/Actions=해외IP)에서 지오펜스+robots로 도달 불가** → KR 로컬 수집기(회사 PC·Windows 스케줄러·주1회·저속) → parquet push(work-automation-data) → 두뇌① 시장대비 권장가. 네이버 쇼핑 API=클라우드 보완 후순위·다나와=소매노이즈 후순위. **구현 막힘=nadl 행사 페이지 실물 대기(파서 작성용).**"
     },
     {
      "tier": "later",
