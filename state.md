@@ -24,7 +24,7 @@
 | esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
-| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문적재 전기간 39개월·판매가검증·P2 송장실배분·매입현황 전기간·두뇌① 탭D·두뇌② 재고지능·**고객키/합포박스키 적재(ADR 0021)** 완료)·다음=ship_alloc 연동→두뇌③ | workflows/intelligence-layer.md |
+| intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문 39개월·판매가검증·P2·매입현황·탭D·두뇌②·고객키/합포박스키 적재·**ship_alloc 합포 ceil(팩/3) 교정** 완료)·다음=두뇌③ | workflows/intelligence-layer.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -114,3 +114,5 @@ _갱신: 2026-06-16 (채널 내 고객키/합포박스키 설계 탐색 — ADR 
 _갱신: 2026-06-16 (cheonnyeon 박스코드 이상 탐지 검수 장치 — 전체 시트 잔류 행 중 영문코드/`[낱개`태그 비차단 경고 + 소분목록 등록 유도. 소분누락→박스 오업로드 재발 방지. core detect_box_anomalies·page 표시·test. ⚠️core→Reboot 1회)_
 
 _갱신: 2026-06-16 (채널 내 고객키·합포박스키 적재 완료 ADR 0021 — 통파일+2023여름 .xls로 39개월 430,592행 재처리·키 박제. robust 검증(이름끝1자·전화뒤4·안심채널 전화제외)·재구매 교차월 병합 실증·합포박스키 55K 송장묶음·2023여름 갭 백필 동시 완료. orders.py 키생성 정합100%·솔트=st.secrets 등록 필요. ⚠️core→Reboot. 다음=ship_alloc 합포박스키 연동(수치변동·사용자확인 후))_
+
+_갱신: 2026-06-16 (ship_alloc 합포박스키 연동 완료 — 175~200 물리합포 ceil(팩/3)·합포 가능품목 제한(블랭킷 swap 금지·B2B 과대병합 방지). 채널총 불변·합포품목 택배 -3.8% 교정. ship_alloc hapo_codes 인자+대시보드 연동. ⚠️core→Reboot. 다음=두뇌③ A/B)_
