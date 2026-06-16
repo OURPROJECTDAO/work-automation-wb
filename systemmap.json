@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-16t",
+  "updated": "2026-06-17a",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -547,7 +547,7 @@
    "status": "partial",
    "star": true,
    "label": "데일리 대시보드",
-   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). 확장판 추가 예정.",
+   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). 확장판 추가 중.",
    "consumes": [
     "product_master",
     "baseline_margin",
@@ -568,6 +568,11 @@
      "tier": "done",
      "title": "품절 알림판",
      "detail": "✅ 2026-06-16(ADR 0024). 발주 Phase2 품절목록→자동 등록(시작일=그날·전건)·상품관리 갱신 후 박스재고>0 재입고→입고로그+자동삭제·수동삭제(로그없음)·'MM월DD일부터 N일째' 표시. core stockout_board.py. data repo history/stockout_board.json + restock_log.csv 영속."
+    },
+    {
+     "tier": "done",
+     "title": "확장판① 채널 요약 + 가격 변동 알림",
+     "detail": "✅ 2026-06-17. 채널별 당일 매출·마진율 요약(groupby) + 가격 변동 알림(전체 상품 직전 대비 ±N% 매입가/판매가 인상/인하, 1b 스냅샷 detect_price_changes·재고 전이탐지 자매). page 0b + core stock_history. forward 적립(2026-06-15~)."
     },
     {
      "tier": "planned",
