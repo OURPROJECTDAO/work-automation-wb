@@ -73,7 +73,10 @@
 
 ## 채널 목록 / 문서
 - 스마트스토어 → workflows/smartstore-register.md (운영 중)
-- (예정) 쿠팡 · ESM(G마켓/옥션) 등 — 채널 추가 = 위 플랫폼별 슬롯 한 세트만.
+- ESM(G마켓) → workflows/esm-register.md (운영 중)
+- 이지어드민(정산 필수 경유) → workflows/easyadmin-register.md (운영 중)
+- 캐시노트(KCD) → workflows/cashnote-register.md (양식·카테고리표 확보·첫 배치 대기)
+- (예정) 쿠팡 등 — 채널 추가 = 위 플랫폼별 슬롯 한 세트만.
 
 ## 관련
 - decisions/0009 (운영방식·아키텍처) · reference: product_master.csv (상품관리, 공통)
