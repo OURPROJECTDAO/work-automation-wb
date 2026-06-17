@@ -110,6 +110,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **올웨이즈 가격변경=append('(올웨이즈)양식')(2026-06-12)**: 양식이 다운로드와 컬럼 동일하나 별도 템플릿 → append 채택(스마트스토어 raw편집 아님). **전 컬럼 재업로드형**(필수 多)이라 카테고리코드·판매상태·1옵션명/값·재고를 extra_cols로 보존 후 재기입. K=권장가·J=FAKE_JEONG(골든 O 대응). 2옵션명/값·옵션ID는 선택+항상공백 → 미캡처(stale 가드 거짓경고 방지). 카테고리·재고는 int_fields. ⚠️ openpyxl inlineStr 저장 — 올웨이즈 실업로드 미검증(식봄/캐시노트/배민 동일·정상). 거부 시 쿠팡식 네이티브 수술 필요.
 - **알리=다중시트 자동정제(consolidate)(2026-06-12)**: AliExpress 대량등록 export는 카테고리별 다중시트(+`_hide`·`global_hide` 숨김)+다단헤더. 매크로(ALI상품매크로V2 CopyDataFromAnotherWorkbook)를 `_consolidate_parse`로 흡수 — **보이는 시트만**(`sheet_state!="visible"` 제외, 매크로 xlSheetVisible 동치), r2 라벨로 id·*제품 이름·*제품 소매 가격·SKU 코드 추출, data r5+(예시'--' 행 require_numeric_id로 제거). 관리코드=SKU코드(G)·상품명=*제품 이름(B 한글 클린)·판매가=*제품 소매 가격(E 텍스트 '13400.00'→_num)·알리상품번호=id(A 16자리). 별도 정제 업무 불요. olevba 전수 — Module2(Sheet1 비우기)는 저장 아님, 숨은 SaveAs 없음.
 - **알리 '신규만 추가' raw append 스킵(2026-06-12)**: append_rows_to_raw가 cfg['cols']['상품번호'] 참조 → 알리(cols 없음=consolidate) KeyError → 페이지에서 consolidate 채널은 raw append 스킵(up_bytes 유지), CSV 머지(merge_listing)만. 알리 raw는 모니터에서 미사용. '전체 교체' 권장(주기적 전체 export).
+- **★ ESM 채널키 'esm'(소문자) 명명 예외(2026-06-17)**: CHANNEL_CONFIG의 ESM 딕셔너리 키만 'esm'(영문 소문자) — 타 채널은 한글 표시명. cross-module에서 채널명을 'ESM'(대문자)로 넘기면 CHANNEL_CONFIG.get(ESM)=None → listing/권장가 전부 누락. 데일리 SHEET_TO_CMM='ESM'와 충돌해 ESM 행만 빈 버그 발생(데일리에서 _cmm_key 대소문자 무시 매칭으로 방어). 잠복 지뢰 — cmm를 다른 모듈과 교차할 땐 채널명 키 정합 주의. 근본 해결안=키 'esm'→'ESM' 통일(미적용·Reboot 필요).
 - - 미해결: baseline↔product_master 조인 갭, sobun↔unit_list↔sub_list 개념중복.
 
 ## 가격 일괄변경
@@ -193,3 +194,5 @@ _갱신: 2026-06-12 (ESM 다중파일 업로드 — multi_file·page accept_mult
 _갱신: 2026-06-12 (ESM 가격변경(append) 추가 — B=사이트상품번호·C=권장가·A순번(seq_col), extra_cols 보존, jeong 없음. esm_price_template.xlsx. 양식 30표본 전건 일치 + **실업로드 성공 사용자 확인**. **8채널 모니터/7채널 가격변경.** core → Reboot)_
 
 _갱신: 2026-06-12 (기준마진율 편집(현재→기준) 추가 — 전 채널 공통. 선택→현재 마진율을 그 채널 baseline으로, 충돌 사용자선택·0.1%p반올림·baseline 라이브read 즉시반영. ADR 0016. core+page → Reboot)_
+
+_갱신: 2026-06-17 (ESM 채널키 'esm' 소문자 명명 예외 함정 — cross-module 'ESM' 대문자와 불일치 잠복지뢰. 데일리는 _cmm_key로 방어)_
