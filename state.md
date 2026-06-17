@@ -22,7 +22,7 @@
 | smartstore-register (스마트스토어) | — | 운영중 (챗) | workflows/smartstore-register.md |
 | easyadmin-register (이지어드민·정산채널) | — | 운영중 (챗) | workflows/easyadmin-register.md |
 | esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
-| cashnote-register (캐시노트=KCD) | — | 운영중 (1차 배치 87건 생성·실업로드 미검증) | workflows/cashnote-register.md |
+| cashnote-register (캐시노트=KCD) | — | 운영중 (1차 87건 업로드 성공·검증완료) | workflows/cashnote-register.md |
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
 | intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문 39개월·판매가검증·P2·매입현황·탭D·두뇌②·고객키/합포박스키 적재·**ship_alloc 합포 ceil(팩/3) 교정**·**두뇌③ A/B v1**(서술+마진율별판매량 탄력성)·**상품360카드 v1** 완료) 두뇌3종+통합카드 완성·다음=사용자선택 | workflows/intelligence-layer.md |
@@ -164,3 +164,5 @@ _세션 클로즈: 2026-06-17 (데일리 대시보드 이상치 표 이중검수
 _갱신: 2026-06-17 (cashnote-register 신설 — 캐시노트 KCD 등록 채널 셋업. 양식 42열·합포N→P열·자체카테고리53종·수수료6%. reference cashnote_category_food.csv + cashnote_bulk_template.xlsx(app repo). 챗 네이티브·코드무변경·첫 배치 대기)_
 
 _갱신: 2026-06-17 (cashnote-register 1차 실업로드 77/87 성공 — ✅openpyxl 저장본·고시값 비움 정상(zip수술 불요). 실패 10건 단일원인=**검색어(H) 상품명 통짜 길이초과**(캐시노트 H=쉼표구분·각≤20자·최대10개) → 쉼표 토큰화로 10건 재업로드 파일. 카테고리 전건·AA 품목별(가공식품21/생활화학37) 적용분. 잔여: raw12 이름·피죤유연제/물티슈 군 임시)_
+
+_갱신: 2026-06-17 (cashnote-register 완료 — 1차 87건 업로드 전건 성공(77+재업로드10). 정본 통합 재작성(workflows/cashnote-register.md end-to-end). 검증: openpyxl 수용·고시/정가/과세 비움 정상·H 쉼표토큰화 필수·AA 품목별. status live)_
