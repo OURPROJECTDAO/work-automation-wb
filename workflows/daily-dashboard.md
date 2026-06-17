@@ -43,7 +43,7 @@
 - **권장가 컬럼**: 당일 마진 점검 표(이상치/전체)에 **현재가·권장가(채널기준)** 추가. 권장가 = 채널 기준마진율 달성 **판매가**(cmm `compute`의 '권장가', 판매가 기준만). 출처=그 채널 listing(channel-margin-monitor 저장본) `compute_listing`(baseline 라이브 override). 1관리코드↔다listing이면 min~max 범위 표시.
 - **체크박스 → 채널 가격변경 시트**: 표를 `st.dataframe(on_select="rerun", selection_mode="multi-row")` 선택형으로. 선택 행 채널이 **2종+/0종 → "한 채널만 가능" 경고**(표가 채널 혼재라 시트는 채널별). **단일 채널** → 그 채널 listing을 선택 관리코드로 필터해 pids 추출 → cmm 빌더 그대로 호출 → 그 채널 양식 다운로드. (채널마진모니터에서 그 상품 골라 내보내는 것과 동일 산출물)
 - core 신규 없음 — cmm 재사용. 페이지 헬퍼: `_cmm_listing`(cached·listing→compute_listing)·`_reco_lookup`·`_gen_price_form`(append/filter/smartstore 디스패치)·`_do_price_change`(단일채널 가드+다운로드).
-- **제약**: ① 알리=가격변경 양식 없음(안내) ② 쿠팡·스마트스토어=raw `.xlsx`('전체 교체') 필요 ③ listing 최신이어야 권장가/현재가 정확(오래되면 채널마진모니터 '상품관리 갱신') ④ listing 없는 채널=권장가 공백.
+- **제약**: ① 알리=가격변경 양식 없음(안내) ② 쿠팡·스마트스토어=raw `.xlsx`('전체 교체') 필요 ③ **현재가**만 listing 최신 의존(미등재=빈칸) — **권장가는 product_master 매입가 기준 역산이라 항상 표시**(listing에 있으면 실 N·실 배송비로 정확, 없으면 N=1·채널기본 배송비 추정). ④ 가격변경 **시트 생성**은 여전히 listing 필요(미등재 상품은 변경 대상 행이 없어 시트 불가).
 
 ## 코드
 - `app/pages/0b_데일리대시보드.py` — 인박스 상태 표시 + 슬롯 수동 갱신(`_slot_ui`) + 당일 마진 표/메트릭/XLSX. 헬퍼(_master_lookup·_pc_lookup·_hapo_codes·_baseline_dict·_to_xlsx)는 8_마진침식과 동형(현재 복제).
@@ -76,3 +76,5 @@ _갱신: 2026-06-17 (확장판① — 채널별 요약(당일 매출·마진율)
 _갱신: 2026-06-17 (확장판② — 이상치 표 권장가(채널기준·판매가) 컬럼 + 체크박스 선택→단일채널 가격변경 시트 다운로드. cmm 빌더 재사용·page-only. 알리 미지원·쿠팡/스마트스토어 raw 필요·listing 최신 의존)_
 
 _갱신: 2026-06-17 (fix — 스마트스토어 가격변경 미지원 오판 수정. `_supports_price_change`(price_form 또는 즉시할인 cols·consolidate 아님=bulk). 알리만 미지원. _gen_price_form pf=None 허용. page-only)_
+
+_갱신: 2026-06-17 (fix — 권장가 항상 표시. listing 미등재여도 product_master 매입가 기준 역산(_reco_from_master, cmm 공식 동일·N=1·채널기본 배송비). 현재가만 listing 의존. page-only)_
