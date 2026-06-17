@@ -166,3 +166,5 @@ _갱신: 2026-06-17 (cashnote-register 신설 — 캐시노트 KCD 등록 채널
 _갱신: 2026-06-17 (cashnote-register 1차 실업로드 77/87 성공 — ✅openpyxl 저장본·고시값 비움 정상(zip수술 불요). 실패 10건 단일원인=**검색어(H) 상품명 통짜 길이초과**(캐시노트 H=쉼표구분·각≤20자·최대10개) → 쉼표 토큰화로 10건 재업로드 파일. 카테고리 전건·AA 품목별(가공식품21/생활화학37) 적용분. 잔여: raw12 이름·피죤유연제/물티슈 군 임시)_
 
 _갱신: 2026-06-17 (cashnote-register 완료 — 1차 87건 업로드 전건 성공(77+재업로드10). 정본 통합 재작성(workflows/cashnote-register.md end-to-end). 검증: openpyxl 수용·고시/정가/과세 비움 정상·H 쉼표토큰화 필수·AA 품목별. status live)_
+
+_갱신: 2026-06-17 (데일리 대시보드 확장판③ 신규 업로드 대상 — 최근 N일(기본7) 재고 새로 생긴 상품(입고전이∪신규등재) ∩ 8채널 전부 미업로드 ∩ 재고>0 → 신규 업로드 후보. 품절 알림판 다음(나감↔들어옴 대칭). 신규 core stock_history.detect_new_stock(직전결측=신규등재 surfacing·baseline floor seed제외) + upload_monitor.build_gap_table 재사용(중복0·키=상품코드·업로드감시의 '최근 입고' 서브셋). 최근매입일=매입현황 cadence(월1회 적재라 보조·재고 신호는 박스재고 양수전환이 daily-fresh). 골든: 실스냅샷 4일(6/14 seed~6/17) 최근7일 입고22+신규등재1=23 ∩ 전채널미업로드264 → 8건. 커밋 stock_history 8845a7a6·0b 71ff2a88. **page 0b=재배포 자동반영·core stock_history 신규함수→안 보이면 Reboot 1회.** 사용자 실사용 확인 대기. 로그 logs/2026-06/2026-06-17-daily-new-upload-alert.md)_
