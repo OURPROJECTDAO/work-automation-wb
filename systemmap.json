@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-17e",
+  "updated": "2026-06-17f",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -566,7 +566,7 @@
    "status": "partial",
    "star": true,
    "label": "데일리 대시보드",
-   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용). 확장판 추가 중.",
+   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중.",
    "consumes": [
     "product_master",
     "baseline_margin",
@@ -603,6 +603,11 @@
      "tier": "done",
      "title": "확장판② 이중검수(listing마진+판정)",
      "detail": "✅ 2026-06-17. 당일 점검 표에 listing마진·판정 컬럼. 당일 미달이라도 listing(compute_listing) 마진이 기준 이상이면 '일시적'(쿠폰·실박스 택배 등·가격 OK), listing도 미달이면 '구조적'(가격조정). _reco_lookup(buffer)가 listing 마진율/미달(마진율<기준-buffer·당일 동일 규칙) 집계. ★당일 vs listing 마진 기저 차이(당일=배송비 수입 미포함+실박스 택배 순비용 / listing=배송비×0.967 수입+실택배비2700)는 설계상 의도. page-only."
+    },
+    {
+     "tier": "done",
+     "title": "확장판③ 신규 업로드 대상",
+     "detail": "✅ 2026-06-17. 최근 N일(기본7) 재고 새로 생긴 상품(입고 전이 ∪ 신규 등재, baseline floor) ∩ 8채널 전부 미업로드 ∩ 현재 박스재고>0 → 신규 업로드 후보. 재고 신호=새 core stock_history.detect_new_stock(detect_transitions/detect_price_changes 자매·직전결측=신규등재로 surfacing·seed일 제외). 채널 미등록·비판매제외·채널별 skip 판정=upload_monitor.build_gap_table 재사용(키=상품코드·중복0). 업로드감시(전수 감사)의 '최근 입고' 서브셋. 최근매입일=매입현황 cadence(월1회 적재라 보조). page 0b + core stock_history(→Reboot 1회). 골든: 실 스냅샷 4일(6/14 seed~6/17) 최근7일 입고22+신규등재1=23 ∩ 전채널미업로드264 → 8건."
     },
     {
      "tier": "planned",
