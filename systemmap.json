@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-17c",
+  "updated": "2026-06-17d",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -264,7 +264,8 @@
    "feeds": [
     "smartstore-register",
     "esm-register",
-    "easyadmin-register"
+    "easyadmin-register",
+    "cashnote-register"
    ],
    "page": "(개념 — KB)",
    "roadmap": [
@@ -318,6 +319,30 @@
    "feeds": [],
    "page": "(챗 네이티브)",
    "roadmap": []
+  },
+  {
+   "id": "cashnote-register",
+   "cluster": "registration",
+   "status": "partial",
+   "label": "캐시노트(KCD) 등록",
+   "line": "상품 양식 42열·데이터 r5+. 수수료6%·합포N→P열 직접·배송정책 DVP212991 고정·자체 카테고리 53종. 양식·표 확보·첫 배치 대기(챗 네이티브)",
+   "consumes": [
+    "product_master",
+    "cashnote_category_food",
+    "cashnote_bulk_template"
+   ],
+   "produces": [
+    "캐시노트 일괄등록.xlsx"
+   ],
+   "feeds": [],
+   "page": "(챗 네이티브)",
+   "roadmap": [
+    {
+     "tier": "planned",
+     "title": "첫 배치·실업로드 검증",
+     "detail": "openpyxl 저장본 업로더 허용 여부 + 고시정보값 비움 충분 여부"
+    }
+   ]
   },
   {
    "id": "easyadmin-register",
@@ -674,6 +699,10 @@
   {
    "from": "channel-margin-monitor",
    "to": "daily-dashboard"
+  },
+  {
+   "from": "product-registration-common",
+   "to": "cashnote-register"
   }
  ]
 }
