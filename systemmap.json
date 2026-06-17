@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-17b",
+  "updated": "2026-06-17c",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -579,6 +579,11 @@
      "tier": "done",
      "title": "확장판② 이상치→권장가+가격변경 시트",
      "detail": "✅ 2026-06-17. 당일 이상치 표에 권장가(채널 기준마진 달성 판매가·cmm compute) 컬럼 + 체크박스 선택→단일채널 가격변경 시트 다운로드(channel-margin-monitor 빌더 append/filter/smartstore 재사용). 알리 미지원·쿠팡/스마트스토어 raw 필요·listing 최신 의존. page-only."
+    },
+    {
+     "tier": "done",
+     "title": "확장판② 이중검수(listing마진+판정)",
+     "detail": "✅ 2026-06-17. 당일 점검 표에 listing마진·판정 컬럼. 당일 미달이라도 listing(compute_listing) 마진이 기준 이상이면 '일시적'(쿠폰·실박스 택배 등·가격 OK), listing도 미달이면 '구조적'(가격조정). _reco_lookup(buffer)가 listing 마진율/미달(마진율<기준-buffer·당일 동일 규칙) 집계. ★당일 vs listing 마진 기저 차이(당일=배송비 수입 미포함+실박스 택배 순비용 / listing=배송비×0.967 수입+실택배비2700)는 설계상 의도. page-only."
     },
     {
      "tier": "planned",
