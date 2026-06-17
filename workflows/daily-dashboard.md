@@ -43,6 +43,8 @@
 - **권장가 컬럼**: 당일 마진 점검 표(이상치/전체)에 **현재가·권장가(채널기준)** 추가. 권장가 = 채널 기준마진율 달성 **판매가**(cmm `compute`의 '권장가', 판매가 기준만). 출처=그 채널 listing(channel-margin-monitor 저장본) `compute_listing`(baseline 라이브 override). 1관리코드↔다listing이면 min~max 범위 표시.
 - **체크박스 → 채널 가격변경 시트**: 표를 `st.dataframe(on_select="rerun", selection_mode="multi-row")` 선택형으로. 선택 행 채널이 **2종+/0종 → "한 채널만 가능" 경고**(표가 채널 혼재라 시트는 채널별). **단일 채널** → 그 채널 listing을 선택 관리코드로 필터해 pids 추출 → cmm 빌더 그대로 호출 → 그 채널 양식 다운로드. (채널마진모니터에서 그 상품 골라 내보내는 것과 동일 산출물)
 - core 신규 없음 — cmm 재사용. 페이지 헬퍼: `_cmm_listing`(cached·listing→compute_listing)·`_reco_lookup`·`_gen_price_form`(append/filter/smartstore 디스패치)·`_do_price_change`(단일채널 가드+다운로드).
+- **이중검수(2026-06-17)**: 표에 `listing마진`·`판정` 컬럼. 당일 미달이라도 **listing(compute_listing) 마진이 기준 이상이면 '일시적'**(쿠폰·실박스 택배 등 — 가격 손댈 필요 없음), **listing도 미달이면 '구조적'**(가격조정). `_reco_lookup(pairs, buffer)`가 listing 마진율/미달(마진율<기준−buffer, 당일과 동일 규칙) 집계 → 4-tuple. page-only.
+- **★ 함정: 당일 vs listing 마진 기저 다름**. 당일=매출(net)에 **배송비 수입 미포함** + 택배 실박스×2700 **순비용**. listing=정산액에 **배송비×0.967 수입 가산** + 실택배비 2700. 그래서 당일 미달인데 listing은 건강(권장가<현재가) 가능 — 버그 아님(설계). '구조적' 과다 시 **listing 배송비 stale 의심**(무료배송인데 기본배송비 3000 잔존 → listing 마진 과대).
 - **제약**: ① 알리=가격변경 양식 없음(안내) ② 쿠팡·스마트스토어=raw `.xlsx`('전체 교체') 필요 ③ **현재가**만 listing 최신 의존(미등재=빈칸) — **권장가는 product_master 매입가 기준 역산이라 항상 표시**(listing에 있으면 실 N·실 배송비로 정확, 없으면 N=1·채널기본 배송비 추정). ④ 가격변경 **시트 생성**은 여전히 listing 필요(미등재 상품은 변경 대상 행이 없어 시트 불가).
 
 ## 코드
@@ -82,3 +84,5 @@ _갱신: 2026-06-17 (fix — 권장가 항상 표시. listing 미등재여도 pr
 _갱신: 2026-06-17 (가격 변동 알림 — 박스재고 컬럼 추가 + 인상 빨강/인하 파랑 색상(Styler ▲▼). XLSX 박스재고 포함. page-only)_
 
 _갱신: 2026-06-17 (fix — Styler.applymap→.map. pandas 3.x(Streamlit Cloud)에서 applymap 제거 AttributeError 해소. 전역 함정 pitfalls 등재)_
+
+_갱신: 2026-06-17 (이상치 표 이중검수 — listing마진+판정(일시적/구조적/없음). 당일 vs listing 마진 기저 차이(배송비 수입·실박스 택배) 함정 기록. page-only·Reboot 불요)_
