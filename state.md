@@ -22,7 +22,7 @@
 | smartstore-register (스마트스토어) | — | 운영중 (챗) | workflows/smartstore-register.md |
 | easyadmin-register (이지어드민·정산채널) | — | 운영중 (챗) | workflows/easyadmin-register.md |
 | esm-register (ESM=G마켓) | — | 운영중 (챗) | workflows/esm-register.md |
-| cashnote-register (캐시노트=KCD) | — | 진행중 (양식·카테고리표 확보·첫 배치 대기) | workflows/cashnote-register.md |
+| cashnote-register (캐시노트=KCD) | — | 운영중 (1차 배치 87건 생성·실업로드 미검증) | workflows/cashnote-register.md |
 | channel-margin-monitor (채널 가격·마진 모니터) | — | 운영중 (8채널 모니터 / 7채널 가격변경) | workflows/channel-margin-monitor.md |
 | upload-monitor (업로드감시) | — | 운영중(업로드제외 등록/해제, L4 대기) | workflows/upload-monitor.md |
 | intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문 39개월·판매가검증·P2·매입현황·탭D·두뇌②·고객키/합포박스키 적재·**ship_alloc 합포 ceil(팩/3) 교정**·**두뇌③ A/B v1**(서술+마진율별판매량 탄력성)·**상품360카드 v1** 완료) 두뇌3종+통합카드 완성·다음=사용자선택 | workflows/intelligence-layer.md |
@@ -162,3 +162,5 @@ _갱신: 2026-06-17 (fix — 데일리 ESM 행 현재가/권장가/판정/가격
 _세션 클로즈: 2026-06-17 (데일리 대시보드 이상치 표 이중검수 + ESM 버그 fix + 인박스 휘발 질문 규명). 완료: ① **이중검수**(listing마진+판정: ⚠️ listing도 미달=구조적 / listing 정상=일시적 / 없음). 당일 vs listing 마진 **기저 차이 규명**(당일=매출net에 배송비 수입 미포함+실박스 택배 순비용 / listing=정산액에 배송비×0.967 수입+실택배비2700) — 권장가<현재가가 버그 아닌 이유. _reco_lookup(buffer) 4-tuple. 커밋 2a71a08. ② **ESM 채널키 버그 fix**: cmm CHANNEL_CONFIG ESM 키 'esm'(소문자) vs daily SHEET_TO_CMM 'ESM'(대문자) 불일치 → ESM 행만 현재가/권장가/판정/가격변경 누락. 0b `_cmm_key` 대소문자 무시 보정(_cmm_listing·_reco_from_master·_do_price_change). 커밋 29990bc. ③ 인박스 탭 유지 질문 = **세션 메모리라 탭 넘김엔 유지되는 게 정상**(PII 무관, 0b에 삭제코드 없음 확인) — 비워진 건 이번 세션 잦은 재배포로 세션 초기화된 탓. **버그 아님, 코드 변경 없음.** **전부 page-only → 재배포 자동반영·Reboot 불요.** 사용자 실사용 확인 대기(ESM 행 정상화·판정 컬럼). ★ 잔여: (a) cmm ESM 키 'esm'→'ESM' 통일은 별건 미적용(Reboot+셀렉트박스 영향 검증 필요—cross-module 잠복지뢰) (b) 인박스 리부트/새세션 영속(비-PII 결과만 저장)은 사용자가 탭 유지만 원해 보류. 다음 한 수=변동 없음 — ★★ 시장지능 nadl 로컬 수집기(행사 샘플 대기) 또는 데일리 추가 인사이트. 로그 logs/2026-06/: daily-dashboard-dual-check·daily-esm-channel-key-fix)_
 
 _갱신: 2026-06-17 (cashnote-register 신설 — 캐시노트 KCD 등록 채널 셋업. 양식 42열·합포N→P열·자체카테고리53종·수수료6%. reference cashnote_category_food.csv + cashnote_bulk_template.xlsx(app repo). 챗 네이티브·코드무변경·첫 배치 대기)_
+
+_갱신: 2026-06-17 (cashnote-register 1차 배치 87건 — 업로드감시 출력 직접 구동·판매가 네이버기준마진(없으면10%)·낱개매입가 master 보충·상품명 스마트 등록명 재활용 75/87·카테고리 77매핑/10빈칸·과세일괄. 사용자 확인: 빈칸·raw12·실업로드)_
