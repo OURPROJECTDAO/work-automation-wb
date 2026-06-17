@@ -60,7 +60,7 @@
 
 ## 자산 위치 (고정 — 챗 네이티브)
 - **양식(빈)**: app repo `reference/cashnote_bulk_template.xlsx` (상품 42열·1~4행 보존·부속 3시트). 배치 시 raw 다운로드→openpyxl load(read_only 금지)→r5 예시 지우고 기입.
-- **카테고리표**: app repo `reference/cashnote_category_food.csv` (53종).
+- **카테고리표**: app repo `reference/cashnote_category_food.csv` (가공식품 53종) + `reference/cashnote_category_all.csv` (**전체 295종** — 가공/신선식품·주방용품·라이프·배달/사무/렌탈, 비식품 배치용). value=양식 드롭다운 정본(4종은 식품계정 드롭다운 외라 재구성).
 - **입력폼**: 스마트스토어 10열 표준 시트 공용.
 - (앱 코드 참조 0건 — 대화창만 사용.)
 
