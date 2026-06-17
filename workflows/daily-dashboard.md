@@ -47,11 +47,22 @@
 - **★ 함정: 당일 vs listing 마진 기저 다름**. 당일=매출(net)에 **배송비 수입 미포함** + 택배 실박스×2700 **순비용**. listing=정산액에 **배송비×0.967 수입 가산** + 실택배비 2700. 그래서 당일 미달인데 listing은 건강(권장가<현재가) 가능 — 버그 아님(설계). '구조적' 과다 시 **listing 배송비 stale 의심**(무료배송인데 기본배송비 3000 잔존 → listing 마진 과대).
 - **제약**: ① 알리=가격변경 양식 없음(안내) ② 쿠팡·스마트스토어=raw `.xlsx`('전체 교체') 필요 ③ **현재가**만 listing 최신 의존(미등재=빈칸) — **권장가는 product_master 매입가 기준 역산이라 항상 표시**(listing에 있으면 실 N·실 배송비로 정확, 없으면 N=1·채널기본 배송비 추정). ④ 가격변경 **시트 생성**은 여전히 listing 필요(미등재 상품은 변경 대상 행이 없어 시트 불가).
 
+## 신규 업로드 대상 (확장판③, 2026-06-17)
+- **무엇**: 최근 N일(기본 7) **재고가 새로 들어왔는데(입고·신규등재) 아직 8채널 어디에도 안 올라간** 상품 → 신규 업로드 후보. 품절 알림판 **바로 다음**(품절=나감 ↔ 신규입고=들어옴 대칭).
+- **신호 = 재고 ∩ 채널미등록**:
+  - 재고: `stock_history.detect_new_stock(snaps, since)` (신규 core) — **입고 전이**(직전 ≤0→양수, detect_transitions와 동일) **∪ 신규 등재**(스냅샷 최초 등장 + 양수). detect_transitions(입고)·detect_price_changes는 *직전 결측(신규 등재)을 일부러 제외* → 그 케이스를 뒤집어 surfacing한 게 신규등재. **상품코드별 최신 이벤트 1건.**
+  - ★ **baseline floor**: forward 적립(2026-06-15~)이라 **최초 스냅샷일(seed)에 처음 뜬 코드는 신규 제외**(그날=기존 catalog). 그 이후 처음 뜬 것만 진짜 신규. 입고 전이는 직전값 있어야 잡혀 seed 자동 제외.
+  - 채널 미등록: `upload_monitor.build_gap_table` **재사용**(중복 0·키=상품코드). **전채널 미업로드 = 모든 채널 ∈ {업로드필요, 업로드제외} & ≥1 업로드필요**. build_gap_table이 비판매 제외(반품/파렛트·exclude.csv)·채널별 skip·재고>0 노이즈컷까지 처리.
+- **= 업로드감시의 '최근 입고' 서브셋**. 업로드감시=전수 감사(가서 봐야 함·재고∩미업로드 전량), 데일리=오늘 새로 들어온 것만 트리거(작게).
+- **표**: 관리코드(공백이면 (상품코드) 폴백)·상품명·박스재고·유형(입고/신규등재)·이벤트일·**최근매입일**·올릴채널수. XLSX·🔄·N 슬라이더. page `_new_uploads(days)`(read_all_snapshots→detect_new_stock→build_gap_table 교집합·cache 30분).
+- **★ 제약**: ① **최근매입일 = 매입현황 cadence(`_buyin_cadence`)인데 월1회 적재** → 당일 막 들어온 매입은 늦게 반영(보조 표시용). **재고 신호는 상품관리 박스재고 양수 전환이라 daily-fresh**(상품관리 매일 갱신). ② listing/product_master 미등재·stale 한계는 업로드감시와 동일 상속. ③ baseline floor는 적립 며칠이면 안정. ④ 매입현황(purchases)을 신호로 안 씀(timing 느림) — 어디까지나 1b 재고 스냅샷 기반.
+
 ## 코드
 - `app/pages/0b_데일리대시보드.py` — 인박스 상태 표시 + 슬롯 수동 갱신(`_slot_ui`) + 당일 마진 표/메트릭/XLSX. 헬퍼(_master_lookup·_pc_lookup·_hapo_codes·_baseline_dict·_to_xlsx)는 8_마진침식과 동형(현재 복제).
 - `core/intelligence/daily_inbox.py` — push/get + 슬롯 상수. (st.session_state를 인자로 받음 — core는 streamlit 비의존)
 - `core/workflows/channel_margin_monitor.py` (cmm) — 권장가(compute_listing)·가격변경 빌더 재사용(이상치→시트 연결).
-- `core/intelligence/stock_history.py` — `detect_price_changes`(가격 변동 알림·1b 스냅샷 연속 비교).
+- `core/workflows/upload_monitor.py` (um) — `load_references`·`build_gap_table`·`CHANNEL_KEYS`·`ST_NEED_UP/ST_SKIP_CH` 재사용(신규 업로드 대상 전채널 미등록 판정·중복 0).
+- `core/intelligence/stock_history.py` — `detect_price_changes`(가격 변동 알림)·`detect_new_stock`(신규 업로드 대상 재고 신호). 둘 다 1b 스냅샷 연속 비교·detect_transitions 자매.
 - `core/intelligence/daily_margin.py` — parse_invoice_shipping·parse_cheonnyeon_sales·compute_daily_margin (변경 없음).
 - 생산 훅: `app/pages/1_파일처리.py` (tab_basic 오픈마켓·tab_cy 천년경영) — `import core.intelligence.daily_inbox as _inbox` + 결과 생성 직후 push.
 - 네비: `app/streamlit_app.py` 첫 그룹, 지도·로드맵 다음.
@@ -88,3 +99,5 @@ _갱신: 2026-06-17 (fix — Styler.applymap→.map. pandas 3.x(Streamlit Cloud)
 _갱신: 2026-06-17 (이상치 표 이중검수 — listing마진+판정(일시적/구조적/없음). 당일 vs listing 마진 기저 차이(배송비 수입·실박스 택배) 함정 기록. page-only·Reboot 불요)_
 
 _갱신: 2026-06-17 (fix — ESM 행만 현재가/권장가/판정/가격변경 누락 버그. 원인=cmm ESM 키 'esm'(소문자) vs SHEET_TO_CMM 'ESM'(대문자) 불일치. 0b _cmm_key 대소문자 무시 보정 3곳. page-only)_
+
+_갱신: 2026-06-17 (확장판③ 신규 업로드 대상 — 최근 입고·신규등재 ∩ 8채널 전부 미업로드 ∩ 재고>0. 신규 core stock_history.detect_new_stock(입고전이∪신규등재·baseline floor·detect_transitions 자매) + upload_monitor.build_gap_table 재사용(중복0·업로드감시 최근입고 서브셋). 최근매입일=cadence(월1회 보조). 골든 8건. page 0b+core→Reboot 1회)_
