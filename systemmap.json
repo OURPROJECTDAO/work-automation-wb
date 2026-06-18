@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updated": "2026-06-18c",
+    "updated": "2026-06-18d",
     "source": "work-automation-wb",
     "schema": "ADR 0019",
     "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -497,26 +497,14 @@
         "ship_alloc 합포 교정 실현마진(175~200 ceil(팩/3)·합포박스키·private)",
         "상품 360 카드(11_상품360.py·관리코드 1개 통합 뷰·8채널 등재현황+현재가/목표마진역산+채널별 실판매+매입가추이+재고소진·조회전용·page-only)",
         "채널 마진율별 판매량(탄력성 v1·가격 A/B 하단·18개월 관리코드×채널 월별 실현마진율↔판매량 산점도+구간평균·서술·private)",
-        "시장가 매칭(시장가 매칭 페이지·nadl 행사 개당가↔관리코드·모델 v2[박스 하드게이트(용량∧팩수)+bigram+브랜드]·top3 사람확정·매핑 ps_goid 영속 nadl_map.csv·private)"
+        "시장가 매칭(시장가 매칭 페이지·nadl 행사 개당가↔관리코드·모델 v2[박스 하드게이트(용량∧팩수)+bigram+브랜드]·top3 사람확정·매핑 ps_goid 영속 nadl_map.csv·private)",
+        "nadl 시장가 수집(로컬 fetcher→GitHub Actions 파싱→market/nadl/prices_*.parquet·행사 개당가/박스가·구조B 운영중·private)"
       ],
       "feeds": [
         "dashboard"
       ],
       "page": "app/pages/8_마진침식.py (두뇌① 3탭·탭D→데일리 대시보드 승격) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰) + 12_시장가매칭.py(시장가 매칭·nadl 개당가↔관리코드 매칭 모델 v2)",
       "roadmap": [
-        {
-          "tier": "done",
-          "phase": "두뇌③",
-          "title": "채널 가격 A/B (실현마진×velocity)",
-          "detail": "**✅ 완료(2026-06-16) — v1 서술 + 탄력성(마진율별 판매량).** ① 서술=관리코드→채널별 실현마진(순이익÷매입가)·낱개이익·판매량·정산단가(net)·EA노출가·실측택배(10_가격AB.py·channel_compare.py). ② 탄력성=가격 A/B 하단 '마진율별 판매량'(page-only). ★레버=**마진율**(가격 아님·사용자)·**18개월**·(관리코드×채널) 월별 점=당시 실현마진율→그달 판매량(낱개) 산점도 + 구간별(역마진/0–8/8–12/12–16/16%+) 평균 월판매량. compute_online_margin 재사용. **행사감별·품절보정·forward적립 전부 안 함**(사용자 확정: 행사탄력 없다·과거 재고이력 없어 품절 신뢰감별 불가→그냥 둠·EA/매출자료에 이미 있음). 상관(서술)·인과 아님."
-        },
-        {
-          "tier": "done",
-          "phase": "통합UI",
-          "title": "상품 360도 카드 (신규)",
-          "star": true,
-          "detail": "**✅ v1 구현(2026-06-16) — 신규 11_상품360.py(page-only·core 무변경).** 관리코드 1개 → 상품의 모든 것 한 화면: 8채널 등재현황(🟢/⚪)+현재 판매가/마진/기준여유+**목표마진 N% 역산 필요판매가**(저장 listing→코드필터→cmm.compute·다중 리스팅 N상이 행펼침) · 채널별 실판매(매출/볼륨/실현마진·channel_breakdown) · 매입가 추이(purchases 실입고 월평균선+최근매입+vs6M·price_history 장부변경·박스단위 오입력 보정) · 재고소진(stockout.forecast 1행). 역산=정산액에서 rate 역산(채널단일/배민 상품별 모두 정확)·100원 올림(목표 이상 보장). 조회전용(가격변경=채널마진모니터 위임). 사용자 정의 MVP='상품이 주인공'. 다음=실사용 확인·후속(권장가→가격변경 인계버튼·baseline 라이브read·listing 가격선 오버레이)."
-        },
         {
           "tier": "planned",
           "phase": "P1·1d",
@@ -534,12 +522,6 @@
           "phase": "UI",
           "title": "데이터현황 2단계(업로드) + 알림 배너",
           "detail": "✅ 1단계 현황 완료. 2단계 업로드=일괄(매입현황·발주자료 등 적립함수 정리 후). 알림 배너(스냅샷 diff: 입고·품절·침식)."
-        },
-        {
-          "tier": "done",
-          "phase": "P3",
-          "title": "시장 지능(경쟁가) — nadl 로컬 수집기",
-          "detail": "**✅ 운영중(2026-06-18 라이브 검증).** 구조 B(로컬=fetch만/클라우드=파서) 확정·구현. 로컬 fetcher(PowerShell·curl, ps_page 동적·상품0종료·저속3~7s) 행사상품(ps_ctid=01320000) raw(.gz) push → GitHub Actions(nadl-parse, 마커 트리거)가 파싱 → market/nadl/prices_{date}.parquet. 첫 실행 606행/21p(개당가 599·박스가 606·dedup). 파서=클라우드 repo라 nadl 변경시 직접 수정. scripts/nadl_parse.py·nadl_fetch.ps1·.github/workflows/nadl.yml(work-automation-data). 다음=개당가↔관리코드 매칭→두뇌① 시장대비 권장가. ADR 0025+구조B."
         },
         {
           "tier": "later",
@@ -560,12 +542,6 @@
           "detail": "과거 통파일 '상품 택배비' 컬럼 → P2 추정 대체 가능성. 최근 .xls엔 없어 전기간 일관 불가."
         },
         {
-          "tier": "done",
-          "phase": "P3·매칭",
-          "title": "nadl 개당가↔관리코드 매칭 (모델 v2 + 시장가매칭 페이지)",
-          "detail": "**✅ v1(2026-06-18·신규 core market_nadl.py + 페이지 12_시장가매칭.py).** 모델 v2=① 박스 하드게이트(용량 L→ml·kg→g 정규화 ∧ 팩수 일치 — nadl은 마트납품·소분없음→박스 다르면 다른 상품, 사용자규칙) ② 랭킹=글자 bigram 자카드(띄어쓰기·어순 무시)+브랜드 가중(동일+0.15/다른명시브랜드−0.15) ③ top3 제시·**자동없음 안함**(점수=신뢰힌트, 최종확정 사람). 대화검증 21건 top3 recall 16/16·1위 15~16/16. 페이지 3탭(조회/매칭 미매칭큐+top3선택·복수등록·직접입력·없음/매칭본 우리컬럼결합+CSV). 매핑=ps_goid 키 nadl_map.csv(status matched/none·중복등록 복수행)→다음 수집 유지. **실사용하며 모델 정교화.** ⚠️신규 core→Reboot 1회. 로그 2026-06-18-nadl-matching."
-        },
-        {
           "tier": "planned",
           "phase": "P3·두뇌①",
           "title": "시장대비 권장가 (두뇌① 시장 결합)",
@@ -579,7 +555,7 @@
       "status": "partial",
       "star": true,
       "label": "데일리 대시보드",
-      "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중.",
+      "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용·**이중검수**: listing마진+판정[구조적/일시적]). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중.",
       "consumes": [
         "product_master",
         "baseline_margin",
@@ -592,36 +568,15 @@
       "produces": [
         "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
         "세션 파일 인박스(파일처리→데일리, 휘발성·PII 미저장)",
-        "품절 알림판(history/stockout_board.json)·입고로그(restock_log.csv·비-PII·영속)"
+        "품절 알림판(history/stockout_board.json)·입고로그(restock_log.csv·비-PII·영속)",
+        "채널별 당일 요약(매출·마진율 groupby)",
+        "가격 변동 알림(1b 스냅샷 ±N% 매입가/판매가·박스재고·인상빨강/인하파랑·detect_price_changes)",
+        "이상치 이중검수(listing마진+판정)+단일채널 가격변경 시트(cmm 빌더 재사용·알리 미지원·listing 의존)",
+        "신규 업로드 대상(최근입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0·업로드감시 코어 재사용·detect_new_stock)"
       ],
       "feeds": [],
       "page": "app/pages/0b_데일리대시보드.py (+ core/intelligence/daily_inbox.py 세션 인계)",
       "roadmap": [
-        {
-          "tier": "done",
-          "title": "품절 알림판",
-          "detail": "✅ 2026-06-16(ADR 0024). 발주 Phase2 품절목록→자동 등록(시작일=그날·전건)·상품관리 갱신 후 박스재고>0 재입고→입고로그+자동삭제·수동삭제(로그없음)·'MM월DD일부터 N일째' 표시. core stockout_board.py. data repo history/stockout_board.json + restock_log.csv 영속."
-        },
-        {
-          "tier": "done",
-          "title": "확장판① 채널 요약 + 가격 변동 알림",
-          "detail": "✅ 2026-06-17. 채널별 당일 매출·마진율 요약(groupby) + 가격 변동 알림(전체 상품 직전 대비 ±N% 매입가/판매가 인상/인하, 1b 스냅샷 detect_price_changes·재고 전이탐지 자매). page 0b + core stock_history. forward 적립(2026-06-15~)."
-        },
-        {
-          "tier": "done",
-          "title": "확장판② 이상치→권장가+가격변경 시트",
-          "detail": "✅ 2026-06-17. 당일 이상치 표에 권장가(채널 기준마진 달성 판매가·cmm compute) 컬럼 + 체크박스 선택→단일채널 가격변경 시트 다운로드(channel-margin-monitor 빌더 append/filter/smartstore 재사용). 알리 미지원·쿠팡/스마트스토어 raw 필요·listing 최신 의존. page-only."
-        },
-        {
-          "tier": "done",
-          "title": "확장판② 이중검수(listing마진+판정)",
-          "detail": "✅ 2026-06-17. 당일 점검 표에 listing마진·판정 컬럼. 당일 미달이라도 listing(compute_listing) 마진이 기준 이상이면 '일시적'(쿠폰·실박스 택배 등·가격 OK), listing도 미달이면 '구조적'(가격조정). _reco_lookup(buffer)가 listing 마진율/미달(마진율<기준-buffer·당일 동일 규칙) 집계. ★당일 vs listing 마진 기저 차이(당일=배송비 수입 미포함+실박스 택배 순비용 / listing=배송비×0.967 수입+실택배비2700)는 설계상 의도. page-only."
-        },
-        {
-          "tier": "done",
-          "title": "확장판③ 신규 업로드 대상",
-          "detail": "✅ 2026-06-17. 최근 N일(기본7) 재고 새로 생긴 상품(입고 전이 ∪ 신규 등재, baseline floor) ∩ 8채널 전부 미업로드 ∩ 현재 박스재고>0 → 신규 업로드 후보. 재고 신호=새 core stock_history.detect_new_stock(detect_transitions/detect_price_changes 자매·직전결측=신규등재로 surfacing·seed일 제외). 채널 미등록·비판매제외·채널별 skip 판정=upload_monitor.build_gap_table 재사용(키=상품코드·중복0). 업로드감시(전수 감사)의 '최근 입고' 서브셋. 최근매입일=매입현황 cadence(월1회 적재라 보조). page 0b + core stock_history(→Reboot 1회). 골든: 실 스냅샷 4일(6/14 seed~6/17) 최근7일 입고22+신규등재1=23 ∩ 전채널미업로드264 → 8건."
-        },
         {
           "tier": "planned",
           "title": "확장판 — 추가 데일리 인사이트",
