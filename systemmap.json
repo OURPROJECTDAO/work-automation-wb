@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-18e",
+  "updated": "2026-06-18f",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -520,8 +520,8 @@
     {
      "tier": "later",
      "phase": "UI",
-     "title": "데이터현황 2단계(업로드) + 알림 배너",
-     "detail": "✅ 1단계 현황 완료. 2단계 업로드=일괄(매입현황·발주자료 등 적립함수 정리 후). 알림 배너(스냅샷 diff: 입고·품절·침식)."
+     "title": "데이터현황 2단계(업로드)",
+     "detail": "✅ 1단계 현황 완료. 2단계 업로드=일괄(매입현황·발주자료 등 적립함수 정리 후). (알림 배너=데일리 대시보드 품절 알림판·가격 변동 알림·신규 업로드 대상으로 실현→항목 삭제 2026-06-18)"
     },
     {
      "tier": "later",
