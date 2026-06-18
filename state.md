@@ -189,3 +189,5 @@ _갱신: 2026-06-18 (sikbom-event-planning 신규 워크플로우 — 식봄 행
 _갱신: 2026-06-18 (로드맵 프루닝 — intel 나중 '알림 배너'(스냅샷 diff: 입고·품절·침식) 항목 삭제. 데일리 대시보드로 이미 실현(품절 알림판=품절·가격 변동 알림=침식/가격·신규 업로드 대상=입고). '데이터현황 2단계(업로드)'만 유지. systemmap meta 2026-06-18f·intel.md §5.6 B·roadmap later 묶음 동반 정리. 검토결과=다른 예정/나중 전건은 미구현→유지)_
 
 _갱신: 2026-06-18 (이력 1d 완료 — channel-margin-monitor listing 갱신 커밋 시 채널 가격을 날짜본으로 적립(snapshots/listing_YYYY-MM.parquet·9컬럼·dedup 멱등·forward). 신규 core listing_history.py(stock_history 1b 동형·detect_listing_price_changes) + 6_채널마진모니터 _accumulate_listing 훅(비차단 toast·_data_secret). 두뇌③ A/B 가격변경 전후 토대. ⚠️ 신규 core import→Reboot 1회. 커밋 코어 620f0a2·page dd34ab7. systemmap 1d planned→done(produces 박제)·meta 2026-06-18g. 다음=1e 행사 로깅(forward) or 두뇌③ A/B 전후 결선 or 시장대비 권장가(매핑 누적 후))_
+
+_갱신: 2026-06-18 (로드맵 프루닝 — upload-monitor '재고금액×예상마진 우선순위(두뇌② 결합)' 항목 삭제(사용자 불요 판단). systemmap meta 2026-06-18h)_
