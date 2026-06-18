@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-18f",
+  "updated": "2026-06-18g",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -498,19 +498,14 @@
     "상품 360 카드(11_상품360.py·관리코드 1개 통합 뷰·8채널 등재현황+현재가/목표마진역산+채널별 실판매+매입가추이+재고소진·조회전용·page-only)",
     "채널 마진율별 판매량(탄력성 v1·가격 A/B 하단·18개월 관리코드×채널 월별 실현마진율↔판매량 산점도+구간평균·서술·private)",
     "시장가 매칭(시장가 매칭 페이지·nadl 행사 개당가↔관리코드·모델 v2[박스 하드게이트(용량∧팩수)+bigram+브랜드]·top3 사람확정·매핑 ps_goid 영속 nadl_map.csv·private)",
-    "nadl 시장가 수집(로컬 fetcher→GitHub Actions 파싱→market/nadl/prices_*.parquet·행사 개당가/박스가·구조B 운영중·private)"
+    "nadl 시장가 수집(로컬 fetcher→GitHub Actions 파싱→market/nadl/prices_*.parquet·행사 개당가/박스가·구조B 운영중·private)",
+    "listing 가격 스냅샷(채널별 날짜본·판매가/정가/배송비·1d·channel-margin-monitor 갱신 훅·forward·private·두뇌③ A/B 가격변경 전후 토대·listing_history.detect_listing_price_changes)"
    ],
    "feeds": [
     "dashboard"
    ],
    "page": "app/pages/8_마진침식.py (두뇌① 3탭·탭D→데일리 대시보드 승격) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰) + 12_시장가매칭.py(시장가 매칭·nadl 개당가↔관리코드 매칭 모델 v2)",
    "roadmap": [
-    {
-     "tier": "planned",
-     "phase": "P1·1d",
-     "title": "listing 스냅샷 보관",
-     "detail": "마진모니터 listing 갱신 시 날짜본 → 채널 가격 이력(두뇌③ A/B 가격변경 전후 기반)."
-    },
     {
      "tier": "planned",
      "phase": "P1·1e",
