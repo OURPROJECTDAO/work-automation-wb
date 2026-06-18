@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-18h",
+  "updated": "2026-06-18i",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -112,6 +112,14 @@
     "intelligence-layer"
    ],
    "note": "175~200ml 30개입 합포가능 60종(관리코드). 탭D 택배 합포 배분(시나리오2·ceil(팩/3)) 소유 + (예정)ship_alloc 과거 합포박스키 정밀화 공유. ADR 0021/합포 2시나리오(2026-06-16)"
+  },
+  {
+   "id": "sikbom_category",
+   "label": "sikbom_category",
+   "consumers": [
+    "sikbom-register"
+   ],
+   "note": "식봄 카테고리 1차/2차/3차 평탄표(266·사용자 큐레이션). 원본 양식 '상품 카테고리' 2축 블록 매트릭스 평탄화. B/C/D에 명 그대로"
   }
  ],
  "clusters": [
@@ -265,7 +273,8 @@
     "smartstore-register",
     "esm-register",
     "easyadmin-register",
-    "cashnote-register"
+    "cashnote-register",
+    "sikbom-register"
    ],
    "page": "(개념 — KB)",
    "roadmap": [
@@ -337,6 +346,36 @@
    "feeds": [],
    "page": "(챗 네이티브)",
    "roadmap": []
+  },
+  {
+   "id": "sikbom-register",
+   "cluster": "registration",
+   "status": "partial",
+   "label": "식봄 일괄등록",
+   "line": "상품 대량 등록 양식 29열·r8부터. 수수료7%·마진=스마트스토어 baseline(없으면10%)·배송비명 L(N==1→'유료배송(수량별)'/else'수량별 배송비 N')·카테고리명 그대로(B/C/D)·이미지 양식外 별도(상품코드 매칭·phase2). 1차 74건 생성·검증·실업로드 대기 (챗 네이티브)",
+   "consumes": [
+    "product_master",
+    "sikbom_category",
+    "baseline_margin",
+    "listing_sikbom"
+   ],
+   "produces": [
+    "식봄 일괄등록.xlsx"
+   ],
+   "feeds": [],
+   "page": "(챗 네이티브)",
+   "roadmap": [
+    {
+     "tier": "planned",
+     "title": "실업로드 검증",
+     "detail": "openpyxl 저장본 식봄 수용 여부 첫 확인(거부 시 쿠팡식 zip 네이티브 수술). 배송비명 센터 사전등록 의존."
+    },
+    {
+     "tier": "planned",
+     "title": "이미지 단계(phase2)",
+     "detail": "양식엔 이미지 없음 — 업로드 성공 후 상품이미지 대량등록(상품코드 A 매칭)."
+    }
+   ]
   },
   {
    "id": "easyadmin-register",
@@ -686,6 +725,10 @@
   {
    "from": "product-registration-common",
    "to": "cashnote-register"
+  },
+  {
+   "from": "product-registration-common",
+   "to": "sikbom-register"
   }
  ]
 }
