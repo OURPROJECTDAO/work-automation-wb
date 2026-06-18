@@ -35,7 +35,7 @@
 - 대시보드 미분류 코드 분류 UI(사용자가 구분 값 배정).
 - 동료 접근 확대 / 필요 시 Railway 이전(Streamlit Cloud RAM 1GB·스케줄러 없음 대비).
 - 상품등록: 결정적 엔진 추출 + 관리코드→{상품명,카테고리} 캐시 성숙 후 재업로드 Streamlit/API 분리 검토. 채널 7~8개 확대.
-- intelligence-layer later 묶음(systemmap 참조): 데이터현황 2단계 업로드+알림 배너 · 시장지능(경쟁가 크롤링) · 퍼널(조회·전환) · 세트/번들 판매가 listing 보정 · 상품택배비 컬럼 실측 검토.
+- intelligence-layer later 묶음(systemmap 참조): 데이터현황 2단계 업로드 · 퍼널(조회·전환) · 세트/번들 판매가 listing 보정 · 상품택배비 컬럼 실측 검토. (알림 배너=데일리 대시보드로 실현·삭제 2026-06-18 / 시장지능 크롤링=nadl 수집기로 완료)
 
 _갱신: 2026-06-15 (roadmap.md 표류 정리 — systemmap.json 정본 체제(ADR 0019)에 맞춰 완료 이정표 현행화 + 상세는 systemmap 포인터로 슬림화)_
 
@@ -54,3 +54,5 @@ _갱신: 2026-06-17 (cashnote-register 등록 채널 셋업 — 완료 이정표
 _갱신: 2026-06-18 (시장지능 nadl 로컬 수집기 ✅완료/운영중 — 구조 B(로컬 fetch=raw push / 클라우드 파서=Actions). 행사상품 606행/21p 라이브 검증. '★★ 다음 최우선·행사샘플 blocked' 해제. systemmap tier planned→done. 다음=개당가↔관리코드 매칭→두뇌① 시장대비 권장가)_
 
 _갱신: 2026-06-18 (로드맵 완료항목 소거 — systemmap.json 노드 roadmap[]의 tier=done 9건 제거(intel 4: 채널A/B·상품360·nadl수집기·nadl매칭 / daily 5: 품절알림판·확장판①채널요약+가격변동·확장판②이상치→가격변경·이중검수·확장판③신규업로드). 제거 전 backbone 박제 확인 — intel produces에 nadl 수집기 추가·daily line에 이중검수 추가·daily produces 4건 보강. roadmap.md '다음'의 완료된 nadl ★★ 제거→완료로 이동, 다음 한 수=시장대비 권장가. meta 2026-06-18d)_
+
+_갱신: 2026-06-18 (로드맵 프루닝 — intel '알림 배너'(스냅샷 diff: 입고·품절·침식) 항목 삭제. 데일리 대시보드 품절 알림판·가격 변동 알림·신규 업로드 대상으로 이미 실현. later 묶음 라인 stale(알림 배너·시장지능) 동반 정리. systemmap meta 2026-06-18f)_
