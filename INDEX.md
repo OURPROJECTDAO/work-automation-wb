@@ -19,7 +19,7 @@
 - logs/YYYY-MM/*.md — 작업 로그 (append-only, 1작업단위 1건)
 - decisions/NNNN-*.md — ADR (append-only)
 
-현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · cashnote-register · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) · daily-dashboard(데일리 대시보드) (state.md 인덱스 참조).
+현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · cashnote-register · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) · daily-dashboard(데일리 대시보드) · sikbom-event-planning(식봄 행사기획) (state.md 인덱스 참조).
 
 ## 읽기 규칙 (세션 시작 — 한 번에)
 - PAT는 프로젝트 지식 파일에서 읽는다(절대 repo에 두지 않음).
@@ -51,3 +51,5 @@ _갱신: 2026-06-15 (systemmap.json 신설 — 지도+로드맵 구조화 정본
 _갱신: 2026-06-16 (daily-dashboard 워크플로우 추가 — 당일점검 승격+세션 자동 인계. ADR 0023)_
 
 _갱신: 2026-06-17 (cashnote-register 워크플로우 추가 — 캐시노트 KCD 일괄등록 채널 셋업)_
+
+_갱신: 2026-06-18 (sikbom-event-planning 워크플로우 추가 — 식봄 행사기획. channel-margin-monitor 정산식 재사용·챗 네이티브)_
