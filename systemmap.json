@@ -1,707 +1,707 @@
 {
- "meta": {
-  "updated": "2026-06-17f",
-  "source": "work-automation-wb",
-  "schema": "ADR 0019",
-  "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
- },
- "assets": [
-  {
-   "id": "product_master",
-   "label": "product_master",
-   "consumers": [
-    "logistics-order",
-    "dashboard",
-    "smartstore-register",
-    "esm-register",
-    "easyadmin-register",
-    "channel-margin-monitor",
-    "upload-monitor"
-   ],
-   "note": "상품관리(매일 갱신) · 상품코드 키 · 재고·매입가·규격·박스내품 — 최대 허브"
+  "meta": {
+    "updated": "2026-06-18a",
+    "source": "work-automation-wb",
+    "schema": "ADR 0019",
+    "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
   },
-  {
-   "id": "logistics_classification",
-   "label": "logistics_classification",
-   "consumers": [
-    "logistics-order",
-    "cheonnyeon-upload",
-    "dashboard"
-   ],
-   "note": "관리코드→구분. 발주서출력업무가 소유·편집, 대시보드 분류도우미도 씀"
-  },
-  {
-   "id": "product_attributes",
-   "label": "product_attributes",
-   "consumers": [
-    "dashboard",
-    "upload-monitor"
-   ],
-   "note": "식품음료·합포수량·최종분류 4컬럼. 대시보드 세분류 + 업로드감시 L4 prefill"
-  },
-  {
-   "id": "baseline_margin",
-   "label": "baseline_margin",
-   "consumers": [
-    "channel-margin-monitor",
-    "intelligence-layer"
-   ],
-   "note": "관리코드+10채널 확정마진율"
-  },
-  {
-   "id": "hapo_multiplier",
-   "label": "hapo_multiplier",
-   "consumers": [
-    "channel-margin-monitor"
-   ],
-   "note": "상품번호·합포량 N(채널무관)"
-  },
-  {
-   "id": "listing_x8",
-   "label": "listing_<channel> x8",
-   "consumers": [
-    "channel-margin-monitor",
-    "upload-monitor",
-    "intelligence-layer"
-   ],
-   "note": "채널 상품관리 스냅샷. 마진모니터 소유, 업로드감시 읽기 공유"
-  },
-  {
-   "id": "product_input_form_v2",
-   "label": "product_input_form_v2",
-   "consumers": [
-    "smartstore-register",
-    "esm-register",
-    "upload-monitor"
-   ],
-   "note": "멀티채널 배치 입력폼. 업로드감시 L4가 이걸로 인계"
-  },
-  {
-   "id": "sales_parquet",
-   "label": "sales_*.parquet",
-   "consumers": [
-    "dashboard",
-    "intelligence-layer"
-   ],
-   "note": "매출 정산 진실(private). 3년 42만행 — 마진의 진실원천"
-  },
-  {
-   "id": "easyadmin_orders",
-   "label": "easyadmin_*.parquet",
-   "consumers": [
-    "intelligence-layer",
-    "dashboard"
-   ],
-   "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·**2023-03~2026-05 연속 36파티션·398,873행**(2023 여름 06~08 갭). P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
-  },
-  {
-   "id": "buyin_purchases",
-   "label": "buyin_*.parquet",
-   "consumers": [
-    "intelligence-layer",
-    "dashboard",
-    "logistics-order",
-    "daily-dashboard"
-   ],
-   "note": "유형별매입현황(실입고·실매입가·private). 일자 파티션·PII제거·**2022-01~2026-06 연속 54파티션·66,741행**(2026-06=1~15일·개별 export). 합계액=진실(공급+부가세). 2C 매입가 교차검증·두뇌② 입고신호·품절목록 cadence(최근입고/평균주기/입고횟수 1년). 거래처코드=통파일 2025+ 결측이나 개별 export는 보존(거래처관리코드 alias·2026-06 78%)"
-  },
-  {
-   "id": "hapo_175_190",
-   "label": "hapo_175_190",
-   "consumers": [
-    "intelligence-layer"
-   ],
-   "note": "175~200ml 30개입 합포가능 60종(관리코드). 탭D 택배 합포 배분(시나리오2·ceil(팩/3)) 소유 + (예정)ship_alloc 과거 합포박스키 정밀화 공유. ADR 0021/합포 2시나리오(2026-06-16)"
-  }
- ],
- "clusters": [
-  {
-   "id": "fulfillment",
-   "num": "01",
-   "label": "수주 · 출고",
-   "flow": "발주 → 정제 → 업로드 → 송장"
-  },
-  {
-   "id": "registration",
-   "num": "02",
-   "label": "상품 등록",
-   "flow": "공통 개념 → 채널별 양식"
-  },
-  {
-   "id": "intelligence",
-   "num": "03",
-   "label": "분석 · 지능",
-   "flow": "관찰 → 두뇌(진단·추천)"
-  }
- ],
- "nodes": [
-  {
-   "id": "openmarket-merge",
-   "cluster": "fulfillment",
-   "status": "live",
-   "label": "오픈마켓 합포·도서산간",
-   "line": "HTML-xls 발주 정제 → 송장 + 합포/지역/미배송/필터 시트",
-   "consumes": [
-    "dosan_list",
-    "filter_list",
-    "undelivered_list"
-   ],
-   "produces": [
-    "송장출력",
-    "확인 5시트"
-   ],
-   "feeds": [],
-   "page": "app/pages/1_파일처리.py",
-   "roadmap": []
-  },
-  {
-   "id": "onnuri-order",
-   "cluster": "fulfillment",
-   "status": "live",
-   "label": "온누리 발주서 (제이티)",
-   "line": "발주서 합계=공급가×수량+배송비 역기입 → (확인).xlsx (zipfile 패치)",
-   "consumes": [
-    "sku_list"
-   ],
-   "produces": [
-    "발주서 (확인).xlsx"
-   ],
-   "feeds": [],
-   "page": "app/pages/1_파일처리.py",
-   "roadmap": [
+  "assets": [
     {
-     "tier": "later",
-     "title": "빈 G셀 회귀 fixture / pytest",
-     "detail": "합포·N제품 결합배송 케이스 — zipfile 패치 빈셀 회귀"
+      "id": "product_master",
+      "label": "product_master",
+      "consumers": [
+        "logistics-order",
+        "dashboard",
+        "smartstore-register",
+        "esm-register",
+        "easyadmin-register",
+        "channel-margin-monitor",
+        "upload-monitor"
+      ],
+      "note": "상품관리(매일 갱신) · 상품코드 키 · 재고·매입가·규격·박스내품 — 최대 허브"
+    },
+    {
+      "id": "logistics_classification",
+      "label": "logistics_classification",
+      "consumers": [
+        "logistics-order",
+        "cheonnyeon-upload",
+        "dashboard"
+      ],
+      "note": "관리코드→구분. 발주서출력업무가 소유·편집, 대시보드 분류도우미도 씀"
+    },
+    {
+      "id": "product_attributes",
+      "label": "product_attributes",
+      "consumers": [
+        "dashboard",
+        "upload-monitor"
+      ],
+      "note": "식품음료·합포수량·최종분류 4컬럼. 대시보드 세분류 + 업로드감시 L4 prefill"
+    },
+    {
+      "id": "baseline_margin",
+      "label": "baseline_margin",
+      "consumers": [
+        "channel-margin-monitor",
+        "intelligence-layer"
+      ],
+      "note": "관리코드+10채널 확정마진율"
+    },
+    {
+      "id": "hapo_multiplier",
+      "label": "hapo_multiplier",
+      "consumers": [
+        "channel-margin-monitor"
+      ],
+      "note": "상품번호·합포량 N(채널무관)"
+    },
+    {
+      "id": "listing_x8",
+      "label": "listing_<channel> x8",
+      "consumers": [
+        "channel-margin-monitor",
+        "upload-monitor",
+        "intelligence-layer"
+      ],
+      "note": "채널 상품관리 스냅샷. 마진모니터 소유, 업로드감시 읽기 공유"
+    },
+    {
+      "id": "product_input_form_v2",
+      "label": "product_input_form_v2",
+      "consumers": [
+        "smartstore-register",
+        "esm-register",
+        "upload-monitor"
+      ],
+      "note": "멀티채널 배치 입력폼. 업로드감시 L4가 이걸로 인계"
+    },
+    {
+      "id": "sales_parquet",
+      "label": "sales_*.parquet",
+      "consumers": [
+        "dashboard",
+        "intelligence-layer"
+      ],
+      "note": "매출 정산 진실(private). 3년 42만행 — 마진의 진실원천"
+    },
+    {
+      "id": "easyadmin_orders",
+      "label": "easyadmin_*.parquet",
+      "consumers": [
+        "intelligence-layer",
+        "dashboard"
+      ],
+      "note": "EasyAdmin 주문(velocity·송장그룹·private). 발주일 파티션·PII제거·**2023-03~2026-05 연속 36파티션·398,873행**(2023 여름 06~08 갭). P2 송장 실배분→대시보드 온라인마진 실측✅(EA박스÷매출낱개·00-12 정합) · 두뇌③ A/B 토대"
+    },
+    {
+      "id": "buyin_purchases",
+      "label": "buyin_*.parquet",
+      "consumers": [
+        "intelligence-layer",
+        "dashboard",
+        "logistics-order",
+        "daily-dashboard"
+      ],
+      "note": "유형별매입현황(실입고·실매입가·private). 일자 파티션·PII제거·**2022-01~2026-06 연속 54파티션·66,741행**(2026-06=1~15일·개별 export). 합계액=진실(공급+부가세). 2C 매입가 교차검증·두뇌② 입고신호·품절목록 cadence(최근입고/평균주기/입고횟수 1년). 거래처코드=통파일 2025+ 결측이나 개별 export는 보존(거래처관리코드 alias·2026-06 78%)"
+    },
+    {
+      "id": "hapo_175_190",
+      "label": "hapo_175_190",
+      "consumers": [
+        "intelligence-layer"
+      ],
+      "note": "175~200ml 30개입 합포가능 60종(관리코드). 탭D 택배 합포 배분(시나리오2·ceil(팩/3)) 소유 + (예정)ship_alloc 과거 합포박스키 정밀화 공유. ADR 0021/합포 2시나리오(2026-06-16)"
     }
-   ]
-  },
-  {
-   "id": "logistics-order",
-   "cluster": "fulfillment",
-   "status": "live",
-   "label": "발주서 출력업무",
-   "line": "매출통계 → 물류팀 시트 + 품절목록 + 발주자료 아카이브 (2-phase+게이트) · 품절목록 E/F=최근입고일·평균매입주기(매입현황 cadence)",
-   "consumes": [
-    "product_master",
-    "logistics_classification",
-    "unit_list",
-    "spec_master",
-    "buyin_purchases"
-   ],
-   "produces": [
-    "발주자료 아카이브",
-    "물류팀 시트",
-    "품절목록"
-   ],
-   "feeds": [
-    "cheonnyeon-upload"
-   ],
-   "page": "app/pages/1_파일처리.py",
-   "roadmap": [
+  ],
+  "clusters": [
     {
-     "tier": "later",
-     "title": "다른상품 합포 회귀 fixture",
-     "detail": "split_multiproduct(대괄호·N개) 골든 테스트 추가"
+      "id": "fulfillment",
+      "num": "01",
+      "label": "수주 · 출고",
+      "flow": "발주 → 정제 → 업로드 → 송장"
+    },
+    {
+      "id": "registration",
+      "num": "02",
+      "label": "상품 등록",
+      "flow": "공통 개념 → 채널별 양식"
+    },
+    {
+      "id": "intelligence",
+      "num": "03",
+      "label": "분석 · 지능",
+      "flow": "관찰 → 두뇌(진단·추천)"
     }
-   ]
-  },
-  {
-   "id": "cheonnyeon-upload",
-   "cluster": "fulfillment",
-   "status": "live",
-   "label": "천년경영 업로드",
-   "line": "발주자료 + 배송비 → 마켓별 업로드 양식 27시트(전체/낱개)",
-   "consumes": [
-    "logistics_classification",
-    "bm_commission",
-    "sub_list"
-   ],
-   "produces": [
-    "27 마켓 업로드 시트",
-    "erp입력자료"
-   ],
-   "feeds": [
-    "intelligence-layer"
-   ],
-   "page": "app/pages/1_파일처리.py",
-   "roadmap": []
-  },
-  {
-   "id": "invoice-fill",
-   "cluster": "fulfillment",
-   "status": "live",
-   "label": "송장처리 (4채널)",
-   "line": "송장 마스터 → 채널 양식에 송장번호 채움(식봄·올웨이즈·배민·캐시노트)",
-   "consumes": [
-    "송장출력 마스터(세션·PII)"
-   ],
-   "produces": [
-    "채널별 송장 양식"
-   ],
-   "feeds": [],
-   "page": "app/pages/5_송장처리.py",
-   "roadmap": [
+  ],
+  "nodes": [
     {
-     "tier": "later",
-     "title": "채널 추가(요청 시)",
-     "detail": "쿠팡·G마켓 등 — CHANNEL_CONFIG 한 세트, 처리전 샘플 받으면"
+      "id": "openmarket-merge",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "오픈마켓 합포·도서산간",
+      "line": "HTML-xls 발주 정제 → 송장 + 합포/지역/미배송/필터 시트",
+      "consumes": [
+        "dosan_list",
+        "filter_list",
+        "undelivered_list"
+      ],
+      "produces": [
+        "송장출력",
+        "확인 5시트"
+      ],
+      "feeds": [],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": []
+    },
+    {
+      "id": "onnuri-order",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "온누리 발주서 (제이티)",
+      "line": "발주서 합계=공급가×수량+배송비 역기입 → (확인).xlsx (zipfile 패치)",
+      "consumes": [
+        "sku_list"
+      ],
+      "produces": [
+        "발주서 (확인).xlsx"
+      ],
+      "feeds": [],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "빈 G셀 회귀 fixture / pytest",
+          "detail": "합포·N제품 결합배송 케이스 — zipfile 패치 빈셀 회귀"
+        }
+      ]
+    },
+    {
+      "id": "logistics-order",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "발주서 출력업무",
+      "line": "매출통계 → 물류팀 시트 + 품절목록 + 발주자료 아카이브 (2-phase+게이트) · 품절목록 E/F=최근입고일·평균매입주기(매입현황 cadence)",
+      "consumes": [
+        "product_master",
+        "logistics_classification",
+        "unit_list",
+        "spec_master",
+        "buyin_purchases"
+      ],
+      "produces": [
+        "발주자료 아카이브",
+        "물류팀 시트",
+        "품절목록"
+      ],
+      "feeds": [
+        "cheonnyeon-upload"
+      ],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "다른상품 합포 회귀 fixture",
+          "detail": "split_multiproduct(대괄호·N개) 골든 테스트 추가"
+        }
+      ]
+    },
+    {
+      "id": "cheonnyeon-upload",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "천년경영 업로드",
+      "line": "발주자료 + 배송비 → 마켓별 업로드 양식 27시트(전체/낱개)",
+      "consumes": [
+        "logistics_classification",
+        "bm_commission",
+        "sub_list"
+      ],
+      "produces": [
+        "27 마켓 업로드 시트",
+        "erp입력자료"
+      ],
+      "feeds": [
+        "intelligence-layer"
+      ],
+      "page": "app/pages/1_파일처리.py",
+      "roadmap": []
+    },
+    {
+      "id": "invoice-fill",
+      "cluster": "fulfillment",
+      "status": "live",
+      "label": "송장처리 (4채널)",
+      "line": "송장 마스터 → 채널 양식에 송장번호 채움(식봄·올웨이즈·배민·캐시노트)",
+      "consumes": [
+        "송장출력 마스터(세션·PII)"
+      ],
+      "produces": [
+        "채널별 송장 양식"
+      ],
+      "feeds": [],
+      "page": "app/pages/5_송장처리.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "채널 추가(요청 시)",
+          "detail": "쿠팡·G마켓 등 — CHANNEL_CONFIG 한 세트, 처리전 샘플 받으면"
+        }
+      ]
+    },
+    {
+      "id": "product-registration-common",
+      "cluster": "registration",
+      "status": "concept",
+      "label": "등록 공통 개념",
+      "line": "낱개/박스·합포N·판매가 공식·상품명 정제·카테고리·서식 일치 (3채널 상속)",
+      "consumes": [
+        "product_master"
+      ],
+      "produces": [
+        "공통 규칙"
+      ],
+      "feeds": [
+        "smartstore-register",
+        "esm-register",
+        "easyadmin-register",
+        "cashnote-register"
+      ],
+      "page": "(개념 — KB)",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "결정적 엔진 + 캐시",
+          "detail": "관리코드→{정제명, 카테고리코드} 채널별 축적 → 재등록 자동화율↑"
+        }
+      ]
+    },
+    {
+      "id": "smartstore-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "스마트스토어 등록",
+      "line": "10열 입력시트 → 일괄등록 양식 13컬럼. 수수료6% (챗 네이티브)",
+      "consumes": [
+        "product_master",
+        "smartstore_category_food",
+        "smartstore_bulk_template",
+        "product_input_form_v2"
+      ],
+      "produces": [
+        "일괄등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "면세 케이스 검증",
+          "detail": "J='면세상품' 미검증(미발생)"
+        }
+      ]
+    },
+    {
+      "id": "esm-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "ESM(G마켓) 등록",
+      "line": "NEW일반상품 양식 15컬럼. 수수료17%·분모0.747 (챗 네이티브)",
+      "consumes": [
+        "product_master",
+        "esm_category_food",
+        "esm_bulk_template",
+        "product_input_form_v2"
+      ],
+      "produces": [
+        "ESM 일괄등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": []
+    },
+    {
+      "id": "cashnote-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "캐시노트(KCD) 등록",
+      "line": "상품 양식 42열·데이터 r5+. 수수료6%·합포N→P열·배송정책 DVP212991·자체 카테고리(food53/all295)·상품군 품목별(식품21/비식품37). 1차 87건 업로드 전건 성공·검증완료(openpyxl 수용·H 쉼표토큰화 필수). 챗 네이티브",
+      "consumes": [
+        "product_master",
+        "cashnote_category_food",
+        "cashnote_bulk_template"
+      ],
+      "produces": [
+        "캐시노트 일괄등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": []
+    },
+    {
+      "id": "easyadmin-register",
+      "cluster": "registration",
+      "status": "live",
+      "label": "이지어드민 등록",
+      "line": "정산 채널 필수 경유. 명칭·공급처·합포 7컬럼만",
+      "consumes": [
+        "product_master"
+      ],
+      "produces": [
+        "이지어드민 등록.xlsx"
+      ],
+      "feeds": [],
+      "page": "(챗 네이티브)",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "양식 보관처 확보 + 이지어드민 workflow",
+          "detail": "빈 양식 Drive 경로 미기록 — 다음 배치 때 확보"
+        }
+      ]
+    },
+    {
+      "id": "dashboard",
+      "cluster": "intelligence",
+      "status": "live",
+      "label": "영업이익 대시보드",
+      "line": "3년 매출 parquet → 매출/이익 KPI·피벗·추이. 온라인 상품마진(실측·EA 송장그룹+00-12 정합)",
+      "consumes": [
+        "sales_parquet",
+        "logistics_classification",
+        "product_master",
+        "product_attributes",
+        "easyadmin_orders"
+      ],
+      "produces": [
+        "KPI·차트",
+        "store_groups"
+      ],
+      "feeds": [
+        "intelligence-layer"
+      ],
+      "page": "app/pages/3_대시보드.py",
+      "roadmap": [
+        {
+          "tier": "planned",
+          "title": "이익/물류량 콤보(이중축)",
+          "detail": "물류량 vs 이익/물류량 한 차트"
+        }
+      ]
+    },
+    {
+      "id": "channel-margin-monitor",
+      "cluster": "intelligence",
+      "status": "live",
+      "label": "채널 가격·마진 모니터",
+      "line": "8채널 리스팅 → 마진율·기준 이탈·권장가. 7채널 가격일괄변경",
+      "consumes": [
+        "product_master",
+        "baseline_margin",
+        "hapo_multiplier",
+        "listing_x8",
+        "sobun",
+        "margin_floor"
+      ],
+      "produces": [
+        "resolve_code 4-tier",
+        "listing 스냅샷",
+        "가격변경 양식"
+      ],
+      "feeds": [
+        "upload-monitor",
+        "intelligence-layer"
+      ],
+      "page": "app/pages/6_채널마진모니터.py",
+      "roadmap": [
+        {
+          "tier": "planned",
+          "title": "baseline↔product_master 조인 갭",
+          "detail": "미해결 · sobun↔unit_list↔sub_list 개념 중복 통합 검토"
+        }
+      ]
+    },
+    {
+      "id": "upload-monitor",
+      "cluster": "intelligence",
+      "status": "partial",
+      "star": true,
+      "label": "업로드 감시",
+      "line": "박스재고 있는데 미업로드 탐지(8채널 매트릭스). 코어/페이지 운영. L4 핸드오프=후순위(채널 일괄업로드 완비 후)",
+      "consumes": [
+        "product_master",
+        "listing_x8",
+        "sobun",
+        "product_attributes"
+      ],
+      "produces": [
+        "갭 매트릭스",
+        "skip 관리",
+        "이미지 XLSX"
+      ],
+      "feeds": [
+        "smartstore-register",
+        "esm-register",
+        "intelligence-layer"
+      ],
+      "page": "app/pages/7_업로드감시.py",
+      "roadmap": [
+        {
+          "tier": "later",
+          "title": "L4 등록 핸드오프",
+          "detail": "후순위(사용자 2026-06-15) · 일괄 업로드 가능 채널 프로세스 완비 후 재논의(미장착 채널 多, 지금 만들 단계 아님) · 미업로드 상품 → product_input_form_v2 prefill(박스·합포·과세+이미지URL) / 6채널 CSV",
+          "star": true
+        },
+        {
+          "tier": "planned",
+          "title": "제외목록 편집 UI",
+          "detail": "upload_monitor_exclude 인앱 편집"
+        },
+        {
+          "tier": "later",
+          "title": "L5 채널 확장",
+          "detail": "11번가·셀러허브·자사몰·토마토 (listing 파서 추가)"
+        },
+        {
+          "tier": "later",
+          "title": "재고금액×예상마진 우선순위",
+          "detail": "baseline_margin 연계 정렬 + **두뇌②(✅재고 지능·9_재고지능) 품절 예측 연계(반응형→예방형, ADR 0020)**: 곧 품절 경보·소진 예측일 컬럼을 업로드감시 매트릭스에 결합."
+        }
+      ]
+    },
+    {
+      "id": "intelligence-layer",
+      "cluster": "intelligence",
+      "status": "partial",
+      "star": true,
+      "brain": true,
+      "label": "지능 레이어 (두뇌)",
+      "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 398K·매입현황 66K·판매가검증✅) + 두뇌① 침식·강화✅(3렌즈: 이미침식·곧침식2C·실판매이상 + velocity 손실액 + 탭D 당일점검✅) + P2 송장 실배분✅. **데이터 backbone 완성 → 신호 결합 단계**. 두뇌② 재고 지능✅(현재고÷소진율 품절·재발주 4구간). 고객키·합포박스키 적재✅(robust·39개월·재구매 교차월 병합 검증). 두뇌③ A/B v1✅(서술+**마진율별 판매량 탄력성**✅) → 상품 360 카드 v1✅ → **두뇌 3종+통합카드 완성**",
+      "consumes": [
+        "sales_parquet",
+        "product_master",
+        "listing_x8",
+        "baseline_margin"
+      ],
+      "produces": [
+        "price_changes.parquet (가격이력·private)",
+        "stock_*.parquet (재고 스냅샷·private)",
+        "마진 침식 경보(두뇌①·8채널·2C예방·실판매이상·velocity 월손실액)",
+        "당일 마진 이상치(**데일리 대시보드**로 승격 2026-06-16·0b_데일리대시보드.py·천년경영 net매출+물리박스 택배배분[합포2시나리오: 250/355 H열다품목 전체추출 + 175~200ml 30개입 수령자 ceil(팩/3)·hapo_175_190.csv]·역마진/미달·당일 트립와이어)",
+        "품절·재발주 예측(두뇌②·9_재고지능·현재고÷소진율·private)",
+        "채널 가격 A/B v1(가격 A/B 페이지·관리코드×채널 실현마진[분모 매입가]·낱개이익·판매량·정산단가net·EA노출가gross·실측/추정 택배·private·서술)",
+        "easyadmin_*.parquet (주문·velocity·송장그룹·private)",
+        "상품별·채널별 실현마진(P2 송장 실배분·EA 송장그룹÷매출낱개·00-12 정합·private)",
+        "buyin_*.parquet (매입현황·실입고·실매입가·private)",
+        "easyadmin orders 고객키·합포박스키 (robust 비-PII 해시·ADR 0021·전기간 39개월 430,592행·재구매/코호트/합포정밀화 토대·private)",
+        "ship_alloc 합포 교정 실현마진(175~200 ceil(팩/3)·합포박스키·private)",
+        "상품 360 카드(11_상품360.py·관리코드 1개 통합 뷰·8채널 등재현황+현재가/목표마진역산+채널별 실판매+매입가추이+재고소진·조회전용·page-only)",
+        "채널 마진율별 판매량(탄력성 v1·가격 A/B 하단·18개월 관리코드×채널 월별 실현마진율↔판매량 산점도+구간평균·서술·private)"
+      ],
+      "feeds": [
+        "dashboard"
+      ],
+      "page": "app/pages/8_마진침식.py (두뇌① 3탭·탭D→데일리 대시보드 승격) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰)",
+      "roadmap": [
+        {
+          "tier": "done",
+          "phase": "두뇌③",
+          "title": "채널 가격 A/B (실현마진×velocity)",
+          "detail": "**✅ 완료(2026-06-16) — v1 서술 + 탄력성(마진율별 판매량).** ① 서술=관리코드→채널별 실현마진(순이익÷매입가)·낱개이익·판매량·정산단가(net)·EA노출가·실측택배(10_가격AB.py·channel_compare.py). ② 탄력성=가격 A/B 하단 '마진율별 판매량'(page-only). ★레버=**마진율**(가격 아님·사용자)·**18개월**·(관리코드×채널) 월별 점=당시 실현마진율→그달 판매량(낱개) 산점도 + 구간별(역마진/0–8/8–12/12–16/16%+) 평균 월판매량. compute_online_margin 재사용. **행사감별·품절보정·forward적립 전부 안 함**(사용자 확정: 행사탄력 없다·과거 재고이력 없어 품절 신뢰감별 불가→그냥 둠·EA/매출자료에 이미 있음). 상관(서술)·인과 아님."
+        },
+        {
+          "tier": "done",
+          "phase": "통합UI",
+          "title": "상품 360도 카드 (신규)",
+          "star": true,
+          "detail": "**✅ v1 구현(2026-06-16) — 신규 11_상품360.py(page-only·core 무변경).** 관리코드 1개 → 상품의 모든 것 한 화면: 8채널 등재현황(🟢/⚪)+현재 판매가/마진/기준여유+**목표마진 N% 역산 필요판매가**(저장 listing→코드필터→cmm.compute·다중 리스팅 N상이 행펼침) · 채널별 실판매(매출/볼륨/실현마진·channel_breakdown) · 매입가 추이(purchases 실입고 월평균선+최근매입+vs6M·price_history 장부변경·박스단위 오입력 보정) · 재고소진(stockout.forecast 1행). 역산=정산액에서 rate 역산(채널단일/배민 상품별 모두 정확)·100원 올림(목표 이상 보장). 조회전용(가격변경=채널마진모니터 위임). 사용자 정의 MVP='상품이 주인공'. 다음=실사용 확인·후속(권장가→가격변경 인계버튼·baseline 라이브read·listing 가격선 오버레이)."
+        },
+        {
+          "tier": "planned",
+          "phase": "P1·1d",
+          "title": "listing 스냅샷 보관",
+          "detail": "마진모니터 listing 갱신 시 날짜본 → 채널 가격 이력(두뇌③ A/B 가격변경 전후 기반)."
+        },
+        {
+          "tier": "planned",
+          "phase": "P1·1e",
+          "title": "행사 로깅 시작",
+          "detail": "가격변경·행사 이벤트 기록(백필 불가, forward only). 두뇌③ 준실험 교란 보정."
+        },
+        {
+          "tier": "later",
+          "phase": "UI",
+          "title": "데이터현황 2단계(업로드) + 알림 배너",
+          "detail": "✅ 1단계 현황 완료. 2단계 업로드=일괄(매입현황·발주자료 등 적립함수 정리 후). 알림 배너(스냅샷 diff: 입고·품절·침식)."
+        },
+        {
+          "tier": "done",
+          "phase": "P3",
+          "title": "시장 지능(경쟁가) — nadl 로컬 수집기",
+          "detail": "**✅ 운영중(2026-06-18 라이브 검증).** 구조 B(로컬=fetch만/클라우드=파서) 확정·구현. 로컬 fetcher(PowerShell·curl, ps_page 동적·상품0종료·저속3~7s) 행사상품(ps_ctid=01320000) raw(.gz) push → GitHub Actions(nadl-parse, 마커 트리거)가 파싱 → market/nadl/prices_{date}.parquet. 첫 실행 606행/21p(개당가 599·박스가 606·dedup). 파서=클라우드 repo라 nadl 변경시 직접 수정. scripts/nadl_parse.py·nadl_fetch.ps1·.github/workflows/nadl.yml(work-automation-data). 다음=개당가↔관리코드 매칭→두뇌① 시장대비 권장가. ADR 0025+구조B."
+        },
+        {
+          "tier": "later",
+          "phase": "P4",
+          "title": "퍼널(조회·전환)",
+          "detail": "리스팅 통계 캡처(주는 채널만) → 단위경제."
+        },
+        {
+          "tier": "later",
+          "phase": "보정",
+          "title": "세트/번들 판매가 listing 보정",
+          "detail": "EA 고가 세트 판매가 과소(스팸세트 등) → velocity/A/B에서 listing 보정. 숫자 이상 시(사용자 보류)."
+        },
+        {
+          "tier": "later",
+          "phase": "P2+",
+          "title": "상품택배비 컬럼 실측 검토",
+          "detail": "과거 통파일 '상품 택배비' 컬럼 → P2 추정 대체 가능성. 최근 .xls엔 없어 전기간 일관 불가."
+        }
+      ]
+    },
+    {
+      "id": "daily-dashboard",
+      "cluster": "intelligence",
+      "status": "partial",
+      "star": true,
+      "label": "데일리 대시보드",
+      "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중.",
+      "consumes": [
+        "product_master",
+        "baseline_margin",
+        "hapo_175_190",
+        "sales_parquet",
+        "logistics_order_품절목록",
+        "buyin_purchases",
+        "listing_x8"
+      ],
+      "produces": [
+        "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
+        "세션 파일 인박스(파일처리→데일리, 휘발성·PII 미저장)",
+        "품절 알림판(history/stockout_board.json)·입고로그(restock_log.csv·비-PII·영속)"
+      ],
+      "feeds": [],
+      "page": "app/pages/0b_데일리대시보드.py (+ core/intelligence/daily_inbox.py 세션 인계)",
+      "roadmap": [
+        {
+          "tier": "done",
+          "title": "품절 알림판",
+          "detail": "✅ 2026-06-16(ADR 0024). 발주 Phase2 품절목록→자동 등록(시작일=그날·전건)·상품관리 갱신 후 박스재고>0 재입고→입고로그+자동삭제·수동삭제(로그없음)·'MM월DD일부터 N일째' 표시. core stockout_board.py. data repo history/stockout_board.json + restock_log.csv 영속."
+        },
+        {
+          "tier": "done",
+          "title": "확장판① 채널 요약 + 가격 변동 알림",
+          "detail": "✅ 2026-06-17. 채널별 당일 매출·마진율 요약(groupby) + 가격 변동 알림(전체 상품 직전 대비 ±N% 매입가/판매가 인상/인하, 1b 스냅샷 detect_price_changes·재고 전이탐지 자매). page 0b + core stock_history. forward 적립(2026-06-15~)."
+        },
+        {
+          "tier": "done",
+          "title": "확장판② 이상치→권장가+가격변경 시트",
+          "detail": "✅ 2026-06-17. 당일 이상치 표에 권장가(채널 기준마진 달성 판매가·cmm compute) 컬럼 + 체크박스 선택→단일채널 가격변경 시트 다운로드(channel-margin-monitor 빌더 append/filter/smartstore 재사용). 알리 미지원·쿠팡/스마트스토어 raw 필요·listing 최신 의존. page-only."
+        },
+        {
+          "tier": "done",
+          "title": "확장판② 이중검수(listing마진+판정)",
+          "detail": "✅ 2026-06-17. 당일 점검 표에 listing마진·판정 컬럼. 당일 미달이라도 listing(compute_listing) 마진이 기준 이상이면 '일시적'(쿠폰·실박스 택배 등·가격 OK), listing도 미달이면 '구조적'(가격조정). _reco_lookup(buffer)가 listing 마진율/미달(마진율<기준-buffer·당일 동일 규칙) 집계. ★당일 vs listing 마진 기저 차이(당일=배송비 수입 미포함+실박스 택배 순비용 / listing=배송비×0.967 수입+실택배비2700)는 설계상 의도. page-only."
+        },
+        {
+          "tier": "done",
+          "title": "확장판③ 신규 업로드 대상",
+          "detail": "✅ 2026-06-17. 최근 N일(기본7) 재고 새로 생긴 상품(입고 전이 ∪ 신규 등재, baseline floor) ∩ 8채널 전부 미업로드 ∩ 현재 박스재고>0 → 신규 업로드 후보. 재고 신호=새 core stock_history.detect_new_stock(detect_transitions/detect_price_changes 자매·직전결측=신규등재로 surfacing·seed일 제외). 채널 미등록·비판매제외·채널별 skip 판정=upload_monitor.build_gap_table 재사용(키=상품코드·중복0). 업로드감시(전수 감사)의 '최근 입고' 서브셋. 최근매입일=매입현황 cadence(월1회 적재라 보조). page 0b + core stock_history(→Reboot 1회). 골든: 실 스냅샷 4일(6/14 seed~6/17) 최근7일 입고22+신규등재1=23 ∩ 전채널미업로드264 → 8건."
+        },
+        {
+          "tier": "planned",
+          "title": "확장판 — 추가 데일리 인사이트",
+          "detail": "당일 점검 외 매일 반복 업무 자료(품절/발주/업로드감시/채널 등)를 한 화면 데일리 인사이트로 결합. 사용자: '마진침식 당일점검의 확장판'."
+        },
+        {
+          "tier": "later",
+          "title": "세션 넘어 영속(비-PII 처리본)",
+          "detail": "현재 인박스=세션 휘발성(송장 PII로 디스크/repo 미저장). 필요 시 비-PII 처리 결과(관리코드·매출·마진)만 날짜본 영속 검토."
+        }
+      ]
     }
-   ]
-  },
-  {
-   "id": "product-registration-common",
-   "cluster": "registration",
-   "status": "concept",
-   "label": "등록 공통 개념",
-   "line": "낱개/박스·합포N·판매가 공식·상품명 정제·카테고리·서식 일치 (3채널 상속)",
-   "consumes": [
-    "product_master"
-   ],
-   "produces": [
-    "공통 규칙"
-   ],
-   "feeds": [
-    "smartstore-register",
-    "esm-register",
-    "easyadmin-register",
-    "cashnote-register"
-   ],
-   "page": "(개념 — KB)",
-   "roadmap": [
+  ],
+  "backlog": [
     {
-     "tier": "later",
-     "title": "결정적 엔진 + 캐시",
-     "detail": "관리코드→{정제명, 카테고리코드} 채널별 축적 → 재등록 자동화율↑"
+      "node": null,
+      "title": "Phase 3 나머지 템플릿 이관",
+      "detail": "업무의 1/10 미만만 이관됨 — 다수 남음. 사용자 실물 파일 제공 대기"
+    },
+    {
+      "node": null,
+      "title": "인프라 — 동료 접근 확대 / Railway 이전",
+      "detail": "Streamlit Cloud RAM 1GB·스케줄러 없음 대비"
     }
-   ]
-  },
-  {
-   "id": "smartstore-register",
-   "cluster": "registration",
-   "status": "live",
-   "label": "스마트스토어 등록",
-   "line": "10열 입력시트 → 일괄등록 양식 13컬럼. 수수료6% (챗 네이티브)",
-   "consumes": [
-    "product_master",
-    "smartstore_category_food",
-    "smartstore_bulk_template",
-    "product_input_form_v2"
-   ],
-   "produces": [
-    "일괄등록.xlsx"
-   ],
-   "feeds": [],
-   "page": "(챗 네이티브)",
-   "roadmap": [
+  ],
+  "edges": [
     {
-     "tier": "later",
-     "title": "면세 케이스 검증",
-     "detail": "J='면세상품' 미검증(미발생)"
+      "from": "logistics-order",
+      "to": "cheonnyeon-upload"
+    },
+    {
+      "from": "cheonnyeon-upload",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "channel-margin-monitor",
+      "to": "upload-monitor"
+    },
+    {
+      "from": "upload-monitor",
+      "to": "smartstore-register"
+    },
+    {
+      "from": "upload-monitor",
+      "to": "esm-register"
+    },
+    {
+      "from": "dashboard",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "channel-margin-monitor",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "upload-monitor",
+      "to": "intelligence-layer"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "smartstore-register"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "esm-register"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "easyadmin-register"
+    },
+    {
+      "from": "intelligence-layer",
+      "to": "dashboard"
+    },
+    {
+      "from": "openmarket-merge",
+      "to": "daily-dashboard"
+    },
+    {
+      "from": "cheonnyeon-upload",
+      "to": "daily-dashboard"
+    },
+    {
+      "from": "logistics-order",
+      "to": "daily-dashboard"
+    },
+    {
+      "from": "channel-margin-monitor",
+      "to": "daily-dashboard"
+    },
+    {
+      "from": "product-registration-common",
+      "to": "cashnote-register"
     }
-   ]
-  },
-  {
-   "id": "esm-register",
-   "cluster": "registration",
-   "status": "live",
-   "label": "ESM(G마켓) 등록",
-   "line": "NEW일반상품 양식 15컬럼. 수수료17%·분모0.747 (챗 네이티브)",
-   "consumes": [
-    "product_master",
-    "esm_category_food",
-    "esm_bulk_template",
-    "product_input_form_v2"
-   ],
-   "produces": [
-    "ESM 일괄등록.xlsx"
-   ],
-   "feeds": [],
-   "page": "(챗 네이티브)",
-   "roadmap": []
-  },
-  {
-   "id": "cashnote-register",
-   "cluster": "registration",
-   "status": "live",
-   "label": "캐시노트(KCD) 등록",
-   "line": "상품 양식 42열·데이터 r5+. 수수료6%·합포N→P열·배송정책 DVP212991·자체 카테고리(food53/all295)·상품군 품목별(식품21/비식품37). 1차 87건 업로드 전건 성공·검증완료(openpyxl 수용·H 쉼표토큰화 필수). 챗 네이티브",
-   "consumes": [
-    "product_master",
-    "cashnote_category_food",
-    "cashnote_bulk_template"
-   ],
-   "produces": [
-    "캐시노트 일괄등록.xlsx"
-   ],
-   "feeds": [],
-   "page": "(챗 네이티브)",
-   "roadmap": []
-  },
-  {
-   "id": "easyadmin-register",
-   "cluster": "registration",
-   "status": "live",
-   "label": "이지어드민 등록",
-   "line": "정산 채널 필수 경유. 명칭·공급처·합포 7컬럼만",
-   "consumes": [
-    "product_master"
-   ],
-   "produces": [
-    "이지어드민 등록.xlsx"
-   ],
-   "feeds": [],
-   "page": "(챗 네이티브)",
-   "roadmap": [
-    {
-     "tier": "later",
-     "title": "양식 보관처 확보 + 이지어드민 workflow",
-     "detail": "빈 양식 Drive 경로 미기록 — 다음 배치 때 확보"
-    }
-   ]
-  },
-  {
-   "id": "dashboard",
-   "cluster": "intelligence",
-   "status": "live",
-   "label": "영업이익 대시보드",
-   "line": "3년 매출 parquet → 매출/이익 KPI·피벗·추이. 온라인 상품마진(실측·EA 송장그룹+00-12 정합)",
-   "consumes": [
-    "sales_parquet",
-    "logistics_classification",
-    "product_master",
-    "product_attributes",
-    "easyadmin_orders"
-   ],
-   "produces": [
-    "KPI·차트",
-    "store_groups"
-   ],
-   "feeds": [
-    "intelligence-layer"
-   ],
-   "page": "app/pages/3_대시보드.py",
-   "roadmap": [
-    {
-     "tier": "planned",
-     "title": "이익/물류량 콤보(이중축)",
-     "detail": "물류량 vs 이익/물류량 한 차트"
-    }
-   ]
-  },
-  {
-   "id": "channel-margin-monitor",
-   "cluster": "intelligence",
-   "status": "live",
-   "label": "채널 가격·마진 모니터",
-   "line": "8채널 리스팅 → 마진율·기준 이탈·권장가. 7채널 가격일괄변경",
-   "consumes": [
-    "product_master",
-    "baseline_margin",
-    "hapo_multiplier",
-    "listing_x8",
-    "sobun",
-    "margin_floor"
-   ],
-   "produces": [
-    "resolve_code 4-tier",
-    "listing 스냅샷",
-    "가격변경 양식"
-   ],
-   "feeds": [
-    "upload-monitor",
-    "intelligence-layer"
-   ],
-   "page": "app/pages/6_채널마진모니터.py",
-   "roadmap": [
-    {
-     "tier": "planned",
-     "title": "baseline↔product_master 조인 갭",
-     "detail": "미해결 · sobun↔unit_list↔sub_list 개념 중복 통합 검토"
-    }
-   ]
-  },
-  {
-   "id": "upload-monitor",
-   "cluster": "intelligence",
-   "status": "partial",
-   "star": true,
-   "label": "업로드 감시",
-   "line": "박스재고 있는데 미업로드 탐지(8채널 매트릭스). 코어/페이지 운영. L4 핸드오프=후순위(채널 일괄업로드 완비 후)",
-   "consumes": [
-    "product_master",
-    "listing_x8",
-    "sobun",
-    "product_attributes"
-   ],
-   "produces": [
-    "갭 매트릭스",
-    "skip 관리",
-    "이미지 XLSX"
-   ],
-   "feeds": [
-    "smartstore-register",
-    "esm-register",
-    "intelligence-layer"
-   ],
-   "page": "app/pages/7_업로드감시.py",
-   "roadmap": [
-    {
-     "tier": "later",
-     "title": "L4 등록 핸드오프",
-     "detail": "후순위(사용자 2026-06-15) · 일괄 업로드 가능 채널 프로세스 완비 후 재논의(미장착 채널 多, 지금 만들 단계 아님) · 미업로드 상품 → product_input_form_v2 prefill(박스·합포·과세+이미지URL) / 6채널 CSV",
-     "star": true
-    },
-    {
-     "tier": "planned",
-     "title": "제외목록 편집 UI",
-     "detail": "upload_monitor_exclude 인앱 편집"
-    },
-    {
-     "tier": "later",
-     "title": "L5 채널 확장",
-     "detail": "11번가·셀러허브·자사몰·토마토 (listing 파서 추가)"
-    },
-    {
-     "tier": "later",
-     "title": "재고금액×예상마진 우선순위",
-     "detail": "baseline_margin 연계 정렬 + **두뇌②(✅재고 지능·9_재고지능) 품절 예측 연계(반응형→예방형, ADR 0020)**: 곧 품절 경보·소진 예측일 컬럼을 업로드감시 매트릭스에 결합."
-    }
-   ]
-  },
-  {
-   "id": "intelligence-layer",
-   "cluster": "intelligence",
-   "status": "partial",
-   "star": true,
-   "brain": true,
-   "label": "지능 레이어 (두뇌)",
-   "line": "관찰↔실행 사이 진단·추천·측정. 이력(가격·재고스냅샷·주문 398K·매입현황 66K·판매가검증✅) + 두뇌① 침식·강화✅(3렌즈: 이미침식·곧침식2C·실판매이상 + velocity 손실액 + 탭D 당일점검✅) + P2 송장 실배분✅. **데이터 backbone 완성 → 신호 결합 단계**. 두뇌② 재고 지능✅(현재고÷소진율 품절·재발주 4구간). 고객키·합포박스키 적재✅(robust·39개월·재구매 교차월 병합 검증). 두뇌③ A/B v1✅(서술+**마진율별 판매량 탄력성**✅) → 상품 360 카드 v1✅ → **두뇌 3종+통합카드 완성**",
-   "consumes": [
-    "sales_parquet",
-    "product_master",
-    "listing_x8",
-    "baseline_margin"
-   ],
-   "produces": [
-    "price_changes.parquet (가격이력·private)",
-    "stock_*.parquet (재고 스냅샷·private)",
-    "마진 침식 경보(두뇌①·8채널·2C예방·실판매이상·velocity 월손실액)",
-    "당일 마진 이상치(**데일리 대시보드**로 승격 2026-06-16·0b_데일리대시보드.py·천년경영 net매출+물리박스 택배배분[합포2시나리오: 250/355 H열다품목 전체추출 + 175~200ml 30개입 수령자 ceil(팩/3)·hapo_175_190.csv]·역마진/미달·당일 트립와이어)",
-    "품절·재발주 예측(두뇌②·9_재고지능·현재고÷소진율·private)",
-    "채널 가격 A/B v1(가격 A/B 페이지·관리코드×채널 실현마진[분모 매입가]·낱개이익·판매량·정산단가net·EA노출가gross·실측/추정 택배·private·서술)",
-    "easyadmin_*.parquet (주문·velocity·송장그룹·private)",
-    "상품별·채널별 실현마진(P2 송장 실배분·EA 송장그룹÷매출낱개·00-12 정합·private)",
-    "buyin_*.parquet (매입현황·실입고·실매입가·private)",
-    "easyadmin orders 고객키·합포박스키 (robust 비-PII 해시·ADR 0021·전기간 39개월 430,592행·재구매/코호트/합포정밀화 토대·private)",
-    "ship_alloc 합포 교정 실현마진(175~200 ceil(팩/3)·합포박스키·private)",
-    "상품 360 카드(11_상품360.py·관리코드 1개 통합 뷰·8채널 등재현황+현재가/목표마진역산+채널별 실판매+매입가추이+재고소진·조회전용·page-only)",
-    "채널 마진율별 판매량(탄력성 v1·가격 A/B 하단·18개월 관리코드×채널 월별 실현마진율↔판매량 산점도+구간평균·서술·private)"
-   ],
-   "feeds": [
-    "dashboard"
-   ],
-   "page": "app/pages/8_마진침식.py (두뇌① 3탭·탭D→데일리 대시보드 승격) + 9_재고지능.py (두뇌② 품절·재발주) + 3_대시보드.py 온라인마진 탭(P2 실측) + 10_가격AB.py(가격 A/B 채널 비교 v1) + 신규/확장 예정 + 데이터현황(연동데이터관리·적재 커버리지) + 11_상품360.py(상품 360 통합 뷰)",
-   "roadmap": [
-    {
-     "tier": "done",
-     "phase": "두뇌③",
-     "title": "채널 가격 A/B (실현마진×velocity)",
-     "detail": "**✅ 완료(2026-06-16) — v1 서술 + 탄력성(마진율별 판매량).** ① 서술=관리코드→채널별 실현마진(순이익÷매입가)·낱개이익·판매량·정산단가(net)·EA노출가·실측택배(10_가격AB.py·channel_compare.py). ② 탄력성=가격 A/B 하단 '마진율별 판매량'(page-only). ★레버=**마진율**(가격 아님·사용자)·**18개월**·(관리코드×채널) 월별 점=당시 실현마진율→그달 판매량(낱개) 산점도 + 구간별(역마진/0–8/8–12/12–16/16%+) 평균 월판매량. compute_online_margin 재사용. **행사감별·품절보정·forward적립 전부 안 함**(사용자 확정: 행사탄력 없다·과거 재고이력 없어 품절 신뢰감별 불가→그냥 둠·EA/매출자료에 이미 있음). 상관(서술)·인과 아님."
-    },
-    {
-     "tier": "done",
-     "phase": "통합UI",
-     "title": "상품 360도 카드 (신규)",
-     "star": true,
-     "detail": "**✅ v1 구현(2026-06-16) — 신규 11_상품360.py(page-only·core 무변경).** 관리코드 1개 → 상품의 모든 것 한 화면: 8채널 등재현황(🟢/⚪)+현재 판매가/마진/기준여유+**목표마진 N% 역산 필요판매가**(저장 listing→코드필터→cmm.compute·다중 리스팅 N상이 행펼침) · 채널별 실판매(매출/볼륨/실현마진·channel_breakdown) · 매입가 추이(purchases 실입고 월평균선+최근매입+vs6M·price_history 장부변경·박스단위 오입력 보정) · 재고소진(stockout.forecast 1행). 역산=정산액에서 rate 역산(채널단일/배민 상품별 모두 정확)·100원 올림(목표 이상 보장). 조회전용(가격변경=채널마진모니터 위임). 사용자 정의 MVP='상품이 주인공'. 다음=실사용 확인·후속(권장가→가격변경 인계버튼·baseline 라이브read·listing 가격선 오버레이)."
-    },
-    {
-     "tier": "planned",
-     "phase": "P1·1d",
-     "title": "listing 스냅샷 보관",
-     "detail": "마진모니터 listing 갱신 시 날짜본 → 채널 가격 이력(두뇌③ A/B 가격변경 전후 기반)."
-    },
-    {
-     "tier": "planned",
-     "phase": "P1·1e",
-     "title": "행사 로깅 시작",
-     "detail": "가격변경·행사 이벤트 기록(백필 불가, forward only). 두뇌③ 준실험 교란 보정."
-    },
-    {
-     "tier": "later",
-     "phase": "UI",
-     "title": "데이터현황 2단계(업로드) + 알림 배너",
-     "detail": "✅ 1단계 현황 완료. 2단계 업로드=일괄(매입현황·발주자료 등 적립함수 정리 후). 알림 배너(스냅샷 diff: 입고·품절·침식)."
-    },
-    {
-     "tier": "planned",
-     "phase": "P3",
-     "title": "시장 지능(경쟁가) — nadl 로컬 수집기",
-     "detail": "**[다음 세션 최우선]** **아키텍처 확정(2026-06-16, ADR 0025).** 1순위 소스 nadl.kr(사람검수 B2B몰·행사 근사최저가·중복없음·매칭쉬움). **클라우드(Streamlit/Actions=해외IP)에서 지오펜스+robots로 도달 불가** → KR 로컬 수집기(회사 PC·Windows 스케줄러·주1회·저속) → parquet push(work-automation-data) → 두뇌① 시장대비 권장가. 네이버 쇼핑 API=클라우드 보완 후순위·다나와=소매노이즈 후순위. **구현 막힘=nadl 행사 페이지 실물 대기(파서 작성용).**"
-    },
-    {
-     "tier": "later",
-     "phase": "P4",
-     "title": "퍼널(조회·전환)",
-     "detail": "리스팅 통계 캡처(주는 채널만) → 단위경제."
-    },
-    {
-     "tier": "later",
-     "phase": "보정",
-     "title": "세트/번들 판매가 listing 보정",
-     "detail": "EA 고가 세트 판매가 과소(스팸세트 등) → velocity/A/B에서 listing 보정. 숫자 이상 시(사용자 보류)."
-    },
-    {
-     "tier": "later",
-     "phase": "P2+",
-     "title": "상품택배비 컬럼 실측 검토",
-     "detail": "과거 통파일 '상품 택배비' 컬럼 → P2 추정 대체 가능성. 최근 .xls엔 없어 전기간 일관 불가."
-    }
-   ]
-  },
-  {
-   "id": "daily-dashboard",
-   "cluster": "intelligence",
-   "status": "partial",
-   "star": true,
-   "label": "데일리 대시보드",
-   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중.",
-   "consumes": [
-    "product_master",
-    "baseline_margin",
-    "hapo_175_190",
-    "sales_parquet",
-    "logistics_order_품절목록",
-    "buyin_purchases",
-    "listing_x8"
-   ],
-   "produces": [
-    "당일 실현마진 이상치(net매출·master원가·물리박스 택배배분)",
-    "세션 파일 인박스(파일처리→데일리, 휘발성·PII 미저장)",
-    "품절 알림판(history/stockout_board.json)·입고로그(restock_log.csv·비-PII·영속)"
-   ],
-   "feeds": [],
-   "page": "app/pages/0b_데일리대시보드.py (+ core/intelligence/daily_inbox.py 세션 인계)",
-   "roadmap": [
-    {
-     "tier": "done",
-     "title": "품절 알림판",
-     "detail": "✅ 2026-06-16(ADR 0024). 발주 Phase2 품절목록→자동 등록(시작일=그날·전건)·상품관리 갱신 후 박스재고>0 재입고→입고로그+자동삭제·수동삭제(로그없음)·'MM월DD일부터 N일째' 표시. core stockout_board.py. data repo history/stockout_board.json + restock_log.csv 영속."
-    },
-    {
-     "tier": "done",
-     "title": "확장판① 채널 요약 + 가격 변동 알림",
-     "detail": "✅ 2026-06-17. 채널별 당일 매출·마진율 요약(groupby) + 가격 변동 알림(전체 상품 직전 대비 ±N% 매입가/판매가 인상/인하, 1b 스냅샷 detect_price_changes·재고 전이탐지 자매). page 0b + core stock_history. forward 적립(2026-06-15~)."
-    },
-    {
-     "tier": "done",
-     "title": "확장판② 이상치→권장가+가격변경 시트",
-     "detail": "✅ 2026-06-17. 당일 이상치 표에 권장가(채널 기준마진 달성 판매가·cmm compute) 컬럼 + 체크박스 선택→단일채널 가격변경 시트 다운로드(channel-margin-monitor 빌더 append/filter/smartstore 재사용). 알리 미지원·쿠팡/스마트스토어 raw 필요·listing 최신 의존. page-only."
-    },
-    {
-     "tier": "done",
-     "title": "확장판② 이중검수(listing마진+판정)",
-     "detail": "✅ 2026-06-17. 당일 점검 표에 listing마진·판정 컬럼. 당일 미달이라도 listing(compute_listing) 마진이 기준 이상이면 '일시적'(쿠폰·실박스 택배 등·가격 OK), listing도 미달이면 '구조적'(가격조정). _reco_lookup(buffer)가 listing 마진율/미달(마진율<기준-buffer·당일 동일 규칙) 집계. ★당일 vs listing 마진 기저 차이(당일=배송비 수입 미포함+실박스 택배 순비용 / listing=배송비×0.967 수입+실택배비2700)는 설계상 의도. page-only."
-    },
-    {
-     "tier": "done",
-     "title": "확장판③ 신규 업로드 대상",
-     "detail": "✅ 2026-06-17. 최근 N일(기본7) 재고 새로 생긴 상품(입고 전이 ∪ 신규 등재, baseline floor) ∩ 8채널 전부 미업로드 ∩ 현재 박스재고>0 → 신규 업로드 후보. 재고 신호=새 core stock_history.detect_new_stock(detect_transitions/detect_price_changes 자매·직전결측=신규등재로 surfacing·seed일 제외). 채널 미등록·비판매제외·채널별 skip 판정=upload_monitor.build_gap_table 재사용(키=상품코드·중복0). 업로드감시(전수 감사)의 '최근 입고' 서브셋. 최근매입일=매입현황 cadence(월1회 적재라 보조). page 0b + core stock_history(→Reboot 1회). 골든: 실 스냅샷 4일(6/14 seed~6/17) 최근7일 입고22+신규등재1=23 ∩ 전채널미업로드264 → 8건."
-    },
-    {
-     "tier": "planned",
-     "title": "확장판 — 추가 데일리 인사이트",
-     "detail": "당일 점검 외 매일 반복 업무 자료(품절/발주/업로드감시/채널 등)를 한 화면 데일리 인사이트로 결합. 사용자: '마진침식 당일점검의 확장판'."
-    },
-    {
-     "tier": "later",
-     "title": "세션 넘어 영속(비-PII 처리본)",
-     "detail": "현재 인박스=세션 휘발성(송장 PII로 디스크/repo 미저장). 필요 시 비-PII 처리 결과(관리코드·매출·마진)만 날짜본 영속 검토."
-    }
-   ]
-  }
- ],
- "backlog": [
-  {
-   "node": null,
-   "title": "Phase 3 나머지 템플릿 이관",
-   "detail": "업무의 1/10 미만만 이관됨 — 다수 남음. 사용자 실물 파일 제공 대기"
-  },
-  {
-   "node": null,
-   "title": "인프라 — 동료 접근 확대 / Railway 이전",
-   "detail": "Streamlit Cloud RAM 1GB·스케줄러 없음 대비"
-  }
- ],
- "edges": [
-  {
-   "from": "logistics-order",
-   "to": "cheonnyeon-upload"
-  },
-  {
-   "from": "cheonnyeon-upload",
-   "to": "intelligence-layer"
-  },
-  {
-   "from": "channel-margin-monitor",
-   "to": "upload-monitor"
-  },
-  {
-   "from": "upload-monitor",
-   "to": "smartstore-register"
-  },
-  {
-   "from": "upload-monitor",
-   "to": "esm-register"
-  },
-  {
-   "from": "dashboard",
-   "to": "intelligence-layer"
-  },
-  {
-   "from": "channel-margin-monitor",
-   "to": "intelligence-layer"
-  },
-  {
-   "from": "upload-monitor",
-   "to": "intelligence-layer"
-  },
-  {
-   "from": "product-registration-common",
-   "to": "smartstore-register"
-  },
-  {
-   "from": "product-registration-common",
-   "to": "esm-register"
-  },
-  {
-   "from": "product-registration-common",
-   "to": "easyadmin-register"
-  },
-  {
-   "from": "intelligence-layer",
-   "to": "dashboard"
-  },
-  {
-   "from": "openmarket-merge",
-   "to": "daily-dashboard"
-  },
-  {
-   "from": "cheonnyeon-upload",
-   "to": "daily-dashboard"
-  },
-  {
-   "from": "logistics-order",
-   "to": "daily-dashboard"
-  },
-  {
-   "from": "channel-margin-monitor",
-   "to": "daily-dashboard"
-  },
-  {
-   "from": "product-registration-common",
-   "to": "cashnote-register"
-  }
- ]
+  ]
 }
