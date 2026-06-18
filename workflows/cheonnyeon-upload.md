@@ -6,12 +6,19 @@
 - 원본 `천년경영업로드자동화V15.xlsm` (36시트, VBA 2631줄, OC_CheonnyeonFullRun 37단계 + 저장)을 Python 재구현.
 - 발주자료 + 배송비(배민·스마트스토어)를 마켓플레이스별 업로드 양식(전체/낱개)으로 변환.
 - Phase 3 (4번째 템플릿). 운영 중. 골든 27시트(14 전체 + 13 낱개) 전 항목 0 불일치 · pytest 29 passed(+ 박스코드 이상 탐지 2건).
+- **출력 = 29시트**(전체 15 + 낱개 14). 2026-06-18 리테일전체/리테일낱개 추가(제이티유통·리테일앤인사이트 B2B 채널).
+- **선택 입력 ④ 추가 판매처 매출통계**: ERP "판매처상품매출통계" export를 발주자료에 자동 병합(발주자료에 안 섞여 들어오는 채널용). 2026-06-18.
 - **logistics-order(발주서출력업무)와 체인**: logistics 발주자료 아카이브 → 천년경영 입력. 멸치쇼핑 분류표 공유. (decisions/0005)
 
 ## 입력 (매 실행 3개 업로드)
 1. `★★발주자료{mmdd}.xlsx` — logistics 발주자료 아카이브. **앞 7열만 사용** [erp관리코드, 어드민옵션, 총수량, 평균단가, 정산금액, 판매처그룹, 선결제택배비].
 2. `배민주문{yyyymmdd}.xlsx` — 배민 배송비. Z(26열)=관리코드, AL(38열)=배송비. 암호 없음.
 3. `스스주문{yyyymmdd}.xlsx` — 스마트스토어 배송비. **암호 1323** (앱이 자동 복호화). r1=안내문, r2=헤더, r3+ 데이터. AJ(36)=배송비묶음번호, AL(38)=배송비합계, AO(41)=판매자상품코드.
+
+### 선택 입력 ④ — 추가 판매처 매출통계 (2026-06-18)
+- ERP "판매처상품매출통계" export. 컬럼 = 발주자료 앞 7열과 동일 + 옵션추가항목1(8열). 보통 **HTML 테이블형 가짜 .xls**(셀 안에 중첩 `<table>`), 드물게 진짜 .xlsx.
+- `parse_sales_stats(bytes) -> (rows, skipped)`로 파싱 후 발주자료 행에 **그대로 병합**. 여러 개 업로드 가능(`stats_files` 리스트).
+- 용도: 발주자료에 **안 섞여 들어오는** 판매처(제이티유통·리테일앤인사이트 등)를 따로 받았을 때. 발주자료에 이미 섞여 있으면 안 올려도 됨(둘 다 자동 처리).
 
 ## 기준데이터 (reference/, 고정)
 - `logistics_classification.csv` — 멸치쇼핑 분류표(관리코드→구분 식품/음료/선물세트). **발주서출력업무와 공유**. 천년경영은 읽기만. 관리는 발주서출력업무 페이지에서.
@@ -21,6 +28,8 @@
 ## 코드 / UI
 - `core/workflows/cheonnyeon_upload.py` (함수형 — logistics_order.py와 동일 패턴, @register 안 씀)
   - `run(baeju_bytes, baemin_bytes, sss_bytes, run_date=None)` → (출력 xlsx bytes, stats, sheets, units)
+  - `run(baeju_bytes, baemin_bytes, sss_bytes, run_date=None, sss_password=..., stats_files=None)` → (출력 xlsx bytes, stats, sheets, units, **merge_info**). `stats_files`=추가 매출통계 bytes 리스트(발주자료에 병합). merge_info={"added":병합행수, "skipped":[코드보정 불가 행]}.
+  - `parse_sales_stats(bytes) -> (rows, skipped)`: 판매처상품매출통계 HTML/xlsx 파서. stdlib `html.parser`(_StatsHTMLParser, 의존성 無)로 바깥 table만 추출·중첩셀 토큰 분리. PK매직→openpyxl. 콤마숫자 정제. **빈 erp코드 → 옵션추가항목1 코드 1개면 보정, 2개+/없음은 skipped**.
   - `process(...)` 메인 파이프라인 / `parse_baeju` / `open_baemin` / `open_sss`(복호화 robust) / `process_baemin` / `process_smartstore` / `generate_output_xlsx`
   - `detect_box_anomalies(sheets)` → 전체(박스) 시트 잔류 행 중 '박스 코드 아님' 탐지(비차단 검수). list[dict]{시트·관리코드·상품명·신호·확신}. ★아래 "검수 장치" 참조.
   - 로더: `load_classification` / `load_commission` / `load_sub_list` (fixture 주입 가능 → 테스트 결정적)
@@ -46,7 +55,7 @@
 ## 마켓별 실제기입단가 H 수식
 | 시트 | G(전체) 소스 | H 수식 |
 |---|---|---|
-| 멸치식품·멸치음료·ESM전체·11번가전체·올웨이즈전체·셀러허브전체·제이티전체 | (NO_G는 없음 / 나머지 선결제비) | F/D |
+| 멸치식품·멸치음료·ESM전체·11번가전체·올웨이즈전체·셀러허브전체·제이티전체·**리테일전체** | (NO_G는 없음 / 나머지 선결제비) | F/D |
 | 식봄전체 | 없음 | F×0.93/D |
 | 캐시노트전체 | 선결제비 | F×0.94/D |
 | 쿠팡전체 | 선결제비 | F×0.88/D |
@@ -71,7 +80,9 @@
 - **소분목록 미등록 = 낱개가 전체로 새어 들어감**: 전체↔낱개 분기는 sub_list 멤버십이 유일 근거. 낱개로 파는 상품인데 sub_list에 없으면 전체 시트에 박스로 잔류 → 오업로드. (실사례 PC005875/0615, 사용자가 사후 등록). detect_box_anomalies가 이를 검수.
 - **logistics 체인**: 발주자료는 logistics 아카이브 앞 7열. 멸치쇼핑 분류표는 logistics_classification.csv 공유(골든 worksheet 215코드 100% 일치 검증). 분류표 변경은 발주서출력업무 페이지에서만.
 - **첫 출현 우선**: 수수료율·소분목록 모두 같은 코드가 여러 행이면 첫 행 채택(VBA Exit For). 로더 dict 구성 시 첫 출현만 등록.
-- **출력 범위**: 앱은 마켓 전체/낱개 27시트만 생성(원본 36시트의 합포데이터·재고관리 등 비파이프라인 시트는 미생성 — 업로드에 불필요). 대용량전체 골든 H1 헤더 #VALUE!는 빈시트 템플릿 artifact라 무시.
+- **출력 범위**: 앱은 마켓 전체/낱개 27시트만 생성(원본 36시트의 합포데이터·재고관리 등 비파이프라인 시트는 미생성 — 업로드에 불필요). 대용량전체 골든 H1 헤더 #VALUE!는 빈시트 템플릿 artifact라 무시. (2026-06-18 리테일 추가로 29시트.)
+- **추가 매출통계 빈 erp코드 보정**: "판매처상품매출통계" export는 묶음/옵션 판매 행의 erp코드가 비고 코드가 **옵션추가항목1**에 들어감. parse_sales_stats가 코드 1개면 보정(예 코카콜라제로 [31-22-02]), **2개+ 묶음(예 24-174|24-175)은 임의분할 위험 → skipped 경고만**(병합 제외, 사용자 수동 처리). parse_baeju/process는 빈 erp코드 행을 그냥 drop하므로 보정은 stats 파서에서만.
+- **stats export 평균단가(E) ≠ F/D 가능**: 이 export의 D>1 행에서 평균단가 ≠ 정산금액/수량인 경우 관측(런천미트 E=9936 vs F/D=49680). H=F/D는 사용자 확정 규칙이라 그대로 출력(제이티·simple 시트 전부 동일). 숫자 이상 시 사용자가 잡음.
 
 ## 검증 (골든 대조)
 - 실물 raw(배민주문·스스주문 암호본) + 역산 발주자료로 **end-to-end 0 불일치** (14 전체 + 13 낱개 = 27시트, B/C/D/E/F/G/H, 낱개 I/J/K 직접 비교).
