@@ -1,0 +1,47 @@
+# 2026-06-18 시장지능 nadl 개당가↔관리코드 매칭 — 모델 v2 + 시장가 매칭 페이지
+
+## 무엇
+nadl 행사 개당가(work-automation-data:market/nadl/prices_{date}.parquet, 수집기 운영중)를
+우리 product_master 관리코드에 매칭하는 모델(v2)과 웹앱 페이지(12_시장가매칭.py)를 구축.
+사람이 top3 후보에서 확정하고, 매핑은 ps_goid 키로 영속(nadl_map.csv).
+
+## 왜
+시장 지능(ADR 0025) 다음 한 수 = nadl 개당가↔관리코드 매칭 → 두뇌① 시장대비 권장가.
+nadl 이름은 풍부("동원 고추참치 90g"), 우리는 압축·어순 변형("환타제로파인350ml(일반)") →
+순수 토큰/substring으론 매칭 실패. 사용자와 대화창에서 21건 실매칭해 모델을 찾음.
+
+## 모델 v2 (대화 검증 21건)
+1. **박스 하드게이트** = 용량(L→ml·kg→g 정규화) 일치 ∧ 팩수 일치. **nadl=마트 납품·소분 없음 →
+   박스 규격 다르면 아예 다른 상품(사용자 핵심 규칙).** 우리 팩수=박스내품>0 우선, 없으면 규격 `*N`/`+N`.
+2. **랭킹 = 글자 bigram 자카드**(띄어쓰기·어순 무시 — "환타파인제로"↔"환타제로파인" 잡음)
+   **+ 브랜드 가중**(동일 +0.15 / 우리쪽 다른 명시 브랜드 −0.15 — 롯데런천미트↔동원, 백설올리브유↔사조 교정).
+3. **top3 제시 · 자동 "없음" 판정 안 함.** 점수는 신뢰 힌트(정렬·색). 최종 "없음"은 사람.
+   - ★같은 브랜드·같은 박스라도 다른 상품 가능(오뚜기 발아흑미밥↔오뚜기밥 0.50) → 점수로 못 거름 → 사람이 확정.
+4. 특수: 중복등록(스팸 마일드)=복수선택 / 콤보행사(코코팜 피치핑크/화이트)=대표 선택 / 카탈로그 누락 의심(이프로 레몬라임).
+
+검증셋 21건: **top3 recall 16/16, 1위 15~16/16**(콤보는 두 맛 다 정답 인정 시 16/16). 없음 5건 처리 OK.
+
+## 변경 (work-automation-app)
+- **신규 core `core/intelligence/market_nadl.py`** — parse_size/nadl_box/pm_box·find_brand·bigram score·
+  build_pm_index(박스키 인덱스 733)·suggest(top3)·GitHub I/O(list_price_dates·load_prices·read_map/write_map)·
+  build_matched(전 nadl행 + 매칭건 우리컬럼 결합·미매칭 공란·status none 구분). 커밋 201.
+- **신규 페이지 `app/pages/12_시장가매칭.py`** — 3탭. ① 조회(전체 nadl·매칭상태·검색·메트릭) ② 매칭(미매칭 큐
+  selectbox→top3 체크박스 선택·복수등록·직접 관리코드 입력·없음 → nadl_map.csv 저장·rerun) ③ 매칭본(결합표·
+  CSV 다운로드·매핑 삭제 관리). 커밋 201.
+- **네비 등록** `app/streamlit_app.py` 분석 그룹에 "시장가 매칭"(🛒) 추가. 커밋 200.
+- 저장: 매핑 = work-automation-data:market/nadl/nadl_map.csv(ps_goid·nadl_name·nadl_spec·관리코드·status·updated).
+  토큰=st.secrets[data].pat(데이터repo 쓰기·1b/baseline 패턴 재사용).
+
+## 검증
+- ast.parse 양 파일 OK.
+- core 골든(실 nadl 606행 + product_master 4347): pm_index 733박스키·3528상품 인덱싱·21건 top3 16/16·1위 16/16·
+  매칭본 결합 정상(매칭건 우리 매입/매출 조인)·파서 스팟(nadl_box·pm_box).
+- 페이지 로직 스모크: 빈매핑 미검토 큐 606=전체, 1건 매칭 후 605, map CSV utf-8-sig 왕복 정상.
+
+## 다음 · 상태
+- ⚠️ **신규 core(market_nadl) → 재배포 후 Reboot app 1회**(페이지가 import). page 12·streamlit_app=자동반영.
+- **실사용 확인 대기**: nadl 수집일 선택→조회→미매칭 큐 매칭(top3 선택/없음)→매칭본 다운로드. 매핑 GitHub 저장 확인.
+- **모델 정교화 = 실사용 루프**(사용자 방향): top3 빗나간 케이스 알려주면 브랜드사전·게이트·가중 보강.
+- **다음 한 수 = 두뇌① 시장대비 권장가** — 매핑된 관리코드에 nadl 개당가 결합: 시장 여유(시장−매입)·
+  우리 포지션(권장가/매출−시장)·시장기반 권장가. 표시=상품360 '시장대비' 섹션 + 전체 스캔. 매핑 누적 후 착수.
+- 알려진 한계: 콤보행사(다맛 1listing)=단일코드 불완전 / 박스규격 미파싱(번들·P·세트 ~80건)=후보 없음→직접입력 / nadl_map은 ps_goid 키라 nadl이 listing 재생성하면 끊길 수 있음(상품명 변동엔 강건).
