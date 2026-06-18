@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updated": "2026-06-18b",
+    "updated": "2026-06-18c",
     "source": "work-automation-wb",
     "schema": "ADR 0019",
     "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -211,7 +211,7 @@
       "cluster": "fulfillment",
       "status": "live",
       "label": "천년경영 업로드",
-      "line": "발주자료 + 배송비 → 마켓별 업로드 양식 27시트(전체/낱개)",
+      "line": "발주자료(+선택 추가 매출통계 병합) + 배송비 → 마켓별 업로드 양식 29시트(전체15/낱개14) · 제이티유통·리테일앤인사이트 분배",
       "consumes": [
         "logistics_classification",
         "bm_commission",
