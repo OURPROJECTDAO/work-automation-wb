@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-18i",
+  "updated": "2026-06-18j",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -350,9 +350,9 @@
   {
    "id": "sikbom-register",
    "cluster": "registration",
-   "status": "partial",
+   "status": "live",
    "label": "식봄 일괄등록",
-   "line": "상품 대량 등록 양식 29열·r8부터. 수수료7%·마진=스마트스토어 baseline(없으면10%)·배송비명 L(N==1→'유료배송(수량별)'/else'수량별 배송비 N')·카테고리명 그대로(B/C/D)·이미지 양식外 별도(상품코드 매칭·phase2). 1차 74건 생성·검증·실업로드 대기 (챗 네이티브)",
+   "line": "상품 대량 등록 양식 29열·r8부터. 수수료7%·마진=스마트스토어 baseline(없으면10%)·배송비명 L(N==1→'유료배송(수량별)'/else'수량별 배송비 N')·카테고리명 그대로(B/C/D)·이미지 양식外 별도(상품코드 매칭·phase2). 등록 전 판매중지 다운로드 디듑(상품코드/소분 환원). 1차 41건(74→디듑33) 실업로드 성공·openpyxl 수용 확인 (챗 네이티브)",
    "consumes": [
     "product_master",
     "sikbom_category",
@@ -365,11 +365,6 @@
    "feeds": [],
    "page": "(챗 네이티브)",
    "roadmap": [
-    {
-     "tier": "planned",
-     "title": "실업로드 검증",
-     "detail": "openpyxl 저장본 식봄 수용 여부 첫 확인(거부 시 쿠팡식 zip 네이티브 수술). 배송비명 센터 사전등록 의존."
-    },
     {
      "tier": "planned",
      "title": "이미지 단계(phase2)",
