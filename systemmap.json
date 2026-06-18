@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-18g",
+  "updated": "2026-06-18h",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -461,11 +461,6 @@
      "tier": "later",
      "title": "L5 채널 확장",
      "detail": "11번가·셀러허브·자사몰·토마토 (listing 파서 추가)"
-    },
-    {
-     "tier": "later",
-     "title": "재고금액×예상마진 우선순위",
-     "detail": "baseline_margin 연계 정렬 + **두뇌②(✅재고 지능·9_재고지능) 품절 예측 연계(반응형→예방형, ADR 0020)**: 곧 품절 경보·소진 예측일 컬럼을 업로드감시 매트릭스에 결합."
     }
    ]
   },
