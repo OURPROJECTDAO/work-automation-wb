@@ -126,6 +126,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - `core/workflows/channel_margin_monitor.py`: CHANNEL_CONFIG + load_references(+hapo) + resolve_code(4-tier) + `_pid`(상품번호·extra_cols 정수정규화) + `_deflo`(구 listing float ID 복원) + `_strip_external_links`(템플릿 외부링크 제거) + **_consolidate_parse(알리 다중시트 정제 — 보이는 시트·라벨조회·숫자ID 필터, 매크로 대체)** + parse_download(consolidate 분기·**include_row_if_col_value(지마켓 keep)·dedup_key(A 중복제거)**·missing-col tolerant·`_ship`(ship_fee_const/ship_fee_policy/cols 3종)·`extra_cols` 보존(OFR/SKU)·_pick_ws·정가) + **_num(콤마 허용 '3,000'→3000·'무료'→0)** + compute(n_source 분기) + **compute_listing(baseline_override 라이브 기준마진)** + run + **기준마진율 편집(parse_baseline_dict·propose_baseline·update_baseline_csv·_fmt_margin)** + **build_append_items(append형 items 생성, 채널무관) + build_price_form_append(필드→컬럼 writer + **seq_col 순번**, 식봄·캐시노트·올웨이즈·**ESM**)** + build_bulk_price_xlsx(스마트스토어) + **build_filter_price_xlsx(쿠팡, zip 수술·openpyxl 미사용, 출력 sharedStrings 정규화) + 수술 헬퍼(_sheet_part·_read_sst·_cell_text·_cell_in_row·_set_num_cell·_renumber_row·_col_letter·`_inline_cells_to_shared`(inlineStr→t=s))**.
 - `app/pages/6_채널마진모니터.py`: 채널선택(`CHANNEL_CONFIG.keys()` 자동 — 캐시노트 자동 노출). **`multi_file` 채널(ESM)은 업로더 `accept_multiple_files=True` → 여러 배치 파일 parse·이어붙이기·`dedup_key` 교차 중복제거 후 전체교체/신규추가(multi는 raw 저장 생략=모니터전용)** → 저장 listing 자동로드 → KPI + 검색 + 필터 + st.dataframe 다중행 선택 + CSV/가격일괄변경 양식(price_form 있는 채널만). 전 컬럼 헤더 수식 help(`_col_config`). **하단 '🎯 기준마진율 설정' 섹션**(선택→현재 마진율을 그 채널 기준으로, 충돌 라디오·0.1%p반올림·offset 프리셋). baseline은 **GitHub 라이브 read**(`_load_baseline_text` 캐시)로 편집 즉시 반영(compute_listing override).
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
+- **이력 1d listing 가격 스냅샷 적립(2026-06-18)**: page가 listing 커밋(전체교체/신규추가) 직후 `_accumulate_listing(key, committed)` → 그 채널 가격을 날짜본으로 private data repo `snapshots/listing_YYYY-MM.parquet` 적립(비차단 toast·`_data_secret` [data] pat/repo·forward). core `core/intelligence/listing_history.py`(stock_history 1b 동형). 두뇌③ A/B 가격변경 전후 토대. import 신규 → Reboot 1회.
 
 ## 검증
 - **스마트스토어 골든 705/706** (2026-06-10): 정산액 707/707·base매입단가 706/707·마진율 705/706.
@@ -196,3 +197,5 @@ _갱신: 2026-06-12 (ESM 가격변경(append) 추가 — B=사이트상품번호
 _갱신: 2026-06-12 (기준마진율 편집(현재→기준) 추가 — 전 채널 공통. 선택→현재 마진율을 그 채널 baseline으로, 충돌 사용자선택·0.1%p반올림·baseline 라이브read 즉시반영. ADR 0016. core+page → Reboot)_
 
 _갱신: 2026-06-17 (ESM 채널키 'esm' 소문자 명명 예외 함정 — cross-module 'ESM' 대문자와 불일치 잠복지뢰. 데일리는 _cmm_key로 방어)_
+
+_갱신: 2026-06-18 (이력 1d — listing 커밋 시 채널 가격 날짜본 스냅샷 적립 훅(_accumulate_listing). core listing_history.py 신규. forward·비차단. import 신규→Reboot 1회)_
