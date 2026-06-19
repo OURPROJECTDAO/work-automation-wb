@@ -30,7 +30,7 @@
 | daily-dashboard (데일리 대시보드) | — | 진행중 (당일점검+세션인계+품절알림판+채널요약+가격변동알림+이상치→가격변경시트) | workflows/daily-dashboard.md |
 | sikbom-event-planning (식봄 행사기획) | — | 운영중 (챗·1차 2026-07 기획전) | workflows/sikbom-event-planning.md |
 | margin-optimizer (기준마진율 최적화·두뇌④) | app/pages/13_기준마진율최적화.py | 진행중 (v0 라이브 — 코어·페이지·원장) | workflows/margin-optimizer.md |
-| ui-design (전 페이지 UI 디자인·횡단) | — | 진행중 (Phase A 라이브 — 테마+헬퍼+로고) | workflows/ui-design.md |
+| ui-design (전 페이지 UI 디자인·횡단) | — | 진행중 (Phase A + 랜딩 리스킨) | workflows/ui-design.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -213,3 +213,5 @@ _갱신: 2026-06-19 (margin-optimizer 두뇌④ **v0 구현·라이브** — 권
 _갱신: 2026-06-19 (두뇌④ v0 운영보강·마진정합 — 택배2700·나들제외·45일억제·UI(월매출·코드·▲▼한국식)·기록+기준마진율 변경=타깃+Δ(ADR 0027)·기준마진율 컬럼. ⑦ 매출목표 로드맵 later. systemmap 2026-06-19c·ADR 0027·로그 ops)_
 
 _갱신: 2026-06-19 (UI 디자인 Phase A 라이브 — 전역 테마(config.toml 인디고+Pretendard)+core/ui.py(CSS·헬퍼)+진입점 로고/그룹명. ADR 0028·systemmap backlog. 재배포+Reboot 1회·체감 확인 대기. 다음=Phase B)_
+
+_갱신: 2026-06-19 (UI Phase C 시작 — 랜딩(지도·로드맵) 팔레트 리스킨: 크림+테라코타→near-white+인디고·상태색 통일·두뇌 인디고 분리·중복 st.title 제거. 기능 보존·page-only 자동반영. 커밋 dae597f. 다음=Phase B(데일리 헬퍼) or Phase C 잔여(오늘 할 일 요약))_
