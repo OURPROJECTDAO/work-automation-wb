@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19h",
+  "updated": "2026-06-19i",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -658,7 +658,8 @@
     "P×C 권장 기준마진율",
     "플래그(🟢🟡🔴)·이유",
     "측정 루프(Gate3)",
-    "⑧ 시즌(선물세트) 제외"
+    "⑧ 시즌(선물세트) 제외",
+    "⑦ 매출목표·나들 floor"
    ],
    "feeds": [
     "channel-margin-monitor"
@@ -667,13 +668,8 @@
    "roadmap": [
     {
      "tier": "later",
-     "title": "⑦ 상품 매출목표 라벨",
-     "detail": "미착수 — 출처 reference/sales_target.csv 포맷(관리코드→월목표·매출 vs 볼륨) 선정 선결. 미달→볼륨푸시(마진↓)·초과→마진챙김. 4분면 위 상품단위 modifier"
-    },
-    {
-     "tier": "later",
      "title": "② 회전 markdown 결합·나들 floor 클램프",
-     "detail": "장기소진 −2%p캡 자동복귀 / 나들 마진 명시 하한"
+     "detail": "장기소진 −2%p캡 자동복귀 / 나들 floor anchor=⑦에 연결 완료(잔여=회전 markdown·선택 margin_floor 제조원가 하한 명시)"
     }
    ]
   }
