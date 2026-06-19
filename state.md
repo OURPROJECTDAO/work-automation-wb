@@ -217,3 +217,5 @@ _갱신: 2026-06-19 (UI 디자인 Phase A 라이브 — 전역 테마(config.tom
 _갱신: 2026-06-19 (UI Phase C 시작 — 랜딩(지도·로드맵) 팔레트 리스킨: 크림+테라코타→near-white+인디고·상태색 통일·두뇌 인디고 분리·중복 st.title 제거. 기능 보존·page-only 자동반영. 커밋 dae597f. 다음=Phase B(데일리 헬퍼) or Phase C 잔여(오늘 할 일 요약))_
 
 _갱신: 2026-06-19 (UI Phase B-1 데일리 — page_header+section_head(인디고 액센트바)·중복 divider 제거·toolkit에 section_head 추가. 이상치 표/metric/Styler 보존. core/ui.py 40fd855·데일리 3355a94. ⚠️ section_head 신규→Reboot 1회(이후 같은 헬퍼 페이지는 page-only). 다음=두뇌④·마진모니터·상품360 배치)_
+
+_갱신: 2026-06-19 (데일리 품절 알림판 수제표 행 구분선 — keyed 컨테이너 스코프 CSS hairline(#ECEEF2). 타 표 무영향·로직 무변경·page-only. 커밋 62fc5cb)_
