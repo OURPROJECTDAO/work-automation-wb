@@ -19,7 +19,7 @@
 - logs/YYYY-MM/*.md — 작업 로그 (append-only, 1작업단위 1건)
 - decisions/NNNN-*.md — ADR (append-only)
 
-현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · cashnote-register · sikbom-register · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) · daily-dashboard(데일리 대시보드) · sikbom-event-planning(식봄 행사기획) · margin-optimizer(기준마진율 최적화·두뇌④) (state.md 인덱스 참조).
+현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · cashnote-register · sikbom-register · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) · daily-dashboard(데일리 대시보드) · sikbom-event-planning(식봄 행사기획) · margin-optimizer(기준마진율 최적화·두뇌④) · ui-design(전 페이지 UI·횡단) (state.md 인덱스 참조).
 
 ## 읽기 규칙 (세션 시작 — 한 번에)
 - PAT는 프로젝트 지식 파일에서 읽는다(절대 repo에 두지 않음).
@@ -57,3 +57,5 @@ _갱신: 2026-06-18 (sikbom-event-planning 워크플로우 추가 — 식봄 행
 _갱신: 2026-06-18 (sikbom-register 워크플로우 추가 — 식봄 일괄등록 최초 셋업. 양식 분석·카테고리 평탄화 정본·1차 74건 생성)_
 
 _갱신: 2026-06-19 (margin-optimizer 워크플로우 추가 — 기준마진율 최적화 두뇌④ 설계확정. ADR 0026)_
+
+_갱신: 2026-06-19 (ui-design 워크플로우 추가 — 전 페이지 UI 디자인·횡단. Phase A 라이브. ADR 0028)_
