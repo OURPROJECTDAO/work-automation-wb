@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19i",
+  "updated": "2026-06-19j",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -642,9 +642,9 @@
   {
    "id": "margin-optimizer",
    "cluster": "intelligence",
-   "status": "partial",
+   "status": "live",
    "label": "기준마진율 최적화(두뇌④)",
-   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). v0+측정루프 라이브(ADR 0026) — 작업목록·결정원장·측정 루프(Gate3: 결정일 이후 실적으로 효과측정→유지/되돌림, **적재 커버리지 30일 게이트+일수 정규화**로 익월초 적재 갭 정합, 되돌림=baseline −Δ 역가산). 시즌라벨·매출목표·cmm prefill 후속 · v0 운영보강(택배2700·나들제외·45일억제·UI)·기준마진율변경=타깃+Δ(ADR 0027)",
+   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). 설계 노브 전부 라이브(측정루프·⑧시즌제외·⑦매출목표/나들floor·②회전markdown)(ADR 0026) — 작업목록·결정원장·측정 루프(Gate3: 결정일 이후 실적으로 효과측정→유지/되돌림, **적재 커버리지 30일 게이트+일수 정규화**로 익월초 적재 갭 정합, 되돌림=baseline −Δ 역가산). 시즌라벨·매출목표·cmm prefill 후속 · v0 운영보강(택배2700·나들제외·45일억제·UI)·기준마진율변경=타깃+Δ(ADR 0027)",
    "consumes": [
     "sales",
     "baseline_margin",
@@ -659,7 +659,8 @@
     "플래그(🟢🟡🔴)·이유",
     "측정 루프(Gate3)",
     "⑧ 시즌(선물세트) 제외",
-    "⑦ 매출목표·나들 floor"
+    "⑦ 매출목표·나들 floor",
+    "② 회전 markdown"
    ],
    "feeds": [
     "channel-margin-monitor"
@@ -668,8 +669,8 @@
    "roadmap": [
     {
      "tier": "later",
-     "title": "② 회전 markdown 결합·나들 floor 클램프",
-     "detail": "장기소진 −2%p캡 자동복귀 / 나들 floor anchor=⑦에 연결 완료(잔여=회전 markdown·선택 margin_floor 제조원가 하한 명시)"
+     "title": "cmm 편집창 직접 prefill·margin_floor 클램프",
+     "detail": "현재 '기준마진율도 함께 변경' 토글이 baseline 직접 write로 갈음 / 제조원가 하한(margin_floor.csv) 명시 클램프는 미적용(나들/0 바닥으로 역마진은 이미 방지)"
     }
    ]
   }
