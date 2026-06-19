@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19j",
+  "updated": "2026-06-19k",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -670,7 +670,7 @@
     {
      "tier": "later",
      "title": "cmm 편집창 직접 prefill·margin_floor 클램프",
-     "detail": "현재 '기준마진율도 함께 변경' 토글이 baseline 직접 write로 갈음 / 제조원가 하한(margin_floor.csv) 명시 클램프는 미적용(나들/0 바닥으로 역마진은 이미 방지)"
+     "detail": "기록 시 baseline_margin.csv Δ가산으로 cmm 반영(항상 적용·토글 제거 2026-06-19). 잔여=cmm 편집창 직접 prefill(현재는 baseline write)·margin_floor 제조원가 하한 명시 클램프"
     }
    ]
   }
