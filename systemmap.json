@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19g",
+  "updated": "2026-06-19h",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -657,18 +657,14 @@
    "produces": [
     "P×C 권장 기준마진율",
     "플래그(🟢🟡🔴)·이유",
-    "측정 루프(Gate3)"
+    "측정 루프(Gate3)",
+    "⑧ 시즌(선물세트) 제외"
    ],
    "feeds": [
     "channel-margin-monitor"
    ],
    "page": "app/pages/13_기준마진율최적화.py (+ core/intelligence/margin_optimizer.py·decision_log.py)",
    "roadmap": [
-    {
-     "tier": "next",
-     "title": "⑧ 시즌(명절세트) 라벨 제외",
-     "detail": "개월 적은 세트류 월순이익 부풀림 → 시즌 특수처리"
-    },
     {
      "tier": "later",
      "title": "⑦ 상품 매출목표 라벨",
