@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19d",
+  "updated": "2026-06-19e",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -700,7 +700,7 @@
   {
    "node": null,
    "title": "UI 디자인 (전 페이지·횡단)",
-   "detail": "stock Streamlit→프로화. config.toml 테마+core/ui.py 전역 2파일. Phase A 라이브(테마·헬퍼·로고)·B(페이지 폴리시)·C(랜딩=지도강화)·D(QA) 남음. ADR 0028·workflows/ui-design.md"
+   "detail": "config.toml 테마+core/ui.py 전역 2파일. ✅Phase A(기반: 인디고+Pretendard+카드/핀필/헬퍼)·C(랜딩 지도·로드맵 리스킨)·B-1(데일리 page_header+section_head+표 구분선). 잔여=**로드맵·필요 시**: B 나머지 페이지(두뇌④·마진모니터·상품360·마진침식·재고지능·가격AB·유틸 — 같은 패턴·page-only) · C '오늘 할 일' 요약 점프 · 데일리 4메트릭→kpi_row(옵션) · D QA. ADR 0028·workflows/ui-design.md"
   }
  ],
  "edges": [
