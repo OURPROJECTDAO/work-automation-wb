@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19c",
+  "updated": "2026-06-19d",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -696,6 +696,11 @@
    "node": null,
    "title": "인프라 — 동료 접근 확대 / Railway 이전",
    "detail": "Streamlit Cloud RAM 1GB·스케줄러 없음 대비"
+  },
+  {
+   "node": null,
+   "title": "UI 디자인 (전 페이지·횡단)",
+   "detail": "stock Streamlit→프로화. config.toml 테마+core/ui.py 전역 2파일. Phase A 라이브(테마·헬퍼·로고)·B(페이지 폴리시)·C(랜딩=지도강화)·D(QA) 남음. ADR 0028·workflows/ui-design.md"
   }
  ],
  "edges": [
