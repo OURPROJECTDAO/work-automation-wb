@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-18j",
+  "updated": "2026-06-19a",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -636,6 +636,47 @@
      "tier": "later",
      "title": "노출 카테고리 빈 버킷 자동 후보",
      "detail": "MD 미지정 버킷을 상품명 키워드 매칭으로 후보 추천 · 인앱 페이지화(현재 챗 네이티브)"
+    }
+   ]
+  },
+  {
+   "id": "margin-optimizer",
+   "cluster": "intelligence",
+   "status": "concept",
+   "label": "기준마진율 최적화(두뇌④)",
+   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). 설계확정·미구현(ADR 0026)",
+   "consumes": [
+    "sales",
+    "baseline_margin",
+    "margin_floor",
+    "product_master",
+    "ship_alloc 실측택배",
+    "두뇌②(stockout)",
+    "두뇌③(channel_compare)"
+   ],
+   "produces": [
+    "P×C 권장 기준마진율",
+    "플래그(🟢🟡🔴)·이유"
+   ],
+   "feeds": [
+    "channel-margin-monitor"
+   ],
+   "page": "(미구현 · 출력은 channel-margin-monitor 기준마진율 편집 data_editor prefill)",
+   "roadmap": [
+    {
+     "tier": "next",
+     "title": "프로토타입 — 권장 기준마진율 자동 산출",
+     "detail": "매칭·고볼륨 상품부터 표 확인 → cmm 편집창 prefill 연동"
+    },
+    {
+     "tier": "later",
+     "title": "① 시장가(nadl) 라벨 복귀",
+     "detail": "ESM 등 쿠폰 채널 고객 실결제가↔nadl 비교 정의 후"
+    },
+    {
+     "tier": "later",
+     "title": "④재구매·⑨미끼 라벨",
+     "detail": "채널×상품 고객 데이터 구조화 선결"
     }
    ]
   }
