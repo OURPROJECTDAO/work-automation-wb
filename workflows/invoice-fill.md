@@ -27,13 +27,13 @@
 | has_guide_row | 헤더 다음 안내문 행 유무 (있으면 데이터 r3~, 없으면 r2~ / 1-based) |
 | password | (선택) 다운로드 파일에 항상 걸린 열기 암호 — 복호화용 |
 | invoice_as_text | (선택) True면 송장번호를 **문자열+일반(General)** 형식으로 기입(숫자셀 거부 채널). 기본 False=숫자(int) |
-| invoice_cell_format | (선택) 송장 셀의 number_format (기본 "General"). **"@"=텍스트 서식**. 올웨이즈는 값=숫자(int)지만 셀 서식만 텍스트(@)여야 업로드 성공. as_text(값 자체 문자열화)와 독립 — 이쪽은 값 유지·서식만 바꿈 |
+| invoice_cell_format | (선택) 송장 셀의 number_format (기본 "General"). **"@"=텍스트 서식**. 값 자체 문자열화(as_text)와 독립 — 이쪽은 값 유지·서식만 바꿈. (배민=as_text, 올웨이즈/식봄/캐시노트=기본 General) |
 | status_col | (선택) 출력 시 값 변환할 상태 컬럼명 |
 | status_map | (선택) {원값:새값} 매핑 (예: {"배송준비중":"배송중"}) |
 
 ### 현재 채널 값
 - **식봄**: format=xls, match_col=상품주문번호, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=배송지, recv_col=수취인명(받는사람), has_guide_row=True.
-- **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False, **invoice_cell_format="@"**. 운송장번호 = **값은 숫자(int) 유지 + 셀 서식만 텍스트(@)**. (서식 이력: 0608 문자열값 → 0610 int+General → **0611 int값+@서식**으로 재수정. 사용자 실측: 셀 서식만 텍스트로 바꾸면 업로드 성공, 골든 8/8 대조)
+- **올웨이즈**: format=xlsx, match_col=주문아이디, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=**운송장번호**, addr_col=주소, recv_col=수령인, has_guide_row=False. 운송장번호 = **값은 숫자(int) + 일반(General) 서식** (특수 키 없음·기본값). (서식 이력: 0608 문자열값 → 0610 int+General → 0611 int값+@서식 → **0619 다시 int+General으로 정정**. 골든 올웨이즈20260619배송 5/5 대조. ★올웨이즈가 요구하는 서식이 바뀜 — 이전 @ 서식 업로드가 더는 안 통함)
 - **배민상회**: format=xlsx(**암호 qwer 항상**), match_col=주문번호, master_key=주문번호, courier=한진택배, courier_col=**\*택배사**, invoice_col=**\*송장번호**, addr_col=도로명 주소, recv_col=받는분, has_guide_row=False, **invoice_as_text=True**. 멀티시트(주문관리목록+택배사명+업로드주의사항).
 - **캐시노트**: format=xlsx(평문), match_col=**ORD코드**, master_key=주문번호, courier=한진택배, courier_col=택배사, invoice_col=송장번호, addr_col=주소, recv_col=수령인명, has_guide_row=False, **status_col=배송상태 / status_map={배송준비중→배송중}**. 송장번호 숫자(int) — 업로드 정상 확인(2026-06-05).
 
@@ -53,7 +53,7 @@
 - **배민 멀티아이템 주문**: 같은 주문번호에 여러 품목행(예: 코카콜라+사이다) → VLOOKUP 첫매칭으로 전부 동일 송장(같은 박스). 정상 동작.
 
 ## 전용 함정
-- **송장번호 형식은 채널별**: 식봄 = **int+General** (`to_invoice_number`, number_format 기본 General). **배민 = 문자열값+일반(General)** (`to_invoice_text`, `invoice_as_text=True`) — 배민 원본 \*송장번호 열은 '@'(텍스트) 형식이라 숫자값 넣으면 업로드 거부. **올웨이즈 = int값 유지 + 셀서식만 @(텍스트)** (`invoice_cell_format="@"`) — 값은 숫자인데 셀 서식이 텍스트여야 업로드 성공(사용자 실측 0611). 캐시노트 = int+General. **세 축이 독립**: ①값을 문자열로(as_text) ②셀 서식(invoice_cell_format). `_write_template_xlsx`는 값 분기(as_text)와 서식(`cfg.get("invoice_cell_format","General")`)을 따로 적용. (이력: 올웨이즈 0608 문자열값 → 0610 int+General → 0611 int값+@서식)
+- **송장번호 형식은 채널별**: 식봄 = **int+General** (`to_invoice_number`, number_format 기본 General). **배민 = 문자열값+일반(General)** (`to_invoice_text`, `invoice_as_text=True`) — 배민 원본 \*송장번호 열은 '@'(텍스트) 형식이라 숫자값 넣으면 업로드 거부. **올웨이즈 = int값 + 일반(General)** (특수 키 없음, 0619 정정 — 이전 @서식에서 복귀). 캐시노트 = int+General. **세 축이 독립**: ①값을 문자열로(as_text) ②셀 서식(invoice_cell_format). `_write_template_xlsx`는 값 분기(as_text)와 서식(`cfg.get("invoice_cell_format","General")`)을 따로 적용. ★**채널이 요구하는 송장 서식은 바뀔 수 있음** — 업로드 거부 시 골든 받아 값타입(int/str)·셀서식(General/@) 두 축 재확인. (올웨이즈 이력: 0608 문자열 → 0610 int+General → 0611 int+@ → 0619 int+General)
 - **택배사 출력**: courier 일괄(없으면 lookup _택배사).
 - **상태 컬럼 변환(캐시노트)**: status_col/status_map 설정 시 출력 행의 상태값 치환(배송준비중→배송중). write 단계에서 적용, 다른 채널은 미설정→무영향.
 - **★ xlsx read_only 차원 오인**: 일부 채널 파일(캐시노트)은 dimension 레코드가 잘못돼 `load_workbook(read_only=True)`가 A1:A1로 오인 → 헤더 'X 1개'·0행. `_parse_template_xlsx`는 **read_only 미사용**(비 read_only)로 calculate_dimension 정확히. (천년경영 스스주문과 동류 함정)
@@ -78,3 +78,4 @@
 - logs/2026-06/2026-06-08-invoice-fill-olweijeu-text.md (올웨이즈 운송장번호 문자열 기입 정정 — 골든0608 대조)
 - logs/2026-06/2026-06-08-invoice-fill-sikbom-compdoc.md (식봄 .xls CompDocError 읽기 픽스 — ignore_workbook_corruption, 64/68 매칭)
 - logs/2026-06/2026-06-11-invoice-fill-olweijeu-cellformat.md (올웨이즈 송장 셀 서식 @ — 값=숫자 유지·서식만 텍스트, invoice_cell_format 키 신설, 골든 8/8)
+- logs/2026-06/2026-06-19-invoice-fill-olweijeu-general.md (올웨이즈 송장 셀 서식 @→일반(General) 복귀 — invoice_cell_format 키 제거, 골든 20260619 int값+General 5/5. 채널 요구 서식 변경)
