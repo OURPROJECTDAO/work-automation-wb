@@ -29,7 +29,7 @@
 | intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문 39개월·판매가검증·P2·매입현황·탭D·두뇌②·고객키/합포박스키 적재·**ship_alloc 합포 ceil(팩/3) 교정**·**두뇌③ A/B v1**(서술+마진율별판매량 탄력성)·**상품360카드 v1** 완료) 두뇌3종+통합카드 완성·다음=사용자선택 | workflows/intelligence-layer.md |
 | daily-dashboard (데일리 대시보드) | — | 진행중 (당일점검+세션인계+품절알림판+채널요약+가격변동알림+이상치→가격변경시트) | workflows/daily-dashboard.md |
 | sikbom-event-planning (식봄 행사기획) | — | 운영중 (챗·1차 2026-07 기획전) | workflows/sikbom-event-planning.md |
-| margin-optimizer (기준마진율 최적화·두뇌④) | app/pages/13_기준마진율최적화.py | 진행중 (v0+측정루프 라이브 — 작업목록/측정 결과 탭·결정원장) | workflows/margin-optimizer.md |
+| margin-optimizer (기준마진율 최적화·두뇌④) | app/pages/13_기준마진율최적화.py | 진행중 (v0+측정루프+⑧시즌제외+⑦매출목표/나들floor) | workflows/margin-optimizer.md |
 | ui-design (전 페이지 UI 디자인·횡단) | — | 진행중 (Phase A·랜딩·B-1 데일리) | workflows/ui-design.md |
 
 ## 완료된 Phase
@@ -227,3 +227,5 @@ _세션 클로즈: 2026-06-19 (두뇌④ 측정 루프 = Gate 3 닫기 구현). 
 _갱신: 2026-06-19 (두뇌④ 측정 루프 하드닝 — 매출자료 익월초 적재 갭 정합. ready=벽시계30일이 아니라 **적재 커버리지**(적재 최신거래일−ts≥30일)·run-rate **일수 정규화**(÷측정일수/30.4, 달력월 개수 아님) → 월말 결정+부분월 적재의 거짓 악화 해소. 신규 컬럼 측정일수·페이지 표시·대기 안내. 검증 4케이스(월말+완결=개선·월말+부분월=측정대기·오늘결정=대기·매출0=악화). 첫 실측=결정 누적+적재 30일분 후(현 5월말→6월분 7월초 적재돼야 시작). ⚠️ core 변경분에 포함→Reboot 1회. 커밋 mo 8834b7e·page 2bb0f5e. 로그 2026-06-19-margin-optimizer-measure-loop-coverage-fix.md)
 
 _갱신: 2026-06-19 (두뇌④ ⑧ 시즌 제외 완료 — 선물세트(product_attributes 식품음료 분류 65종) build_prod에서 작업목록/측정 제외. 명절 스파이크(설13억·추석29억)가 활성개월 run-rate 부풀려 임팩트 상위 점령하던 노이즈 해소. page-only·Reboot 불요. 다음=⑦ 매출목표 라벨(sales_target.csv 포맷 선결). 커밋 page b7fcadb·로그 season-exclude)
+
+_갱신: 2026-06-19 (두뇌④ ⑦ 매출목표+나들 floor(나) — best 관리채널 월매출<100만=미달 → 고마진/베이스근처/proven은 **나들 마진까지 절반스텝 인하**·나들 마진 없으면 −1%p·저마진은 🔴 사람판단. 원안 'best(나들포함) 따라가기'는 나들=바닥 무한인하라 폐기, 100만 절대 floor만 채택((나): 표시+자동제안, 측정 데이터 어차피 쌓임). 나들 floor anchor=build_prod가 나들 제외 전 1패스로 nadl_map 계산. core recommend_code(nadl_margin)·worklist(nadl_map)·TARGET_FLOOR 100만·TEST_CAP −1%p·목표 컬럼. 검증 합성 전건. ⚠️ core 변경→Reboot 1회(측정루프·하드닝·⑧·⑦ 묶어 1회). 다음=② 회전 markdown. 커밋 mo 277d295·page 2ca2a2d·로그 sales-target)
