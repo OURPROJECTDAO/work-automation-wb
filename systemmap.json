@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19b",
+  "updated": "2026-06-19c",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -644,7 +644,7 @@
    "cluster": "intelligence",
    "status": "partial",
    "label": "기준마진율 최적화(두뇌④)",
-   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). v0 라이브(ADR 0026) — 작업목록·결정원장. 측정루프·시즌라벨·cmm prefill 후속",
+   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). v0 라이브(ADR 0026) — 작업목록·결정원장. 측정루프·시즌라벨·cmm prefill 후속 · v0 운영보강(택배2700·나들제외·45일억제·UI)·기준마진율변경=타깃+Δ(ADR 0027)",
    "consumes": [
     "sales",
     "baseline_margin",
@@ -671,12 +671,12 @@
     {
      "tier": "next",
      "title": "⑧ 시즌(명절세트) 라벨 제외",
-     "detail": "개월 적은 세트류가 월순이익 상위 부풀림 → 시즌 라벨로 특수처리"
+     "detail": "개월 적은 세트류 월순이익 부풀림 → 시즌 특수처리"
     },
     {
      "tier": "later",
-     "title": "cmm 편집창 직접 prefill",
-     "detail": "현재는 권장값 표시·원장 기록까지. 채널마진모니터 기준마진율 편집 data_editor 직접 주입"
+     "title": "⑦ 상품 매출목표 라벨",
+     "detail": "미착수 — 출처 reference/sales_target.csv 포맷(관리코드→월목표·매출 vs 볼륨) 선정 선결. 미달→볼륨푸시(마진↓)·초과→마진챙김. 4분면 위 상품단위 modifier"
     },
     {
      "tier": "later",
