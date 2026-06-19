@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19a",
+  "updated": "2026-06-19b",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -642,9 +642,9 @@
   {
    "id": "margin-optimizer",
    "cluster": "intelligence",
-   "status": "concept",
+   "status": "partial",
    "label": "기준마진율 최적화(두뇌④)",
-   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). 설계확정·미구현(ADR 0026)",
+   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). v0 라이브(ADR 0026) — 작업목록·결정원장. 측정루프·시즌라벨·cmm prefill 후속",
    "consumes": [
     "sales",
     "baseline_margin",
@@ -661,22 +661,27 @@
    "feeds": [
     "channel-margin-monitor"
    ],
-   "page": "(미구현 · 출력은 channel-margin-monitor 기준마진율 편집 data_editor prefill)",
+   "page": "app/pages/13_기준마진율최적화.py (+ core/intelligence/margin_optimizer.py·decision_log.py)",
    "roadmap": [
     {
      "tier": "next",
-     "title": "프로토타입 — 권장 기준마진율 자동 산출",
-     "detail": "매칭·고볼륨 상품부터 표 확인 → cmm 편집창 prefill 연동"
+     "title": "측정 루프(Gate3 닫기)",
+     "detail": "다음 사이클 매출/스냅샷으로 결정원장 측정후·결과 채움 → 유지/되돌림 자동 판정"
+    },
+    {
+     "tier": "next",
+     "title": "⑧ 시즌(명절세트) 라벨 제외",
+     "detail": "개월 적은 세트류가 월순이익 상위 부풀림 → 시즌 라벨로 특수처리"
     },
     {
      "tier": "later",
-     "title": "① 시장가(nadl) 라벨 복귀",
-     "detail": "ESM 등 쿠폰 채널 고객 실결제가↔nadl 비교 정의 후"
+     "title": "cmm 편집창 직접 prefill",
+     "detail": "현재는 권장값 표시·원장 기록까지. 채널마진모니터 기준마진율 편집 data_editor 직접 주입"
     },
     {
      "tier": "later",
-     "title": "④재구매·⑨미끼 라벨",
-     "detail": "채널×상품 고객 데이터 구조화 선결"
+     "title": "② 회전 markdown 결합·나들 floor 클램프",
+     "detail": "장기소진 −2%p캡 자동복귀 / 나들 마진 명시 하한"
     }
    ]
   }
