@@ -59,3 +59,5 @@ _갱신: 2026-06-18 (sikbom-register 워크플로우 추가 — 식봄 일괄등
 _갱신: 2026-06-19 (margin-optimizer 워크플로우 추가 — 기준마진율 최적화 두뇌④ 설계확정. ADR 0026)_
 
 _갱신: 2026-06-19 (ui-design 워크플로우 추가 — 전 페이지 UI 디자인·횡단. Phase A 라이브. ADR 0028)_
+
+_갱신: 2026-06-19 (margin-optimizer 두뇌④ 측정 루프 = Gate 3 닫기 구현 — 결정일 이후 실적으로 효과측정→유지/되돌림, 측정창 30일·되돌림 baseline −Δ 역가산. core measure/_verdict·decision_log.update·page 탭구조. Reboot 1회)_
