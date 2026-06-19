@@ -61,3 +61,5 @@ _갱신: 2026-06-19 (margin-optimizer 워크플로우 추가 — 기준마진율
 _갱신: 2026-06-19 (ui-design 워크플로우 추가 — 전 페이지 UI 디자인·횡단. Phase A 라이브. ADR 0028)_
 
 _갱신: 2026-06-19 (margin-optimizer 두뇌④ 측정 루프 = Gate 3 닫기 구현 — 결정일 이후 실적으로 효과측정→유지/되돌림, 측정창 30일·되돌림 baseline −Δ 역가산. core measure/_verdict·decision_log.update·page 탭구조. Reboot 1회)_
+
+_갱신: 2026-06-19 (margin-optimizer 두뇌④ 설계 노브 전부 완성 → 운영중: 측정 하드닝(커버리지 게이트+일수정규화)·⑧ 시즌(선물세트) 제외·⑦ 매출목표+나들 floor·② 회전 markdown. core+page·Reboot 1회. 정본 workflows/margin-optimizer.md §13~17)_
