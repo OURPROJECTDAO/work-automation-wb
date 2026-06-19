@@ -29,7 +29,7 @@
 | intelligence-layer (지능 레이어·이력엔진+두뇌) | — | 진행중 (1a·1b·두뇌①·주문 39개월·판매가검증·P2·매입현황·탭D·두뇌②·고객키/합포박스키 적재·**ship_alloc 합포 ceil(팩/3) 교정**·**두뇌③ A/B v1**(서술+마진율별판매량 탄력성)·**상품360카드 v1** 완료) 두뇌3종+통합카드 완성·다음=사용자선택 | workflows/intelligence-layer.md |
 | daily-dashboard (데일리 대시보드) | — | 진행중 (당일점검+세션인계+품절알림판+채널요약+가격변동알림+이상치→가격변경시트) | workflows/daily-dashboard.md |
 | sikbom-event-planning (식봄 행사기획) | — | 운영중 (챗·1차 2026-07 기획전) | workflows/sikbom-event-planning.md |
-| margin-optimizer (기준마진율 최적화·두뇌④) | — | 개념doc (설계확정·미구현) | workflows/margin-optimizer.md |
+| margin-optimizer (기준마진율 최적화·두뇌④) | app/pages/13_기준마진율최적화.py | 진행중 (v0 라이브 — 코어·페이지·원장) | workflows/margin-optimizer.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -205,3 +205,5 @@ _갱신: 2026-06-18 (sikbom-register 운영중 — 1차 41건(74→판매중지 
 _세션 클로즈: 2026-06-18 (sikbom-register 신설·end-to-end 운영중 — 식봄 최초 상품 일괄등록). 완료: ① 카테고리 정리 reference/sikbom_category.csv(원본 양식 '상품 카테고리' **2축 블록 매트릭스→평탄 1차/2차/3차**·367→사용자 큐레이션 266) ② 양식 분석·전용값(상품 대량 등록 29열·r8·수수료7%·마진=스마트스토어 baseline(없으면10%)·판매가 공통식(2500/내림)·**배송비명 L=N==1?'유료배송(수량별)':'수량별 배송비 N'**[N=박스합포/낱개합포×박스내품·식봄센터 사전등록 의존]·카테고리명 그대로 B/C/D·과세 y·키워드 ≤15자/10개/한영숫자만·이미지 양식外) ③ 1차 74건 생성→검토 워크시트(정제명·카테고리 제안 정본100%·비고19건 검색/이미지 확정: 비스더블랙=캔커피·맛기름=향미유 참기름·스파크=세탁세제·밤감로자=밤통조림·호니베어=파이필링잼·피죤=섬유유연제2입) ④ **판매중지 다운로드 디듑**(상품코드 환원[낱개PC·박스관리코드·소분 변환코드→원코드]·446건 대조→33제거[낱개32+소분1: 백설튀김가루 박스08-45↔소분PD1KG5EA-08-45]→41) ⑤ **41건 실업로드 성공**(사용자 확인·openpyxl 수용·zip수술 불요) ⑥ 골든 박제 app repo reference/(sikbom_bulk_template.xlsx 빈양식·sikbom_bulk_golden_41.xlsx 검증본) ⑦ **이미지 phase2**(상품코드 폴더 zip·**찾기=관리코드/저장=상품코드A** — 낱개는 상이라 리네임 실질·82장 전건 성공·식봄이미지_41건.zip). systemmap sikbom-register **live**·meta 2026-06-18j. 로그 logs/2026-06/2026-06-18-sikbom-register-{setup,dedup,golden,images}.md. **다음 한 수=변동 없음** — 시장대비 권장가(두뇌① 시장결합·매핑 누적 후) 또는 이력 1e 행사 로깅(systemmap planned). 식봄 등록=펜딩 없음(차기 배치는 업로드감시 출력 받아 표준 흐름 반복).)
 
 _갱신: 2026-06-19 (margin-optimizer(기준마진율 최적화·두뇌④) 신규 워크플로우 설계확정·미구현 — 인터뷰로 정의 도출. 베이스=proven채널 순이익가중평균·4분면·절반스텝·노브4종·라벨로스터. ADR 0026·systemmap 2026-06-19a)_
+
+_갱신: 2026-06-19 (margin-optimizer 두뇌④ **v0 구현·라이브** — 권장 기준마진율 작업목록 + Gate3 결정원장(history/decisions.parquet seed). proven=월순이익 run-rate 누적85%·경계포함, 15-04 수작업 일치. ★**Reboot 필요**. 다음=측정루프→시즌라벨→cmm prefill. systemmap 2026-06-19b·로그 build)_
