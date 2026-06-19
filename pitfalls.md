@@ -53,7 +53,10 @@
 - reference csv는 UTF-8-sig(BOM)로 저장. Excel에서 직접 열어도 안 깨짐.
 - 대시보드 차트: matplotlib는 한글 폰트 미설치 시 □□□. Plotly/Altair(브라우저 폰트) 권장.
 - 정렬: VBA xlPinYin vs Python 코드포인트 정렬 차이 가능 → 골든 파일 대조로 확인.
+- cmm 기준마진율 = 노출가(표시가) 기반 forward target ≠ 매출자료 realized(할인·쿠폰·믹스로 realized<target가 정상). 두 값 동일시 금지 — 교차 반영은 Δ(변화량) 가산으로(두뇌④, ADR 0027).
 
 _갱신: 2026-06-11 (openpyxl 저장 네이티브 포맷 파괴 함정 추가 — 쿠팡 업로드 사례)_
 
 _갱신: 2026-06-17 (pandas Styler.applymap 제거(3.x) → .map 함정 추가 — Streamlit Cloud)_
+
+_갱신: 2026-06-19 (cmm target↔매출자료 realized 마진 정의 정합 함정 — 두뇌④/ADR 0027)_
