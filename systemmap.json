@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-19f",
+  "updated": "2026-06-19g",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -644,7 +644,7 @@
    "cluster": "intelligence",
    "status": "partial",
    "label": "기준마진율 최적화(두뇌④)",
-   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). v0+측정루프 라이브(ADR 0026) — 작업목록·결정원장·측정 루프(Gate3: 결정일 이후 실적으로 효과측정→유지/되돌림, 측정창 30일, 되돌림=baseline −Δ 역가산). 시즌라벨·매출목표·cmm prefill 후속 · v0 운영보강(택배2700·나들제외·45일억제·UI)·기준마진율변경=타깃+Δ(ADR 0027)",
+   "line": "P×C(상품×채널)마다 최적 기준마진율을 데이터로 → cmm 기준마진율 편집창 prefill. 베이스=순이익누적85% proven채널 순이익가중평균·볼륨×(마진vs베이스) 4분면·저볼륨고마진=절반스텝 인하·저볼륨저마진=hold-low·회전 markdown·채널독립·시도→측정 루프(Gate2·3)·전부 사람저장(🟢🟡🔴). v0+측정루프 라이브(ADR 0026) — 작업목록·결정원장·측정 루프(Gate3: 결정일 이후 실적으로 효과측정→유지/되돌림, **적재 커버리지 30일 게이트+일수 정규화**로 익월초 적재 갭 정합, 되돌림=baseline −Δ 역가산). 시즌라벨·매출목표·cmm prefill 후속 · v0 운영보강(택배2700·나들제외·45일억제·UI)·기준마진율변경=타깃+Δ(ADR 0027)",
    "consumes": [
     "sales",
     "baseline_margin",
