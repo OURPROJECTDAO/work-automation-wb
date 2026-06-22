@@ -127,6 +127,7 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **등록/해제 UI**: 표 선택 → '🔒 제한 상품 등록/해제' 섹션 data_editor(제한내용✏️). 입력=등록/수정·비움(기존 제한)=해제·빈칸+무제한=무변경. 저장→margin_floor.csv 반영→tblver+1+rerun(즉시 반영·선택 풀림).
 - **core**: `parse_floor_dict`(text→{관리코드:{상품명,비고,제한내용}}) · `update_floor_csv(text,upserts,removes)`(헤더/BOM/CRLF/타코드 보존, update_baseline 패턴) · `compute_listing(...,floor_override=)`(refs["floor"] 교체·즉시반영, compute 무수정).
 - 두뇌④(load_locked)와 동일 파일 — 등록 시 그 상품 작업목록 제외. 제한내용 기본=빈칸(일괄 오등록 방지).
+- **필터**: '제한상품만' 옆에 **'제한 제외'**(제한 아닌 것만) 체크박스(2026-06-22·page-only·filter_sig 동기).
 - ⚠️ core 신규 → Reboot 1회.
 
 ## 전월매출 (박스/낱개/소분 통일) — 표 참고 컬럼 (2026-06-22)
