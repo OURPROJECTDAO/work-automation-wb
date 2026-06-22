@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updated": "2026-06-22 (channel-margin-monitor 전월매출 2컬럼·canonical_code 통일·매출자료 소비 추가)",
+    "updated": "2026-06-22 (channel-margin-monitor 세션: 전월매출 2컬럼·canonical_code·기준마진율 UX 안정화·제한 등록/해제(floor R/W)·필터 다수)",
     "source": "work-automation-wb",
     "schema": "ADR 0019",
     "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
