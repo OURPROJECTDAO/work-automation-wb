@@ -103,3 +103,5 @@ _갱신: 2026-06-17 (fix — ESM 행만 현재가/권장가/판정/가격변경 
 _갱신: 2026-06-17 (확장판③ 신규 업로드 대상 — 최근 입고·신규등재 ∩ 8채널 전부 미업로드 ∩ 재고>0. 신규 core stock_history.detect_new_stock(입고전이∪신규등재·baseline floor·detect_transitions 자매) + upload_monitor.build_gap_table 재사용(중복0·업로드감시 최근입고 서브셋). 최근매입일=cadence(월1회 보조). 골든 8건. page 0b+core→Reboot 1회)_
 
 _갱신: 2026-06-22 (가격 변동 알림 — **매입가 전용**. 판매가 불요(사용자) → 구분 멀티셀렉트 토글 제거·매입가 고정 필터·표 '구분' 컬럼 제거. core detect_price_changes 무변경(둘 다 탐지·page에서 매입가만 필터, 판매가 복귀는 1줄). 커밋 b594bdf·page-only·Reboot 불요)_
+
+_갱신: 2026-06-22 (가독성 — ① 상단 4메트릭 매출/마진 잘림 해소(st.columns [3,3,2,2]로 매출·마진 넓게+이 페이지 CSS stMetricValue 1.55rem·nowrap) ② 채널별 요약 콤마(NumberColumn→Styler {:,.0f}, 가격변동 표와 동일 패턴) ③ **택배=박스개수**(택배비÷2700, 사용자요청 40500→15·캡션 실제박스수와 정합). 커밋 7d0fefe·page-only·Reboot 불요)_
