@@ -161,7 +161,8 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - **채널 컬럼만**: `update_baseline_csv`가 baseline_col 컬럼만 수정(타 채널·타 관리코드·헤더/열순서/BOM/CRLF 보존). 없는 관리코드 행 추가.
 - **즉시 반영**: baseline를 배포본 로컬(load_references) 대신 **GitHub 라이브**(`_load_baseline_text` @cache_data)로 읽어 `compute_listing(baseline_override=)` 주입 → 저장 시 cache clear+rerun, 재배포 불요. (기존엔 reference 로컬 read라 재배포 전 미반영)
 - **검증**: 미달 10(관리코드 유니크)→baseline=현재→전부 미달 해제, 전체 49→29. 구조·타채널 보존, override 즉시반영.
-- 향후: ②인라인 편집(data_editor) ③일괄 규칙(필터 전체=고정값). 1차는 선택→현재만.
+- **UX 안정화(2026-06-22)**: 체크박스 stale(이상한 값 체크·간헐 미작동) 해소 — 두뇌④ 패턴 이식. ① 메인 표 key에 **`cmm_tblver` 버전카운터**(저장 시 +1로 선택 강제 초기화·filter_sig 무관) ② **인라인화**(버튼+`bl_{key}` session_state 2단계 → 선택 즉시 data_editor 1단계) ③ 저장 후 tblver+1+rerun → 즉시 반영+체크박스 풀림. page-only.
+- 향후: ③일괄 규칙(필터 전체=고정값).
 
 ## 채널 추가 레시피 (★앞으로 채널 다수 — 이 순서)
 새 채널 = 보통 **CHANNEL_CONFIG 한 세트** 만(정산식은 스마트스토어 표준 고정). 코드 4-tier·reference·페이지·listing 저장은 공통(수정 불필요).
@@ -211,5 +212,7 @@ _갱신: 2026-06-17 (ESM 채널키 'esm' 소문자 명명 예외 함정 — cros
 _갱신: 2026-06-18 (이력 1d — listing 커밋 시 채널 가격 날짜본 스냅샷 적립 훅(_accumulate_listing). core listing_history.py 신규. forward·비차단. import 신규→Reboot 1회)_
 
 _갱신: 2026-06-22 (전월매출 2컬럼(이채널·전체) — 표 참고. core canonical_code(박스/낱개/소분→원박스 통일)·page _load_prev_sales/_CH_TO_SANGHO(쿠팡=윙+로켓). 매출자료=박스코드(낱개·합포·소분 0건 검증)→listing만 정규화. 같은 canonical 행 같은값=세로합산금지. 베이스(%)는 성능으로 보류. core→Reboot 1회. 커밋 core 9c265d12·page 4aee8eb0)_
+
+_갱신: 2026-06-22 (기준마진율 설정 UX 안정화 — 인라인화(2단계→1단계)+표 버전카운터 cmm_tblver(저장 시 선택 강제 초기화), 두뇌④ mo_tblver 패턴 이식. 체크박스 stale 해소. page-only. 커밋 13b33e56)_
 
 _갱신: 2026-06-22 (전월매출(전체) 정의 정정 — '전 거래처'가 아니라 **내 관리 8채널 합**(나들·B2B 제외, 사용자 정정). _load_prev_sales total을 _CH_TO_SANGHO 상호명으로 한정. page-only. 커밋 474885c0)_
