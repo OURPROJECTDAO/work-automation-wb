@@ -43,3 +43,5 @@ stock Streamlit("딱 봐도 Streamlit") → 절제된 인디고 액센트 + Pret
 ## 관련 로그/결정
 - ADR 0028 (UI 디자인 방향·전역 2파일 구조)
 - logs/2026-06/2026-06-19-ui-design-phase-a.md
+
+_갱신: 2026-06-22 (전역 본문 폭 풀기 — core/ui.py `.block-container max-width:1180px→none`으로 전 페이지 양옆 꽉차게(layout=wide 풀폭·좌우 패딩만). 데일리(0b)에 임시로 넣었던 page-scoped override 제거(전역화로 중복). ★core 모듈→**Reboot 1회 필요**. 커밋 ui 5e11c40·0b f9141d4. 휑한 텍스트 페이지는 개별 캡 재부여 가능)_
