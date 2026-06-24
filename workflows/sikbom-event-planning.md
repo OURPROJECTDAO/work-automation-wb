@@ -81,6 +81,22 @@
 - 산출=xlsx 2시트(분석 라이브수식 + 식봄 공식양식 판매자 H:O, 실 상품no/정가 기입).
 - 잔여=메밀칩 4건 식봄 등재 후 같은 흐름. ⚠️ 86-66-05-0211 재고 -15.
 
+## 3차 사례 (2026-07 기획전 단가 인하 검토 · 2026-06-24)
+- **진입**: 식봄측이 "양식 시트 행사가에서 단가 추가 인하 가능?" 문의 → 내부 검토 시트. 대상=공식양식(2차) 판매자칸 13품목(레몬에이드+새우칩6+메밀칩4+꽈배기2, 전건 식봄 등재).
+- **상품no→코드**: 폼 J열=식봄 상품no → listing_sikbom.csv 코드 조인 → product_master 단위별 매입가. 메밀칩/꽈배기는 2·3차 등록분이 이제 등재(상품no 부여).
+- **현 행사가 마진 6.3~8.6%**: 새우칩/메밀칩 대부분 6~7%대=식봄 기준마진(8%) 이하로 이미 공격적. **추가인하여력=현재가−3%하한가**(품목당 100~700원). 메밀칩 100=바닥, 꽈배기/새우칩박스 400~700 여지. 단 8% 밑 인하는 살 깎는 양보.
+- ⚠️ 컨츄리타임 레몬에이드 박스재고 −15(재입고 필요).
+- 산출=식봄_7월_행사가_인하여력_분석.xlsx 2탭(행사가_마진분석 라이브수식 + 명가꽈배기_식봄경쟁가).
+
+## ★ 식봄(foodspring) 경쟁가 크롤링 (2026-06-24 실증 — 신규 capability)
+- **가능**. foodspring.co.kr 지오펜스 없음(해외IP 200). 가격=SPA, GraphQL `api.foodspring.co.kr/v2/graphql`로 로드. 운영사=마켓보로.
+- **방법**: ① GET `/`로 게스트 세션 쿠키(GUEST_SESSION·ci_session) ② JS 번들 `_next/static/chunks/pages/search/all-*.js`에 **raw 쿼리텍스트** 박혀있음(persisted 전용 아님) — `SearchResultGoodsListPCPaginationQuery` 추출 ③ POST(헤더 Origin/Referer·X-Device-Type:pc·X-Client-Environment:production, variables={keyword,isMobile:false,input:{keyword,sort:"ACCURACY_DESC"},first:80,areaId}).
+- **막힘 포인트**(우회됨): introspection 비활성·persisted operationName POST=403 → **raw 쿼리텍스트 POST는 200**.
+- **응답**: Goods.price{salePrice·originalPrice·**appliedCoupon.price**·discountRate}·vendor.name·deliveryFee·stock.
+- ★ **즉시할인(−20%)은 전 판매자 동일 적용=마켓보로 플랫폼 부담**(KB 기존 정합) → 정산 미반영. **경쟁 비교·우리 마진은 salePrice(판매가) 기준**. 랭킹은 판매가=쿠폰가 동일(uniform 20%).
+- 명가꽈배기 검증: 우리(태동유통) 참깨/흑당 5,000=식봄 최저(차순위 디에이치5,480·다봄5,690). areaId=null(영역 미지정)도 가격 수신.
+- nadl과 동형 KR 로컬 수집기로 정례화 가능(영역가 areaId까지). 시장지능 후보·당장 셋업 미착수.
+
 ## 관련
 - channel-margin-monitor.md (식봄 정산식·resolve_code 4-tier·hapo N — 전부 재사용)
 - 공유 reference: product_master·hapo_multiplier·sobun·baseline_margin (manifest A)
@@ -89,3 +105,5 @@
 _생성: 2026-06-18 (식봄 행사기획 신규 워크플로우 — 1차 2026-07 기획전. 챗 네이티브·channel-margin-monitor 정산식 재사용)_
 
 _갱신: 2026-06-23 (2차 사례 — MD 관리코드 직접 지정·과자/레몬에이드. 학습: listing 스냅샷 stale 재fetch·PC낱개/박스 유닛별 마진 단위. 현재가 이미 기준마진 이하→현재가 유지)_
+
+_갱신: 2026-06-24 (3차 사례 — 행사가 단가 인하여력 검토(6.3~8.6%·여력100~700원·8%기준 이하 양보). ★식봄 GraphQL 경쟁가 크롤링 실증(raw 쿼리텍스트 POST·게스트세션·우리가 명가꽈배기 최저5000=8.6%). 즉시할인20%=마켓보로 부담 정산무관)_
