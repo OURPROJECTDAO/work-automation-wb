@@ -59,6 +59,7 @@
 - 어드민옵션 좌측, 재고 우측. 테두리 회색(999999).
 - 열 순서: 구분 / 규격 / erp(C열 숨김) / 어드민옵션 / 총수량 / 재고.
 - 품절목록 시트도 동일 톤(헤더색, 현재고 빨강).
+- **인쇄 가독성 (2026-06-25)**: 물류팀 시트 한정 후처리 — A(구분)·B(규격)·F(재고) 글자크기 **9pt**, D(어드민옵션) **자동줄바꿈 해제**(wrap_text=False). `generate_result_xlsx` 물류팀 ws 빌드 직후 `iter_rows` 1패스(Font size=9는 기존 색/볼드 보존, D는 정렬 보존). 공유 폰트 상수 미수정 → C/D/E·품절목록 무영향. ★병합셀 내부 비표시 셀은 11pt 잔존하나 표시 앵커셀이 9pt라 인쇄상 동일(골든파일도 동일 패턴). core 변경 → Reboot 1회.
 
 ## 검증 (골든 대조)
 - pytest 4 passed (`tests/test_logistics_order.py`):
@@ -85,3 +86,5 @@
 _갱신: 2026-06-16 (품절목록 E열 최근입고일·F열 평균매입주기 추가 — 매입현황 cadence(purchases.cadence_by_code) 주입. 실데이터 검증 OK. core→Reboot)_
 
 _갱신: 2026-06-16 (품절목록 cadence — 발주 날짜 기준 최근 1년 윈도우(months=12)·G열 입고횟수(1년) 추가. cadence_by_code(now,months) 윈도우 인자. 실데이터 재검증. core→Reboot)_
+
+_갱신: 2026-06-25 (물류팀 인쇄 가독성 — A/B/F 9pt·D 자동줄바꿈 해제. generate_result_xlsx ws 한정 후처리. core→Reboot)_
