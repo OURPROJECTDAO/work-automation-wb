@@ -146,6 +146,15 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - reference는 배포본 로컬 `reference/`에서 읽음. **core import 모듈 수정 → 첫 배포 후 Reboot app 1회 필요.**
 - **이력 1d listing 가격 스냅샷 적립(2026-06-18)**: page가 listing 커밋(전체교체/신규추가) 직후 `_accumulate_listing(key, committed)` → 그 채널 가격을 날짜본으로 private data repo `snapshots/listing_YYYY-MM.parquet` 적립(비차단 toast·`_data_secret` [data] pat/repo·forward). core `core/intelligence/listing_history.py`(stock_history 1b 동형). 두뇌③ A/B 가격변경 전후 토대. import 신규 → Reboot 1회.
 
+## 챗 네이티브 가격변경 생성 (앱 페이지 미경유 — 2026-06-25)
+- 앱 page 6 글루를 오프라인 재현해 챗에서 직접 가격변경 시트 생성 가능. core + reference만 있으면 됨.
+- 절차: ① listing_<key>.csv → `csv_text_to_recs` ② `compute_listing(recs, channel, ref_dir)` → rows ③ 대상 상품번호 sel_pids 선정 ④ 빌더 분기:
+  - **append형**(식봄·캐시노트·배민상회·올웨이즈·ESM): `build_append_items(pf, rows, recs, sel_pids)` → `build_price_form_append((REF/pf['template']).read_bytes(), items, pf)`.
+  - **smartstore**(default): `compute_new_prices(rows, recs, sel_pids)` → `build_bulk_price_xlsx(listing_smartstore.xlsx bytes, new_prices, cfg)`. (즉시할인 조정으로 net↑, 판매가 유지)
+  - **쿠팡**(filter형): `build_filter_price_xlsx(listing_coupang.xlsx bytes, rows, sel_pids, cfg)`. raw는 '전체 교체' 네이티브 전제.
+- **매입가 인상 이벤트 판단 규칙**: 미달(탐지 < -1%p)만 권장가로 인상, 기준 초과분은 유지(자동 인하 안 함 — 인상 취지 역행, 사용자 판단). 권장가=현 매입가로 기준마진 달성가(2,700·ceil).
+- ★ 권장가는 **현재 저장 listing·기준마진율 스냅샷 기준** — 매입가/기준 재변경 시 갱신 후 재실행. (로그 2026-06-25-cmm-pricechange-coke-cost-increase)
+
 ## 검증
 - **스마트스토어 골든 705/706** (2026-06-10): 정산액 707/707·base매입단가 706/707·마진율 705/706.
 - **식봄 골든 대조** (식봄결과페이지 716행, 2026-06-11): 정산가 H 485/485·합포 N 485/485·매입가 480/485(5 vintage). 로직 불일치 0.
