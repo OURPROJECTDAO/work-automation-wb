@@ -10,6 +10,13 @@
   --our      우리 현재 판매가(우리 마진 표시·선택)
   --extra    추가 검색어(쉼표 구분, 여러 개). 손으로 더 넓은/다른 표현 보태고 싶을 때.
   --exact    자동 일반화 끄기(준 검색어 그대로만 검색).
+  --agg-comp 묶음배송(AggregateDelivery)도 경쟁사로 포함(기본=택배배송만).
+
+★ 배송형태 규칙(경쟁사 판정 · 2026-06-29):
+  vendor.delivery.__typename로 형태 구분 — ParcelDelivery=택배 / DirectDelivery=직배송 / AggregateDelivery=묶음.
+  **경쟁최저 = 택배배송(ParcelDelivery)만.** 직배송 제외(사용자 규칙 — 직배송은 조건부 무료배송 등
+  우리 실비택배 2,700과 경제구조가 달라 동일선상 비교 불가). 묶음도 기본 제외(--agg-comp로 포함 가능).
+  표에 형태 컬럼 표시·제외행은 '✗제외' 표기·택배 경쟁최저보다 싼 비-택배 있으면 참고 안내.
 
 ★ 크롤링 규칙(검색 분절 방지·2026-06-29):
   식봄 검색은 ACCURACY 매칭이라 우리 통짜 등재명("진양 죽순 4호 400g 1개")으로 치면
@@ -645,11 +652,13 @@ def crawl(keyword, jar):
     for g in seen.values():
         pr=g.get("price") or {}
         df=g.get("deliveryFee") or {}
-        res.append(dict(name=g.get("name",""), vendor=(g.get("vendor") or {}).get("name",""),
+        ven=g.get("vendor") or {}
+        vdeliv=(ven.get("delivery") or {}).get("__typename","")  # 배송형태(ParcelDelivery=택배/DirectDelivery=직배송/AggregateDelivery=묶음)
+        res.append(dict(name=g.get("name",""), vendor=ven.get("name",""),
             sale=pr.get("salePrice"), orig=pr.get("originalPrice"),
             coupon=(pr.get("appliedCoupon") or {}).get("price"),
             stock=(g.get("stock") or {}).get("quantity"),
-            deliv=df.get("__typename",""), cond=df.get("condition")))
+            deliv=df.get("__typename",""), cond=df.get("condition"), vdeliv=vdeliv))
     return res
 
 def margin(price, cost):
@@ -707,6 +716,7 @@ def main():
     ap.add_argument("--our", type=float, default=None)
     ap.add_argument("--extra", default=None, help="추가 검색어(쉼표 구분)")
     ap.add_argument("--exact", action="store_true", help="자동 일반화 끄기")
+    ap.add_argument("--agg-comp", dest="agg_comp", action="store_true", help="묶음배송도 경쟁사로 포함(기본=택배만)")
     a=ap.parse_args()
     # 검색어 집합 구성: 준 검색어 + (자동)일반화 + (수동)extra
     keywords=[a.keyword]
@@ -727,22 +737,36 @@ def main():
         print(f'검색어 {keywords} 결과 0건.'); return
     dmap={"FreeDeliveryFee":"무료","ConditionalDeliveryFee":"조건무료","PaidDeliveryFee":"유료",
           "QuantityDeliveryFee":"수량별","ArrivalDeliveryFee":"착불","ChunkDeliveryFee":"묶음"}
+    fmap={"ParcelDelivery":"택배","DirectDelivery":"직배송","AggregateDelivery":"묶음","":"?"}
+    def is_comp(r):
+        # 경쟁사 = 택배배송(ParcelDelivery)만. 직배송 제외(사용자 규칙). 묶음은 --agg-comp 줄 때만 포함.
+        f=r.get("vdeliv","")
+        if "태동" in r["vendor"]: return False
+        if f=="ParcelDelivery": return True
+        if f=="AggregateDelivery" and a.agg_comp: return True
+        return False
     rows=sorted(res, key=lambda x:x["sale"] if x["sale"] else 9e9)
     kwdesc=" + ".join(f'"{k}"({n})' for k,n in used)
     print(f'=== 식봄 검색 {kwdesc} → 병합 {len(rows)}건 (판매가 오름차순) ===')
-    print(f'{"판매가":>8} {"정가":>7} {"재고":>8} {"배송":<6} | {"판매자":<20} | 상품명[규격]')
-    print("-"*104)
+    print(f'경쟁사 = 택배배송만 (직배송{"·묶음" if not a.agg_comp else ""} 제외{"·묶음 포함" if a.agg_comp else ""})')
+    print(f'{"판매가":>8} {"정가":>7} {"재고":>8} {"형태":<4} {"배송비":<6} | {"판매자":<20} | 상품명[규격]')
+    print("-"*108)
     for r in rows:
         sp=f'{int(r["sale"]):,}' if r["sale"] else "NA"
         op=f'{int(r["orig"]):,}' if r["orig"] else "-"
         st=r["stock"]; st=f'{int(st):,}' if isinstance(st,(int,float)) else "?"
         dv=dmap.get(r["deliv"],r["deliv"])
         if r["deliv"]=="ConditionalDeliveryFee" and r["cond"]: dv=f'{int(r["cond"]/10000)}만↑'
+        fm=fmap.get(r.get("vdeliv",""),r.get("vdeliv",""))
+        excl="" if (is_comp(r) or "태동" in r["vendor"]) else " ✗제외"  # 경쟁최저서 빠지는 행 표시
         hint=spec_hint(r["name"])
-        print(f'{sp:>8} {op:>7} {st:>8} {dv:<6} | {r["vendor"][:20]:<20} | {r["name"][:40]} [{hint}]')
-    # 최저(우리 제외 추정: 이름에 태동/우리 키워드 없으면 경쟁)
-    comp=[r for r in rows if r["sale"] and "태동" not in r["vendor"]]
+        print(f'{sp:>8} {op:>7} {st:>8} {fm:<4} {dv:<6} | {r["vendor"][:20]:<20} | {r["name"][:38]} [{hint}]{excl}')
+    # 경쟁최저 = 택배배송만
+    comp=[r for r in rows if r["sale"] and is_comp(r)]
     low=comp[0] if comp else None
+    # 직배송/묶음 중 택배 경쟁최저보다 싼 게 있으면 참고 안내(규칙상 제외했음을 명시)
+    excluded_cheaper=[r for r in rows if r["sale"] and "태동" not in r["vendor"] and not is_comp(r)
+                      and (low is None or r["sale"]<low["sale"])]
     if a.cost is not None:
         print("\n--- 식봄 정산마진 (매입가 {:,}) ---".format(int(a.cost)))
         if a.our:
@@ -751,10 +775,18 @@ def main():
         if low:
             n,p,m=margin(low["sale"], a.cost)
             tag="✅3%이상" if m>=FLOOR else "⚠️3%미달"
-            print(f'  경쟁최저 {int(low["sale"]):,} ({low["vendor"]}) → 매칭시 마진 {m*100:.1f}% {tag}')
+            print(f'  경쟁최저(택배) {int(low["sale"]):,} ({low["vendor"]}) → 매칭시 마진 {m*100:.1f}% {tag}')
+        else:
+            print('  경쟁최저(택배) 없음 — 택배배송 경쟁사 없음(직배송/묶음만 존재하거나 우리 단독).')
         print(f'  3%하한가 {floor_price(a.cost,FLOOR):,} · 손익분기 {floor_price(a.cost,0):,}')
     elif low:
-        print(f'\n경쟁최저: {int(low["sale"]):,} ({low["vendor"]}) — 매입가(--cost) 주면 마진까지 계산')
+        print(f'\n경쟁최저(택배): {int(low["sale"]):,} ({low["vendor"]}) — 매입가(--cost) 주면 마진까지 계산')
+    else:
+        print('\n경쟁최저(택배) 없음 — 택배배송 경쟁사 없음.')
+    if excluded_cheaper:
+        e=excluded_cheaper[0]
+        print(f'  ※ 더 싼 비-택배 존재(규칙상 제외): {int(e["sale"]):,} ({e["vendor"]}/{fmap.get(e.get("vdeliv",""),"?")}) '
+              f'— 묶음도 경쟁으로 보려면 --agg-comp')
 
 if __name__=="__main__":
     main()
