@@ -4,12 +4,23 @@
 역공학 1회 완료분(GraphQL 엔드포인트+쿼리)을 박제. 매 세션 재탐색 불필요.
 
 사용:
-  python sikbom_price_lookup.py --keyword "명가꽈배기" [--cost 4200] [--our 5000]
-  --keyword  검색어(필수)
+  python sikbom_price_lookup.py --keyword "진양 죽순 4호 400g 1개" [--cost 1700] [--our 2500]
+  --keyword  검색어(필수). 우리 식봄 등재명 통짜로 줘도 됨 — 자동으로 일반화해 함께 검색.
   --cost     우리 매입가(낱개/박스, 식봄 정산마진 계산용·선택)
   --our      우리 현재 판매가(우리 마진 표시·선택)
+  --extra    추가 검색어(쉼표 구분, 여러 개). 손으로 더 넓은/다른 표현 보태고 싶을 때.
+  --exact    자동 일반화 끄기(준 검색어 그대로만 검색).
 
-출력: 판매자별 (판매가 오름차순) 표 + (--cost 시) 최저가/우리가 기준 식봄 정산마진.
+★ 크롤링 규칙(검색 분절 방지·2026-06-29):
+  식봄 검색은 ACCURACY 매칭이라 우리 통짜 등재명("진양 죽순 4호 400g 1개")으로 치면
+  우리만 걸려 '경쟁없음'을 오판한다. 그래서 기본으로 검색어를 **일반화**해 같이 검색하고
+  결과를 nid로 병합한다. 일반화 = 호수(4호)·낱개꼬리(1개/낱개)·괄호속성(상온/택배)을 떼고
+  **브랜드+품목+규격(g/ml/kg/L)**은 보존(브랜드만 남기는 과일반화는 다른품목 오매칭이라 안 함).
+  멀티팩(X24·24개입·*24개·box)은 보존(박스 listing이면 박스 경쟁이 잡혀야 함).
+
+출력: 판매자별 (판매가 오름차순) 병합표 + (--cost 시) 최저가/우리가 기준 식봄 정산마진.
+  · 규격 [..]에 멀티팩은 'x24' 식으로 표기 — 단캔/박스 구분용(AI가 동일규격만 비교).
+  · 가격 비교 기준 = salePrice(판매가). 쿠폰/즉시할인가(−20%)는 마켓보로 부담이라 정산무관·미사용.
 ※ 같은 상품 판별/규격 매칭은 출력 보고 사람(AI)이 확정 — 스크립트는 후보만 제공.
 ※ 200 안 나오거나 빈 결과면 식봄이 쿼리/엔드포인트 바꾼 것 → 역공학 재실행 필요(workflows/sikbom-event-planning.md §크롤링).
 """
@@ -650,27 +661,75 @@ def floor_price(cost, M):
     return math.ceil(((cost+REAL_SHIP)/(1-M)-SHIP_BUYER*SF)/(1-COMM)/100)*100
 
 def spec_hint(name):
-    g=re.findall(r"(\d+(?:\.\d+)?)\s*(kg|g|ml|l|개|입|ea)", name, re.I)
-    return " ".join(f"{a}{b}" for a,b in g) if g else ""
+    # 멀티팩 표기(X24·*24·24개입·24입)를 'x24'로 먼저 채집 — 단캔/박스 구분용
+    packs=re.findall(r"(?:[xX*]\s*(\d+)|(\d+)\s*개입|(\d+)\s*입)", name)
+    pk=[next(t for t in tup if t) for tup in packs]
+    g=re.findall(r"(\d+(?:\.\d+)?)\s*(kg|g|ml|l)", name, re.I)
+    parts=[f"{a}{b}" for a,b in g]
+    parts+= [f"x{p}" for p in pk]
+    return " ".join(parts)
+
+_ATTR=re.compile(r"^(상온|실온|냉장|냉동|택배|택배배송|직배송|무료배송|대용량|업소용|벌크|낱개|개당|ea)$", re.I)
+def _paren_sub(mo):
+    inner=mo.group(1).strip()
+    toks=[t for t in re.split(r"[\s,/]+", inner) if t]
+    if toks and all(_ATTR.match(t) for t in toks):   # 괄호 안이 배송/보관/마케팅 속성뿐 → 제거
+        return " "
+    return " "+inner+" "                               # 브랜드/규격 등이 들었으면 언랩(괄호만 제거)
+
+def normalize_keyword(raw):
+    """우리 통짜 등재명 → 일반화 검색어. 호수·낱개꼬리·괄호속성만 제거, 코어(브랜드+품목+규격)·멀티팩 보존."""
+    s=raw
+    s=re.sub(r"[\(\[]([^\)\]]*)[\)\]]", _paren_sub, s)  # (상온)(택배)=제거 / (진양 400g)=언랩 보존
+    s=re.sub(r"\d+\s*호"," ",s)                     # 캔 호수(4호 등) — 판매자 전용 표기·검색 분절
+    s=re.sub(r"(?<![xX*\d])\b1\s*개\b"," ",s)        # 단독 '1개'(낱개 의미) 제거 — 멀티팩 X24/24개는 보존
+    s=re.sub(r"낱\s*개"," ",s)
+    s=re.sub(r"\s+"," ",s).strip()
+    return s
+
+def crawl_merge(keywords, jar):
+    """여러 검색어를 각각 크롤해 nid로 병합(누락 방지). 반환 (rows, errinfo)."""
+    merged={}; used=[]; err=None
+    for kw in keywords:
+        r=crawl(kw, jar)
+        if r is None: err=err or "parse"; continue
+        if isinstance(r,dict): err=err or "gql"; continue
+        used.append((kw,len(r)))
+        for row in r:
+            k=(row["vendor"], row["name"], row["sale"])  # nid 동치 키(판매자+상품명+가격)
+            merged[k]=row
+    return list(merged.values()), used, err
 
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--keyword", required=True)
     ap.add_argument("--cost", type=float, default=None)
     ap.add_argument("--our", type=float, default=None)
+    ap.add_argument("--extra", default=None, help="추가 검색어(쉼표 구분)")
+    ap.add_argument("--exact", action="store_true", help="자동 일반화 끄기")
     a=ap.parse_args()
+    # 검색어 집합 구성: 준 검색어 + (자동)일반화 + (수동)extra
+    keywords=[a.keyword]
+    if not a.exact:
+        nk=normalize_keyword(a.keyword)
+        if nk and nk!=a.keyword: keywords.append(nk)
+    if a.extra:
+        for e in a.extra.split(","):
+            e=e.strip()
+            if e and e not in keywords: keywords.append(e)
     jar=session_cookie()
-    res=crawl(a.keyword, jar)
-    if res is None:
-        print("[ERR] 응답 파싱 실패 — 엔드포인트/쿼리 변경 가능. 역공학 재실행 필요."); sys.exit(2)
-    if isinstance(res,dict):
-        print("[ERR] GraphQL 에러:", json.dumps(res.get("errors"),ensure_ascii=False)[:300]); sys.exit(2)
+    res, used, err = crawl_merge(keywords, jar)
     if not res:
-        print(f'"{a.keyword}" 검색결과 0건.'); return
+        if err=="parse":
+            print("[ERR] 응답 파싱 실패 — 엔드포인트/쿼리 변경 가능. 역공학 재실행 필요."); sys.exit(2)
+        if err=="gql":
+            print("[ERR] GraphQL 에러 — 역공학 재실행 필요."); sys.exit(2)
+        print(f'검색어 {keywords} 결과 0건.'); return
     dmap={"FreeDeliveryFee":"무료","ConditionalDeliveryFee":"조건무료","PaidDeliveryFee":"유료",
           "QuantityDeliveryFee":"수량별","ArrivalDeliveryFee":"착불","ChunkDeliveryFee":"묶음"}
     rows=sorted(res, key=lambda x:x["sale"] if x["sale"] else 9e9)
-    print(f'=== 식봄 "{a.keyword}" {len(rows)}건 (판매가 오름차순) ===')
+    kwdesc=" + ".join(f'"{k}"({n})' for k,n in used)
+    print(f'=== 식봄 검색 {kwdesc} → 병합 {len(rows)}건 (판매가 오름차순) ===')
     print(f'{"판매가":>8} {"정가":>7} {"재고":>8} {"배송":<6} | {"판매자":<20} | 상품명[규격]')
     print("-"*104)
     for r in rows:
