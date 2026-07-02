@@ -46,6 +46,24 @@
 - 없음. (B2 인프라 완료 — repo·PAT R/W·st.secrets 검증됨 2026-06-08.)
 
 ## 다음 한 수
+- **★★ 세션 클로즈 (2026-07-02): 7월초 6월 데이터 백필 + 쿠팡로켓그로스 정산 자동화 + 신규상품 20건 풀체인 등록.**
+  이번 세션 요약(다 완료·대기 상태):
+  1) **쿠팡 로켓그로스 6월 정산** 첫 자동화(WING 상품관리 직접매핑+수량매칭+11.66%수수료) — 매달 반복,
+     8/1(7월분)부터 workflows/coupang-rocketgrowth-settlement.md 체크리스트로 재현.
+  2) **6월 데이터 4종 전부 적재** — 영업이익현황(sales, 11344행)·매입현황(buyin, 6/20~30 병합)·가격이력
+     (price_changes, 1년롤링 놓치면 안 되는 구간 커버)·EasyAdmin주문(10387행, salt 재처리 완료). 두뇌④ 측정루프
+     커버리지 게이트 충족 — **다음 세션에 두뇌④ 측정 시작 가능**(6월 매출 30일 경과 후).
+  3) **"직접 적립" 업로드 기능 신규 구축** — 데이터현황 페이지에서 매출·주문·가격이력·매입현황을 앱에서 직접
+     업로드 가능해짐(챗 없이). ⚠️ coverage.py 건드려서 **Reboot 1회 필요**(사용자 체감 확인 대기).
+  4) **신규상품 20건 풀체인 등록 완료** — 상품명 정제(이미지+웹서치 3중검증, 오정정 3건 발견해 되돌림 — 교훈:
+     웹서치보다 관리코드 실물이미지가 항상 우선)→식봄 일괄등록 3차(양식+이미지40장)→이지어드민 등록→
+     erp관리코드 기입까지. 양쪽 다 실업로드 완료 확인.
+  - 다음 세션 시작점: (a) Reboot 여부 확인(직접적립 기능), (b) 두뇌④ 측정 개시, (c) 로켓그로스 7월분(8/1).
+  정본: workflows/coupang-rocketgrowth-settlement.md·dashboard.md·sikbom-register.md·easyadmin-register.md.
+  로그: 2026-07-02-coupang-rocketgrowth-june-settlement·2026-07-02-june-{sales,purchases,price-history,orders}-ingest·
+  2026-07-02-direct-ingest-feature·2026-07-02-sikbom-register-3rd-batch-20·2026-07-02-sikbom-name-correction·
+  2026-07-02-easyadmin-register-20·2026-07-02-easyadmin-erp-code-fill.
+
 - **★ UI 디자인 Phase A 라이브 (2026-06-19, ADR 0028).** 전 페이지+사이드바+랜딩 프로화 1단계. **전역 2파일**: `.streamlit/config.toml`(인디고#3B5BDB·Pretendard·라운드/테두리, 19페이지 자동 상속) + `core/ui.py`(inject_css 전역 CSS: st.metric→카드·버튼/탭 폴리시·브랜드·KPI카드·핀필·▲빨강▼파랑 + 헬퍼 page_header/kpi_row/status_pill/delta_html). 진입점 inject_css 1회+사이드바 브랜드+네비 그룹명'분석·지능'. 커밋 config 168e203·ui e166707·app 6006b28. ⚠️ **재배포+Reboot 1회**(폰트·새 코어). **사용자 체감 확인 대기.** 함정=st.dataframe 캔버스라 CSS불가(Phase B 색표는 Styler/HTML 우회). 다음=체감 OK면 Phase B(데일리부터 헬퍼 적용). 정본 workflows/ui-design.md·로그 2026-06-19-ui-design-phase-a.md.
 - **★★ 세션 클로즈 (2026-06-19): 두뇌④ 노브 완성 + 운영 UX + 가격제한 제외 + baseline 백필.** 이번 세션: ⑦매출목표(월매출<100만→나들까지 절반)+나들floor·②회전markdown(소진예측>180일→−2%p캡 자동복귀)·**사유/액션 전부 평어화**(올림·내림·낮게유지·재고정리내림·가격테스트·_MOVE/_DOWN 상수)·상단 설명서+wf §0 한눈에로직·**기록 후 st.rerun 이어서 진행**(필터유지·mo_recent 즉시숨김)·**'함께 변경' 토글 제거→항상 적용**·**baseline 백필 106건**(토글 누락분, 6 미스=낱개/소분류)·**작업목록 4분류**(메인=가격조정가능+변화 / 🔒가격제한=margin_floor 마진민감 48코드 / 🔴변화없음=가격외요인 / 가격테스트)·**KPI 채널+검색 동적**·UI wide·채널칩·8관리채널 스코프. status=live. ★core변경(⑦②평어)=Reboot 1회(스샷상 반영됨)·이후 page-only=재배포만. 원장 141건/baseline 106적용·측정은 7월초 6월매출+30일커버리지 후. 잔여=cmm직접prefill·margin_floor 원가하한클램프·미스6건·ESM키통일. 정본 wf §0·§13~22·로그 2026-06-19-margin-optimizer-{sales-target,turnover-markdown,baseline-backfill,session-close}.
 - **★★ 기준마진율 최적화(두뇌④) v0 라이브 + 운영보강 (2026-06-19, ADR 0026·0027).** P×C 권장 기준마진율 작업목록 — 베이스=순이익누적85% proven 순이익가중평균·볼륨×(마진vs베이스) 4분면·절반스텝·🟢🟡🔴·관망(비중<1% 실험큐, 2회 무반응 park). **45일 억제**(결정원장 read로 최근 결정 셀 숨김). **기록 + 기준마진율 변경 통합** — 변경 시 **현 타깃 + Δ 가산**(cmm 노출가-target ↔ 두뇌④ 매출자료-realized 정합, ADR 0027 — 절대 기입 시 방향 역전). 표에 기준마진율(현 타깃) 컬럼·권장변화 ▲빨강/▼파랑(한국식)·월매출. 택배비 2,700 고정·나들 제외. **결정원장 history/decisions.parquet**(Gate3) seed. 데이터 토대 전부 보유(매출자료·ship_alloc·orders·두뇌②·nadl). **다음 = 측정 루프**(원장 측정후·결과 채움→유지/되돌림 자동) → ⑧시즌 제외 → **⑦ 상품 매출목표 라벨(미착수·출처 sales_target.csv 포맷 선결)** → ②회전·나들 floor. 정본 workflows/margin-optimizer.md(§14)·로그 2026-06-19-margin-optimizer-ops.md.
