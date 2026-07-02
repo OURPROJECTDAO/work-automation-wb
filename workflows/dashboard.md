@@ -67,6 +67,7 @@
 ## 저장소 (B2 — decisions/0006 갱신)
 - **거래처 그룹 매핑** `groups/store_groups.csv`(상호명,그룹)도 같은 private repo. 상호명=영업정보라 public app repo 금지.
 - **적재 현황(2026-06-08 확인)**: 41개 월 파티션 · **2023-01~2026-05 · 총 421,865행 · 고유 거래처 1,041곳**. (최초 3개년 부트스트랩 후 2023년치 추가 갱신 — 사용자 의도. load_master가 파티션을 동적 전수 로드하므로 앱은 자동 반영.)
+- **적재 현황(2026-07-02 갱신)**: 42개 월 파티션 · **2023-01~2026-06 · 총 433,209행**(6월 11,344행 신규). 6월 253개 거래처·매출합계 33.56억(1~5월 월평균 33.8억대와 정합, 이상 없음).
 - master(거래처 매출)는 **PII**(영업기밀) → public app repo 금지.
 - **private repo `OURPROJECTDAO/work-automation-data`** 에 월별 parquet 보관. 앱이 `st.secrets`의 PAT로 R/W.
 - (대안 기각/백업: B1 Drive+서비스계정 — GCP 셋업 부담. B3 세션보유 — 영속 없음.)
@@ -93,6 +94,8 @@
 - requirements: pyarrow(parquet)·python-calamine 추가.
 
 ## 전용 함정
+- **영업이익현황 export 헤더 오염("jrkf") — 2026-07-02 발견**: 특정 회차 export에서 A1(거래일자) 헤더 텍스트가 "jrkf"로 깨져서 옴(값 자체는 정상 날짜). `parse_sales`가 컬럼명 "거래일자"를 하드코딩 기대하므로 이 상태로 넣으면 KeyError. **매번 A1 헤더 텍스트 먼저 확인** — "거래일자"가 아니면(포지션은 항상 1열) openpyxl로 셀 값만 "거래일자"로 고쳐서 저장 후 진행. 원인 불명(ERP export 측 산발적 오류로 추정), 재발 가능성 있음.
+
 - **합계행**: 맨끝 1행 거래일자 NaT = 합계. 제외 안 하면 전 수치 2배. `df[df['거래일자'].notna()]`.
 - **관리코드 NFC**: 출처 다른 데이터 NFD면 조인 실패. `unicodedata.normalize("NFC", ...)` 후 조인.
 - **분류표는 발주 흐름 코드 위주**: logistics_classification은 발주서출력업무를 거친 코드 위주라 영업 데이터 꼬리가 빠짐 → 2차 fallback(product_master 중분류) 필요.
