@@ -33,7 +33,7 @@
 | slow-moving-inventory (재고 회전 둔화상품) | — | 운영중 (챗·월2회·골든서식) | workflows/slow-moving-inventory.md |
 | retail-insight-pricing (리테일앤인사이트 가격책정) | — | 운영중 (챗·1차 내부공유본·568건) | workflows/retail-insight-pricing.md |
 | ui-design (전 페이지 UI 디자인·횡단) | — | 진행중 (Phase A·랜딩·B-1 데일리) | workflows/ui-design.md |
-| coupang-rocketgrowth-settlement (쿠팡 로켓그로스 정산) | — | 운영중 (챗·6월 첫 자동화) | workflows/coupang-rocketgrowth-settlement.md |
+| coupang-rocketgrowth-settlement (쿠팡 로켓그로스 정산) | — | 운영중 (챗·매달 반복, 다음=8/1 7월분) | workflows/coupang-rocketgrowth-settlement.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -293,3 +293,5 @@ _갱신: 2026-06-30 (식봄 행사기획 9차 — 스팸 박스2(340 466208 82,0
 _갱신: 2026-06-30 (식봄 행사기획 9차 후속 — 인하 4건 식봄 '상품 일괄수정' 양식 식봄_가격변경_7월행사_4건.xlsx 생성·전달(466208/1003806/1003823/1003827, 통깨 미변경 제외). 변경불가 등재값 정확일치·정가≥판매가·E=n·상품코드 텍스트. 코드변경0·Reboot불요. 사용자 식봄 업로드 예정)_
 
 _갱신: 2026-07-02 (coupang-rocketgrowth-settlement 신규 워크플로우 — 로켓그로스는 발주자료에 안 잡혀 cheonnyeon-upload 밖 별도 보충 입력. 5월은 사용자 수작업(쿠팡로켓데이터집계v1.xlsx) → 6월부터 챗 재현. 쿠팡 WING "쿠팡상품관리" export(옵션ID→관리코드 직접매핑, fuzzy매칭 불요)+"수량매칭"(옵션명 "n개"=실제낱개 배수) 재사용. 수수료율=11.66%(일반쿠팡12%와 다름). 6월 106옵션 중 103매핑(매출 커버리지 100%, 원본 TOTAL행 제외 합계 64,000,650원과 정확 일치)·정산금액 56,538,174원·관리코드31개. ⚠️함정 2건 기록: ① 쿠팡 판매통계 export 마지막 행에 TOTAL 합계행 존재 — 제외 안 하면 정확히 2배 합산(반복 실수). ② "쿠팡상품관리" export 관리코드 칸이 빈 문자열인 행 존재 — `in dict` 멤버십 체크만으론 안 걸러짐, truthy 체크+수량매칭 시트 폴백 필요. 산출 쿠팡로켓그로스_6월_천년경영입력용.xlsx(관리코드별 집계+원본상세+미해결3건). 코드변경0. 정본 workflows/coupang-rocketgrowth-settlement.md·로그 2026-07-02-coupang-rocketgrowth-june-settlement.md)_
+
+_갱신: 2026-07-02b (coupang-rocketgrowth-settlement 세션 마무리 — 6월분 최종 산출 쿠팡전체_로켓그로스_202606.xlsx(천년경영 쿠팡전체 시트와 동일 컬럼 A일자~H실제기입단가, 발주일 2026-06-28 일괄·쿠팡 단일채널·매출있는 관리코드 27개만). 워크플로우 문서에 "다음 실행 시 체크리스트" 정리해둠(8/1 7월분부터 그대로 따라가면 됨) — TOTAL행 제외·매핑 우선순위(전월 소스 재사용→product_master 재검색→매출있는것만 사용자 확인)·수량매칭 판별법(옵션명 n=박스개수인 경우 주의)·검산법(관리코드별 내재단가 대조·매출합계 정확 일치 확인). 다음 한 수=변동 없음(두뇌④ 측정루프·시장대비 권장가), 8/1 재개 시 workflows/coupang-rocketgrowth-settlement.md 체크리스트부터)_
