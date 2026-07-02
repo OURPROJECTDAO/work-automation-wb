@@ -303,3 +303,5 @@ _갱신: 2026-07-02d (6월 유형별매입현황 완결 — purchases/buyin_2026
 _갱신: 2026-07-02e (가격이력(수정로그) 5/30~6/30 적재 완료 — history/price_changes.parquet 215행 추가(매입단가155·매출단가60), 2,567→2,782행. dedup-append 멱등. core price_history.py 재사용. ★6월 자료 4종(영업이익현황·매입현황·가격이력·쿠팡로켓그로스) 전부 완료, 남은 건 EasyAdmin 주문(6월 전체)뿐. 코드변경0. 로그 2026-07-02-june-price-history-ingest.md)_
 
 _갱신: 2026-07-02f (★★EasyAdmin 주문 6월 적재로 6월 자료 5종 전부 완료 — orders/easyadmin_2026-06.parquet 신규 10,387행(06-01~06-30). ⚠️ 챗 세션엔 customer_key_salt 없어서 고객키·합포박스키 빈값으로 적재됨(원본 PII 폐기라 소급 불가 — velocity dedup·P2 합포배분 6월분 정확도 영향, 필요시 앱에서 salt로 재업로드 권장). 두뇌④ 측정루프 커버리지 게이트 충족. 코드변경0. 로그 2026-07-02-june-orders-ingest.md)_
+
+_갱신: 2026-07-02g (★"직접 적립" 업로드 기능 신규 구축 — app/pages/3_연동데이터관리/2_데이터현황.py에 매출·주문·가격이력·매입현황 업로드 섹션 추가(선택→업로드→미리보기→적재, 상품관리 페이지 패턴 재사용). core/intelligence/coverage.py 매입현황 upload planned→direct 갱신. ⚠️coverage.py는 core모듈이라 앱 Reboot 필요(페이지 자체는 자동반영). 6월 EasyAdmin 주문은 사용자 제공 customer_key_salt로 재처리·재적재 완료(고객키·합포박스키 100% 채움, 이전 빈값 이슈 해소). 로그 2026-07-02-direct-ingest-feature.md)_
