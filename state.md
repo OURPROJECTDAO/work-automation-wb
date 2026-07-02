@@ -301,3 +301,5 @@ _갱신: 2026-07-02c (6월 영업이익현황 적재 완료 — master/sales_202
 _갱신: 2026-07-02d (6월 유형별매입현황 완결 — purchases/buyin_2026-06.parquet 06-20~30 병합(400행)+기존 06-01~19 = 1,425행, 6월 전체 완결. 06-20·21=토일이라 실입고 없음(갭 아님). core purchases.py 그대로 재사용. 남은 6월 자료: EasyAdmin 주문·가격이력 수정로그. 코드변경0. 로그 2026-07-02-june-purchases-ingest.md)_
 
 _갱신: 2026-07-02e (가격이력(수정로그) 5/30~6/30 적재 완료 — history/price_changes.parquet 215행 추가(매입단가155·매출단가60), 2,567→2,782행. dedup-append 멱등. core price_history.py 재사용. ★6월 자료 4종(영업이익현황·매입현황·가격이력·쿠팡로켓그로스) 전부 완료, 남은 건 EasyAdmin 주문(6월 전체)뿐. 코드변경0. 로그 2026-07-02-june-price-history-ingest.md)_
+
+_갱신: 2026-07-02f (★★EasyAdmin 주문 6월 적재로 6월 자료 5종 전부 완료 — orders/easyadmin_2026-06.parquet 신규 10,387행(06-01~06-30). ⚠️ 챗 세션엔 customer_key_salt 없어서 고객키·합포박스키 빈값으로 적재됨(원본 PII 폐기라 소급 불가 — velocity dedup·P2 합포배분 6월분 정확도 영향, 필요시 앱에서 salt로 재업로드 권장). 두뇌④ 측정루프 커버리지 게이트 충족. 코드변경0. 로그 2026-07-02-june-orders-ingest.md)_
