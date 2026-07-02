@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-06-24 (slow-moving-inventory 신규 워크플로우 — 재고 회전 둔화상품 챗 네이티브. 골든 서식 확정·reference 박제. 6월 부분월 매출 1회성 메모리 합산(미적재))",
+  "updated": "2026-07-02 (coupang-rocketgrowth-settlement 신규 워크플로우 — 로켓그로스 6월 정산 첫 자동화. WING 상품관리 직접매핑+수량매칭 배수+11.66% 확정)",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -691,6 +691,26 @@
     "재고회전둔화상품.xlsx (3/6/12개월 시트)"
    ],
    "feeds": [],
+   "page": "(챗 네이티브)",
+   "roadmap": []
+  },
+  {
+   "id": "coupang-rocketgrowth-settlement",
+   "cluster": "fulfillment",
+   "status": "live",
+   "label": "쿠팡 로켓그로스 정산",
+   "line": "로켓그로스는 쿠팡 자체 풀필먼트라 발주자료(우리쪽 출고기록)에 안 잡힘 → cheonnyeon-upload 파이프라인 밖의 별도 보충 입력. 쿠팡 WING '판매통계'(옵션별 순매출·순수량) + '쿠팡상품관리' 다운로드(옵션ID→업체상품코드 직접매핑, fuzzy매칭 불필요)로 관리코드 결합. 옵션명의 'n개'=수량매칭 배수(실제수량=순매출개수×수량매칭, 애매하면 매출단가로 sanity check). 정산금액=순매출×(1−11.66%, 일반쿠팡12%와 다름). 관리코드별 집계→천년경영 수기 입력용 별도 파일. 매달 반복(5월은 사용자 수작업, 6월부터 챗 재현).",
+   "consumes": [
+    "product_master",
+    "쿠팡 WING 판매통계 export",
+    "쿠팡 WING 상품관리(옵션ID매핑) export"
+   ],
+   "produces": [
+    "쿠팡로켓그로스_YYYY월_천년경영입력용.xlsx (관리코드별 집계+원본상세+미해결)"
+   ],
+   "feeds": [
+    "cheonnyeon-upload"
+   ],
    "page": "(챗 네이티브)",
    "roadmap": []
   }
