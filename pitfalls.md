@@ -47,6 +47,10 @@
 ## pandas Styler (st.dataframe 색상 — 전 워크플로우 공통)
 - **`Styler.applymap`은 pandas 3.x(Streamlit Cloud 현행·py3.14)에서 제거됨** → `AttributeError: 'Styler' object has no attribute 'applymap'`. 원소별 스타일은 **`Styler.map(func, subset=...)`** 사용(2.1.0부터 rename). `DataFrame.applymap`도 동일하게 `DataFrame.map`. (daily-dashboard 가격 변동 알림 색상, logs/2026-06-17-price-alert-boxstock-color)
 
+## 외부 플랫폼(쿠팡 등) export 공통 함정
+- **집계표 하단 TOTAL/합계 행**: 쿠팡 WING 판매통계 등 플랫폼 export는 마지막에 헤더 없는 합계행이 딸려오는 경우가 흔함(옵션ID 등 키 컬럼은 빈칸, 금액 컬럼만 채워짐). 데이터 순회 시 `v[0]=='TOTAL'`류 필터 없이 합산하면 **정확히 2배로 잡히는 특징적인 오류** — 총합이 항목별 합의 정확히 2배면 이 패턴을 의심할 것. (쿠팡 로켓그로스 정산, logs/2026-07-02)
+- **딕셔너리 멤버십 체크와 빈 문자열 값**: `if key in dict`는 값이 빈 문자열('')이어도 True — 매핑 소스 export가 키는 있는데 값 칸이 비어있는 행(예: 관리코드 미기입)을 놓치기 쉬움. 값을 실제로 쓸 거면 `dict.get(key)`의 **truthy 체크**로 폴백 처리할 것. (쿠팡 로켓그로스 정산, logs/2026-07-02)
+
 ## 한국어 처리 (엑셀/앱 — 전 워크플로우 공통)
 - 주소·상품명 매칭 전 NFC 정규화 필수(unicodedata.normalize("NFC", s)). 출처 다른 데이터가 NFD(자모 분리)면 같은 글자라도 부분일치 매칭 실패 → 도서산간/미배송 매칭 치명적.
 - **숫자 ID 키 정규화 (전 워크플로우 공통)**: openpyxl은 정수 ID 셀(예 상품번호 46903)을 **float(46903.0)**로 읽음. str()/NFC만 하면 '46903.0' → CSV/reference의 '46903' 키와 매칭 실패(조용히 미매칭=기본값). 정수값 float은 int화 후 키로 쓸 것(`int(v) if isinstance(v,float) and v.is_integer() else v`). (channel-margin-monitor 캐시노트 N 전건 1 오류 사례, logs/2026-06-11-cashnote)
