@@ -45,3 +45,5 @@ stock Streamlit("딱 봐도 Streamlit") → 절제된 인디고 액센트 + Pret
 - logs/2026-06/2026-06-19-ui-design-phase-a.md
 
 _갱신: 2026-06-22 (전역 본문 폭 풀기 — core/ui.py `.block-container max-width:1180px→none`으로 전 페이지 양옆 꽉차게(layout=wide 풀폭·좌우 패딩만). 데일리(0b)에 임시로 넣었던 page-scoped override 제거(전역화로 중복). ★core 모듈→**Reboot 1회 필요**. 커밋 ui 5e11c40·0b f9141d4. 휑한 텍스트 페이지는 개별 캡 재부여 가능)_
+
+_갱신: 2026-07-07 (`use_container_width`→`width` 전역 전환 — Streamlit deprecation 경고가 배포 로그에 반복 출력되어 전 페이지(17개 파일·83건, 전부 True→`width="stretch"`) 일괄 치환. core/는 해당 없음(grep 0건) → **전부 page-only, Reboot 불필요**. 같은 세션에 기준데이터관리 천년경영업로드 페이지의 소분목록 저장 `st.form` 화도 동반(별도 함정 항목, pitfalls.md/workflows/cheonnyeon-upload.md 참조). 로그 logs/2026-07/2026-07-07-cheonnyeon-sublist-save-fix-and-width-deprecation.md)_
