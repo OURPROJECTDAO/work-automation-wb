@@ -44,6 +44,19 @@
 - 해결: 플랫폼 양식을 **선택행 남기기·몇 칸 기입** 정도만 수정할 땐 openpyxl 대신 **원본 .xlsx를 zip레벨로 수술**(원본 sheet xml 텍스트 편집 + sharedStrings/styles 등 그대로 repack) → 네이티브 포맷 100% 보존. 단 원본 raw 자체가 네이티브여야 함(업로드 바이트 그대로 저장). channel-margin-monitor 쿠팡 `build_filter_price_xlsx` 참고(logs/2026-06-11).
 - **append류(`append_rows_to_raw`)도 openpyxl 저장 → 네이티브 파괴**. 네이티브 보존이 필요한 채널(쿠팡)은 '신규만 추가'(=append) 대신 '전체 교체'(업로드 바이트 저장)를 쓸 것.
 
+## Streamlit 위젯 경합/버전 함정 (앱 전체 — 전 워크플로우 공통)
+- **`st.data_editor` + 폼 밖의 별도 `st.button` = 마지막 셀 미확정 상태로 저장되는 경합**: 표에서 셀을
+  편집(특히 새 행 추가 후 마지막 셀)한 직후 곧바로 폼 밖 버튼을 누르면, 그 편집이 위젯 상태에 커밋되기
+  전에 버튼 클릭이 먼저 처리돼 **직전 상태로 저장**됨 → 사용자 입장에선 "한 번에 저장이 안 되고
+  두 번째 클릭에야 반영"되는 것처럼 보임. 해결: `st.data_editor`와 저장 버튼을 **`st.form`으로 묶고
+  `st.form_submit_button` 사용** — 폼 제출은 모든 위젯 값을 한 번에 확정한 뒤 처리되므로 경합이 없음.
+  (기준데이터관리 천년경영업로드 소분목록 저장, 2026-07-07, logs/2026-07/2026-07-07-cheonnyeon-sublist-save-fix)
+- **`use_container_width` deprecated → `width` 파라미터**: 최신 Streamlit은 `use_container_width=True/False`
+  대신 `width="stretch"`/`width="content"`(또는 픽셀 정수)를 요구, 구 파라미터 사용 시 배포 로그에 매
+  상호작용마다 경고가 반복 출력됨(st.dataframe/data_editor/button/image/plotly_chart 등 전 위젯 공통).
+  전환 시 `True`→`width="stretch"`, `False`→`width="content"` 단순 매핑. (2026-07-07 전 페이지 83건 일괄
+  전환, logs/2026-07/2026-07-07-cheonnyeon-sublist-save-fix-and-width-deprecation)
+
 ## pandas Styler (st.dataframe 색상 — 전 워크플로우 공통)
 - **`Styler.applymap`은 pandas 3.x(Streamlit Cloud 현행·py3.14)에서 제거됨** → `AttributeError: 'Styler' object has no attribute 'applymap'`. 원소별 스타일은 **`Styler.map(func, subset=...)`** 사용(2.1.0부터 rename). `DataFrame.applymap`도 동일하게 `DataFrame.map`. (daily-dashboard 가격 변동 알림 색상, logs/2026-06-17-price-alert-boxstock-color)
 
@@ -74,3 +87,5 @@ _갱신: 2026-06-11 (openpyxl 저장 네이티브 포맷 파괴 함정 추가 �
 _갱신: 2026-06-17 (pandas Styler.applymap 제거(3.x) → .map 함정 추가 — Streamlit Cloud)_
 
 _갱신: 2026-06-19 (cmm target↔매출자료 realized 마진 정의 정합 함정 — 두뇌④/ADR 0027)_
+
+_갱신: 2026-07-07 (Streamlit 위젯 경합/버전 함정 섹션 신설 — data_editor+폼밖버튼 경합(st.form 해결)·use_container_width→width 전환)_
