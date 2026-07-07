@@ -33,6 +33,7 @@
   - 로더: `load_classification` / `load_commission` / `load_sub_list` (fixture 주입 가능 → 테스트 결정적)
 - `app/pages/1_파일처리.py` — "🏪 천년경영 업로드" 탭(3파일 업로드→run→{yymmdd}.xlsx 다운로드). **출력 후 detect_box_anomalies 결과를 메트릭↔다운로드 사이에 경고 표로 표시 + 소분목록 등록 유도.**
 - `app/pages/2_기준데이터관리/4_천년경영업로드.py` — 수수료율·소분목록 view+교체업로드(GitHub 커밋). 분류표는 발주서출력업무와 공유 안내.
+  **저장은 `st.form`으로 묶음**(`_edit_with_search`가 `(result, submitted)` 반환) — data_editor+저장 버튼 경합 수정(2026-07-07, 아래 함정 참조).
 - 테스트: `tests/test_cheonnyeon_upload.py`, fixtures `tests/fixtures/cheonnyeon/`.
 
 ## 파이프라인 순서 (VBA 단계 매핑 — 순서 중요)
@@ -72,6 +73,13 @@
 - 향후: 영문 정상박스 5개 화이트리스트·출력 xlsx 검수 시트·낱개 시트 박스코드 역검출(미구현).
 
 ## 전용 함정
+- **기준데이터 관리 페이지(4_천년경영업로드.py) 소분목록/수수료율 저장이 "한 번에 안 됨"(2026-07-07 수정)**:
+  `st.data_editor`로 새 행을 추가하고 마지막 셀(원코드 등)을 입력한 직후 곧바로 폼 밖의 별도 `st.button`을
+  누르면, 그 마지막 셀 값이 위젯 상태에 커밋되기 전에 버튼 클릭이 먼저 처리되어 **직전 상태로 저장**됨 —
+  사용자 입장에선 두 번째 클릭에야 반영되는 것처럼 보임. 고전적인 Streamlit `data_editor`+외부버튼 경합.
+  해결: `st.data_editor`+저장 버튼을 **`st.form`으로 묶고 `st.form_submit_button` 사용**(폼 제출은 모든
+  위젯 값을 한 번에 확정 후 처리 → 경합 없음). 전역 패턴은 pitfalls.md에도 기록(다른 페이지의 유사
+  data_editor+버튼 조합에도 재발 가능 — 재보고 시 같은 패턴 적용).
 - **스스주문 암호 1323**: msoffcrypto-tool로 복호화. `open_sss`는 is_encrypted() 확인 후 암호본/평문 자동 분기(평문 업로드도 허용). requirements에 `msoffcrypto-tool` 필요. (전역 패턴은 pitfalls.md)
 - **배송비 조인 순서**: 전체시트 dedup(상품명 합산)이 배송비 조인보다 **먼저**. 조인은 dedup 후 첫 출현 관리코드(B)에 매칭. 순서 바꾸면 합산·매칭 어긋남.
 - **NO_G 시트 G열 빈칸+0 동작**: dedup 시 병합된 행은 G=0(빈칸+빈칸=0, VBA 산술), 미병합 행은 빈칸 유지. 골든 ESM전체에서 확인됨 — None을 0으로 일괄 치환하면 미병합 행 불일치.
@@ -93,3 +101,4 @@
 - decisions/0005-cheonnyeon-logistics-chain.md
 - logs/2026-06/2026-06-04-cheonnyeon-upload.md
 - logs/2026-06/2026-06-16-cheonnyeon-box-anomaly-check.md
+- logs/2026-07/2026-07-07-cheonnyeon-sublist-save-fix-and-width-deprecation.md
