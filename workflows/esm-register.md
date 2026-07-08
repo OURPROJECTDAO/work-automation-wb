@@ -82,6 +82,7 @@
 - **박스 ESM 등록인데 타 채널엔 낱개(PC코드)로 등재된 경우 잦음** — listing/baseline 조회 시 박스 관리코드로만 찾지 말고 **PC+상품코드6자리로도 교차조회**(2026-07-06 62건 중 58건이 이 경우). 등재명은 '1개'→'{박스내품}개' 변환.
 - 누룽지과자=스낵, 요구르트스파클링=기타탄산음료로 확정(사용자 승인).
 - 양식 도입 전 업로드건 사후 백필: G마켓 export(정제명)↔소스(원본명) 조인은 규격(용량+박스내품수)+맛 키워드 매칭 사용. 합포장은 소스 시트에만 있음(ESM 출력엔 없음). logs/2026-06/2026-06-10-esm-postupload-backfill.md.
+- **등록결과 export 관리코드 백필(2026-07-08)**: goods-list-result엔 판매자관리코드 빈칸(등록 양식에 안 넣음). 채우기 = 상품명 정규화(` 무료배송`·끝 `N개`·특수문자/공백 제거) → 통합 listing `코드` 역매칭 → PC낱개면 product_master 상품코드로 **박스 관리코드 환원**(ESM=박스등록). listing_esm 상품번호 직매칭은 스냅샷이 등록 전이면 0 → 상품명 매칭 필수. 62건 62/62·박스4/PC58(등록 로그와 일치). logs/2026-07-08-esm-goods-list-code-backfill.
 
 ## 관련
 - 공통 → workflows/product-registration-common.md · 스마트스토어 → smartstore-register.md · 이지어드민 → easyadmin-register.md
