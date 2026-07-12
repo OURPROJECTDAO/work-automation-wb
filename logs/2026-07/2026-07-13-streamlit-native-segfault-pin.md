@@ -54,3 +54,20 @@ requirements.txt가 `pandas>=2.0`·`pyarrow>=14`·numpy 미핀 → Community Clo
   낮추려면 Cloud 앱 설정에서 **Python 버전을 3.12로 내려야** 함(사용자 대시보드 조작 필요·이번엔 안 함).
 - **다음·상태**: Cloud가 새 커밋(3bb27e2 requirements)으로 빠르게 재빌드. 이전 hang 빌드(5131380)는
   최신 커밋으로 대체됨 — 안 풀리면 **Reboot app 1회**로 최신 커밋 재빌드 강제. 사용자 정상화 확인 대기.
+
+---
+## 정정 (3차) — 진짜 근본원인 = Cloud Python 3.14, 해법 = 3.12 재배포
+- **Cloud 로그 입수**: Python **3.14.6** 환경. deps 빠르게 설치(wheel)됐고 서버 뜬 뒤 상품관리 페이지에서
+  `Segmentation fault`(run-streamlit.sh line9). 가드 배포(030afb0 22:49:50) **이후** 빌드(22:52:19 clone)인데도 크래시.
+- **재현 시도(py3.14 venv, uv, Cloud 정확 동일 스택 pandas3.0.3/pyarrow25/numpy2.5.1)**: 전 12페이지 실PAT 2회·
+  parquet 60회·문자열 read_csv 40회(가드 유무) — **전부 세그폴트 재현 안 됨**. 즉 힙-상태/타이밍 의존
+  네이티브 heisenbug로, **Cloud의 py3.14 실런타임에서만** 발현(AppTest 샌드박스로 못 잡음).
+- **결론**: 특정 코드경로 패치로 못 잡음. **불안정 변수=bleeding-edge py3.14 스택** 자체를 제거해야 함.
+  Streamlit Cloud 기본 Python은 3.12(안정)인데 이 앱이 3.14로 떠 있음. **py3.12에선 이 스택 전체가
+  battle-tested**(내 py3.12 검증 전부 통과·가드로 문자열 경로도 커버).
+- **해법(사용자 액션 필요)**: Cloud는 기존 앱 Python 버전 in-place 변경 불가 → **삭제+재배포 시 Advanced
+  settings에서 Python 3.12 선택**(공식 절차). requirements를 **python_version 마커**로 재작성(커밋 5e1fef4):
+  py3.12→안정핀(pandas2.2.3/numpy1.26.4/pyarrow17), py3.13+→최신(hang 방지). 3.12 재배포 시 안정스택 자동 설치.
+- **가드(0fec9cf 엔트리·030afb0 core/__init__)는 유지**(무해·다중 방어). 배포된 requirements=마커(5e1fef4).
+- **다음·상태**: 사용자가 (1) 현 앱 Secrets 복사 → (2) 앱 삭제 → (3) 동일 repo 재배포(main file app/streamlit_app.py)
+  Advanced=Python 3.12 + Secrets 붙여넣기. 그러면 안정 스택으로 뜸. 재배포 후 정상화 확인 대기.
