@@ -44,6 +44,20 @@
 - 해결: 플랫폼 양식을 **선택행 남기기·몇 칸 기입** 정도만 수정할 땐 openpyxl 대신 **원본 .xlsx를 zip레벨로 수술**(원본 sheet xml 텍스트 편집 + sharedStrings/styles 등 그대로 repack) → 네이티브 포맷 100% 보존. 단 원본 raw 자체가 네이티브여야 함(업로드 바이트 그대로 저장). channel-margin-monitor 쿠팡 `build_filter_price_xlsx` 참고(logs/2026-06-11).
 - **append류(`append_rows_to_raw`)도 openpyxl 저장 → 네이티브 파괴**. 네이티브 보존이 필요한 채널(쿠팡)은 '신규만 추가'(=append) 대신 '전체 교체'(업로드 바이트 저장)를 쓸 것.
 
+## Streamlit Community Cloud 네이티브 스택 자동 업그레이드 세그폴트 (배포 인프라 — 전 워크플로우 공통)
+- **Community Cloud는 requirements.txt의 `>=` 열린 핀을 재배포마다 최신으로 재해석**(각 커밋=데이터
+  커밋 포함=재빌드 트리거) → 어느 날 갑자기 bleeding-edge 조합이 설치됨. 코드 무변경인데 앱이
+  "Error running app"(전체 페이지)로 죽고, Cloud 로그에 `Segmentation fault ... streamlit`(SIGSEGV,
+  OOM의 `Killed`/SIGKILL 아님). 리부트하면 잠깐 되다 특정 페이지 열면 재발(힙-상태 의존 heisenbug).
+- **관측 사례(2026-07-13)**: `pandas 3.0.2 + pyarrow 25 + numpy 2.4`에서 `pd.read_csv`의 arrow 백엔드
+  문자열(`string_arrow.py _from_sequence`, pandas3.0 기본 문자열 dtype=ArrowStringArray)이 한글
+  CSV(product_master 등) 읽을 때 네이티브 크래시. 상품360/두뇌④/가격AB/대시보드에서 발생.
+- **진단**: 한 프로세스에 여러 페이지 연속 로드(=Cloud 장수명 프로세스 모사) + `faulthandler.enable()`로
+  C레벨 크래시 지점 캡처. 단일 페이지 독립 실행은 안 터질 수 있음(누적 네이티브 상태 필요).
+- **해결**: 네이티브 3종(numpy/pandas/pyarrow)은 **상한 캡 포함 핀**으로 고정. 검증된 안정선
+  `pandas>=2.2.3,<2.3`·`numpy>=1.26,<2.0`·`pyarrow>=16,<18`. 변경 후 **재배포+Reboot 1회**(venv 재설치).
+  코드가 pandas 3.0 전용 API 안 쓰는지만 확인(`applymap`은 이미 `.map`으로 이관됨).
+
 ## Streamlit 위젯 경합/버전 함정 (앱 전체 — 전 워크플로우 공통)
 - **`st.data_editor` + 폼 밖의 별도 `st.button` = 마지막 셀 미확정 상태로 저장되는 경합**: 표에서 셀을
   편집(특히 새 행 추가 후 마지막 셀)한 직후 곧바로 폼 밖 버튼을 누르면, 그 편집이 위젯 상태에 커밋되기
@@ -89,3 +103,5 @@ _갱신: 2026-06-17 (pandas Styler.applymap 제거(3.x) → .map 함정 추가 �
 _갱신: 2026-06-19 (cmm target↔매출자료 realized 마진 정의 정합 함정 — 두뇌④/ADR 0027)_
 
 _갱신: 2026-07-07 (Streamlit 위젯 경합/버전 함정 섹션 신설 — data_editor+폼밖버튼 경합(st.form 해결)·use_container_width→width 전환)_
+
+_갱신: 2026-07-13 (Community Cloud 네이티브 스택 자동 업그레이드 세그폴트 함정 신설 — pandas3.0+pyarrow25 arrow-string read_csv. 네이티브 3종 상한 캡 핀)_
