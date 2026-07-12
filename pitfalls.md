@@ -54,9 +54,14 @@
   CSV(product_master 등) 읽을 때 네이티브 크래시. 상품360/두뇌④/가격AB/대시보드에서 발생.
 - **진단**: 한 프로세스에 여러 페이지 연속 로드(=Cloud 장수명 프로세스 모사) + `faulthandler.enable()`로
   C레벨 크래시 지점 캡처. 단일 페이지 독립 실행은 안 터질 수 있음(누적 네이티브 상태 필요).
-- **해결**: 네이티브 3종(numpy/pandas/pyarrow)은 **상한 캡 포함 핀**으로 고정. 검증된 안정선
-  `pandas>=2.2.3,<2.3`·`numpy>=1.26,<2.0`·`pyarrow>=16,<18`. 변경 후 **재배포+Reboot 1회**(venv 재설치).
-  코드가 pandas 3.0 전용 API 안 쓰는지만 확인(`applymap`은 이미 `.map`으로 이관됨).
+- **해결(권장) = 런타임 가드**: 버전 다운핀은 **Cloud Python이 최신(3.13/3.14)이라 wheel 부재→소스빌드
+  hang**("Preparing metadata (pyproject.toml)" 무한대기)이 되므로 피한다. 대신 pandas는 최신 유지(wheel 확보)
+  하고, 엔트리(streamlit_app.py, 매 로드 최선두)에서 `pd.set_option("mode.string_storage","python")`로
+  문자열 dtype을 python 백엔드로 고정 → ArrowStringArray(`string_arrow._from_sequence`) 크래시 경로 회피.
+  검증: 크래시 조합에서 가드없음 세그폴트→가드있음 정상(2026-07-13). 커밋 app 0fec9cf.
+- **버전으로 낮추고 싶으면**: requirements 캡만 걸지 말고 **Cloud 앱 설정에서 Python 버전을 3.12로** 내려
+  안정 wheel(pandas2.2/numpy1.26/pyarrow17)을 확보해야 함(둘 중 하나만 하면 hang 또는 세그폴트 재발).
+- 코드가 pandas 3.0 전용 API 안 쓰는지만 확인(`applymap`은 이미 `.map`으로 이관됨).
 
 ## Streamlit 위젯 경합/버전 함정 (앱 전체 — 전 워크플로우 공통)
 - **`st.data_editor` + 폼 밖의 별도 `st.button` = 마지막 셀 미확정 상태로 저장되는 경합**: 표에서 셀을
@@ -105,3 +110,5 @@ _갱신: 2026-06-19 (cmm target↔매출자료 realized 마진 정의 정합 함
 _갱신: 2026-07-07 (Streamlit 위젯 경합/버전 함정 섹션 신설 — data_editor+폼밖버튼 경합(st.form 해결)·use_container_width→width 전환)_
 
 _갱신: 2026-07-13 (Community Cloud 네이티브 스택 자동 업그레이드 세그폴트 함정 신설 — pandas3.0+pyarrow25 arrow-string read_csv. 네이티브 3종 상한 캡 핀)_
+
+_갱신: 2026-07-13 (위 함정 정정 — 다운핀은 py3.14 wheel 부재로 hang. 해결책을 런타임 가드 pd.set_option mode.string_storage=python 으로 교체)_
