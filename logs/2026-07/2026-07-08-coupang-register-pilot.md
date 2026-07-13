@@ -75,6 +75,19 @@ WING 상품일괄등록 공식 가이드(PDF) 정독. 확정/교정:
 3. 로컬 1건(DOLE) 등록 테스트 → 이미지 URL 허용 판정 → 71건 확장.
 ※ 엑셀 일괄등록 경로는 v4 완성본 보류(WING 일괄 막힘 해제되면 사용 가능).
 
+## 로컬 API 스크립트 완성 (2026-07-08) ★진행
+로컬 실행 스크립트 `coupang_register_pilot.py` 완성(query/preview/register). 로컬에서 query 성공 확인.
+- **출고지/반품지 확정**: 한진2025 출고지=**23482844**, 2025한진 반품지=**1002309412**. (출고지 조회 최신경로=GET /v2/providers/marketplace_openapi/apis/api/v1/vendor/shipping-place/outbound; v4 outboundShippingCenters는 410 retired. 반품지=GET /openapi/apis/api/v4/vendors/{vid}/returnShippingCenters)
+- **필수 구매옵션(58569)**: 개당 중량(g)·개당 용량(ml)은 groupNumber=1 택1, 수량(개)=NONE 필수. → 칵테일=개당 중량 선택. 값 형식=**숫자+단위 통째**('3000g','6개').
+- **고시**: 카테고리 메타 필드명은 `notices`가 아니라 **`noticeCategories`**(유형 여러 개 중 1개 선택→그 noticeCategoryDetailNames 전부 입력). 스크립트가 메타에서 '가공식품' 자동 선택·항목 전부 content='상세설명 참조'(전화 항목만 상담전화)로 채움.
+- **페이로드 형식 확정**(상품생성 API): attributes=[{attributeTypeName,attributeValueName:'3000g'}], images=[{imageOrder,imageType:'REPRESENTATION',vendorPath:A1URL}], contents=[{contentsType:'TEXT',contentDetails:[{content:"<img src='B1URL' />",detailType:'TEXT'}]}], 바코드없음=emptyBarcode:true+emptyBarcodeReason. 배송=deliveryChargeType FREE·deliveryChargeOnReturn 5000·returnCharge 5000·deliveryCompanyCode HANJIN.
+- **스크립트 메타 기반 자동화**: build_attributes(필수만·group택1)·build_notices(noticeCategories 파싱)로 카테고리만 바꾸면 71건 확장 가능. requested=False(임시저장) 기본.
+
+## 다음 한 수
+- 사용자: 로컬에서 `preview`(페이로드 확인)→`register`(DOLE 1건 임시저장) 실행.
+- 등록 성공(sellerProductId) 시: ①WING서 노출/이미지 확인 ②이미지 URL(png 4건 포함) 실반영 확인 ③71건 확장(카테고리 매핑안 작성→검수→업로드감시_이미지+참조표로 배치 페이로드 생성). 에러 시 메시지로 보정.
+- ※IP 화이트리스트 등록 완료(로컬). 클라우드(이 대화)에서는 API 호출 불가 유지.
+
 ## 다음 / 상태 (★검증 대기)
 - **사용자 쿠팡 WING 실업로드 테스트 대기** — 확인 3점: ① .xlsm 파싱/카테고리 인식 ② **이미지 URL 방식 통과 여부**(양식 원안내는 "[업로드]버튼 파일선택"이라 URL 텍스트가 막힐 위험·최우선) ③ 판매가/옵션/고시/과세 정상 ④ 이미지 png(대표) URL 허용 여부(DOLE=png). ※검색옵션/placeholder 이슈는 v3에서 검색옵션 생략으로 해소.
 - 통과 시 = 71건 확장(카테고리 매핑안→검수→값 자동채움, 브랜드=상품명·제조사 B1). 이미지 막히면 이미지 처리 재설계.
