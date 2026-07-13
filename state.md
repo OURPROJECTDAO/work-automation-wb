@@ -360,3 +360,5 @@ _갱신: 2026-07-13 (logistics-order 챗네이티브 발주서 출력 — 앱 �
 _갱신: 2026-07-13 (신규 PC낱개 20건 스마트스토어 갭 일괄 등록 — reference unit_list+17·sub_list+16·spec_master+20(app repo, 커밋 2eb7ec85/0b51b498/71dfd01f). PC 낱개개수=1 불변식·원코드=product_master[4]·규격 파생규칙 확립. sub_list 전건 낱개개수1·원코드 PM정합 검증. 식품/음료 분류는 사용자 몫. 재사용 레시피=logs/2026-07-13-bulk-pc-registration-smartstore-gap.md·workflows/cheonnyeon-upload.md. 기존중복 관측(무해). 코드변경0·Reboot불요. 다음 한 수=변동 없음)_
 
 _갱신: 2026-07-08 (coupang-register 정식 워크플로우 채택 — 쿠팡 신규상품 로컬 API 배치 등록 확립. IP화이트리스트로 로컬실행(nadl 패턴)·HMAC서명·상품생성 apis경로·출고지23482844(한진2025)/반품지1002309412(2025한진)/HANJIN/무료배송·초도반품비5000·마진10%·박스·과세·재고9999·리드5·상품명(규격제거)/옵션명(규격)분리·attributes와notices는 카테고리메타 자동·이미지 gi.esmplus URL. 70건 임시저장 등록 성공. workflows/coupang-register.md)_
+
+_갱신: 2026-07-14 (logistics-order 합포 셀나누기 버그픽스 — 코드끼리 붙고 대괄호·옵션1 없는 합포(카프리썬 24-49-04 사과맛+24-49-01 오렌지망고, 발주 54·55행)가 미분리되던 문제 해결. parse_sales_report를 lxml로 교체해 중첩테이블(tableGridA) 행 경계를 sentinel로 보존→split 1순위. 골든4/4 PASS·실파일 diff 173행 동일(카프리 1→2행만). ⚠️core→Reboot 1회. 커밋 app bda98ee2. 정본 workflows/logistics-order.md·로그 2026-07-14-logistics-multiproduct-sentinel-fix)_
