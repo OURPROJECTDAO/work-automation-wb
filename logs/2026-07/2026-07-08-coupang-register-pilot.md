@@ -88,7 +88,22 @@ WING 상품일괄등록 공식 가이드(PDF) 정독. 확정/교정:
 - 등록 성공(sellerProductId) 시: ①WING서 노출/이미지 확인 ②이미지 URL(png 4건 포함) 실반영 확인 ③71건 확장(카테고리 매핑안 작성→검수→업로드감시_이미지+참조표로 배치 페이로드 생성). 에러 시 메시지로 보정.
 - ※IP 화이트리스트 등록 완료(로컬). 클라우드(이 대화)에서는 API 호출 불가 유지.
 
-## 다음 / 상태 (★검증 대기)
+## ✅ 파일럿 성공 (2026-07-08) — DOLE 1건 API 등록 완료
+로컬 스크립트로 DOLE 후르츠칵테일 1건 **임시저장 등록 성공**. WING서 대표이미지(png URL) 정상 반영 확인. 파이프라인 전 구간 검증 완료.
+- **막판 2개 버그 수정**: ①상품생성 경로 `seller_api/apps/...`→**`seller_api/apis/...`**(apps 오타→"Provider id is not specified correctly" 400). ②반품지 주소는 응답 최상위가 아니라 **`placeAddresses[0]`** 안(returnZipCode/returnAddress/returnAddressDetail/companyContactNumber)에서 추출.
+- **이미지 URL 방식 최종 확정**: images[].vendorPath에 gi.esmplus URL 직접(png 포함) OK. 별도 업로드 불요.
+- 정답 경로: POST https://api-gateway.coupang.com/v2/providers/seller_api/apis/api/v1/marketplace/seller-products. 초당 10건 제한. requested=False 임시저장→WING 확인→승인.
+
+## 다음 / 상태 (71건 확장 착수)
+파일럿 완료. 이제 71건 확장:
+1. **카테고리 매핑**: 쿠팡 카테고리 추천 API(상품명→displayCategoryCode)로 71건 자동 매핑→사용자 검수. (식품 4862 카테고리라 자동추천+검수 방식)
+2. **옵션 자동**: 카테고리 메타 필수옵션(개당중량 or 개당용량 group택1 + 수량)에 product_master 규격(col6 규격·col7 박스내품)에서 개당량·수량(박스내품수) 매핑. 중량/용량 구분은 메타 basicUnit(g vs ml)으로.
+3. **판매가**: ceil((박스매입가+2700)/((1−수수료)(1−0.10))/100)×100. 수수료=카테고리 판매대행수수료.
+4. 고시(가공식품 등 메타 자동)·이미지(A1/B1 URL, 업로드감시_이미지 71건 전량 보유)·배송(무료·한진·5000/5000)·과세 TAX.
+5. **배치 등록**: 초당10건 제한 준수(텀), requested=False 임시저장 후 일괄 확인→승인.
+- 스크립트 `coupang_register_pilot.py`를 배치용으로 확장(데이터=업로드감시_이미지+product_master+카테고리매핑).
+
+
 - **사용자 쿠팡 WING 실업로드 테스트 대기** — 확인 3점: ① .xlsm 파싱/카테고리 인식 ② **이미지 URL 방식 통과 여부**(양식 원안내는 "[업로드]버튼 파일선택"이라 URL 텍스트가 막힐 위험·최우선) ③ 판매가/옵션/고시/과세 정상 ④ 이미지 png(대표) URL 허용 여부(DOLE=png). ※검색옵션/placeholder 이슈는 v3에서 검색옵션 생략으로 해소.
 - 통과 시 = 71건 확장(카테고리 매핑안→검수→값 자동채움, 브랜드=상품명·제조사 B1). 이미지 막히면 이미지 처리 재설계.
 - ⚠️ **미검증 함정 후보**: 쿠팡 xlsx는 과거 가격변경에서 openpyxl 저장이 inlineStr 변질→업로드 거부(sharedStrings 엄격, cmm는 zip수술로 해결). 등록 xlsm도 동일 위험 가능 → 실업로드 결과로 판단. 코드 변경 0.
