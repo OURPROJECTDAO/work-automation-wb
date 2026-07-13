@@ -30,8 +30,8 @@
 - **HTML 매출통계 노이즈**: .xls 안에 서브테이블(품절 사전경고)이 있어 `pd.read_html[0]` 앞에 'col0만 값, 나머지 NaN'인 노이즈 행이 섞임 → 'erp관리코드' 헤더 행을 찾아 그 위를 전부 skip.
 - **셀나누기(합포 1건 묶음) — 같은 상품**: HTML rowspan 병합셀 → 두 번째 행의 총수량·정산금액이 NaN. 감지 후 위 행 값 ÷2를 두 행에 분배, 판매처그룹·선결제비·평균단가는 복사. `split_merged_cells` 처리.
 - **셀나누기(합포 1건 묶음) — 다른 상품**: 두 서로 다른 상품이 합포된 경우, `pd.read_html`이 어드민옵션·옵션추가항목1을 **한 셀에 이어붙여** 파싱함(두 번째 행 NaN 아님 → `split_merged_cells` 감지 불가). → `split_multiproduct_cells`(Step 0a, `fill_management_code` 전 실행)로 처리.
-  - **감지·분리 1순위 = 어드민옵션의 `[erp코드]` 대괄호** (`_BRACKET_CODE_RE=\[([A-Z0-9][A-Z0-9.\-]*)\]`, 숫자 포함 코드만). 대괄호가 명확한 구분자 → `옵션추가항목1`의 붙은 문자열보다 안전. **N개 상품** 지원: 총수량·정산금액 ÷ N, 어드민옵션을 각 `[코드]` 경계로 분할, 각 행에 해당 erp코드 직접 기입.
-  - 2순위(fallback): 대괄호 코드 2개 미만이면 `옵션추가항목1` 숫자코드(`\d{2}-\d{2}-\d{2}`) 2개로 처리.
+  - **★2026-07-14★ 감지·분리 1순위 = parse가 남긴 `_SENTINEL`(중첩테이블 행 경계).** ERP HTML은 다른상품 합포를 **셀 안 중첩테이블(`tableGridA`)의 여러 `<tr>`**로 표현(코드/상품명 행분리) → `pd.read_html`은 이걸 이어붙여 뭉갬. `parse_sales_report`를 **lxml 기반으로 교체**해 중첩행을 `_SENTINEL="\x1f"`로 보존(빈셀=None). split은 sentinel 경계로 N분할, 코드 = erp행값 → 옵션1행값 → 상품명 `[대괄호코드]` 순. **대괄호도 옵션1도 없이 코드끼리만 붙은 케이스(카프리썬 `24-49-04`+`24-49-01`)까지 잡음** — 이게 옛 버그(대괄호/옵션1 둘 다 실패)의 근본해결. lxml 실패 시 read_html 폴백.
+  - 2순위(fallback): 어드민옵션의 `[erp코드]` 대괄호 (`_BRACKET_CODE_RE`, 숫자 포함 코드만·N개). 3순위: `옵션추가항목1` 숫자코드(`\d{2}-\d{2}-\d{2}`) 2개.
   - ★2026-06-04★ 최초 구현은 `옵션추가항목1` 숫자패턴 `\d{2}-\d{2}-\d{2}`만 감지 → **영문접두/PC 코드 합포 누락**(예 `MGG1EA-67-74`+`MGG1EA-67-74-01` 명가 꽈배기 미분리, 0608 raw 61행). ★2026-06-08★ 대괄호 기준으로 교체해 포맷 무관·N개 처리(logs/2026-06-08-logistics-multiproduct-bracket-fix).
   - **한계(균등분배)**: 합포 행은 품목별 수량 정보가 병합 시 소실 → 총수량을 상품 수로 **균등 분할**(4→2+2)할 수밖에 없음. 실제가 1+3 이어도 알 수 없음. 기대 출력 있으면 대조 권장.
 - **발주자료 아카이브 = 원본 8열, 중복제거 전**(개별주문 보존). 완성 phase1(10열·구분/규격·중복제거 후) 아님. `run_phase1`이 archive_df를 별도 반환. 헤더는 '어드민 옵션'(띄어쓰기).
@@ -81,10 +81,13 @@
 - logs/2026-06/2026-06-02-streamlit-infra-fixes.md (nav·모듈캐시 — 전역, pitfalls.md)
 - logs/2026-06/2026-06-04-logistics-multiproduct-fix.md (다른 상품 합포 버그픽스 — 숫자코드)
 - logs/2026-06/2026-06-08-logistics-multiproduct-bracket-fix.md (합포 감지 대괄호 기준 교체 — 영문/PC코드·N개)
-- logs/2026-06/2026-06-09-refdata-editor-search-mergeback.md (기준데이터 편집표 검색+merge-back — 낱개목록·분류표 등 전역)
+- logs/2026-06/2026-06-09-refdata-editor-search-mergeback.md
+- logs/2026-07/2026-07-14-logistics-multiproduct-sentinel-fix.md (합포 sentinel 파싱 — 코드끼리 붙은 케이스, 카프리썬) (기준데이터 편집표 검색+merge-back — 낱개목록·분류표 등 전역)
 
 _갱신: 2026-06-16 (품절목록 E열 최근입고일·F열 평균매입주기 추가 — 매입현황 cadence(purchases.cadence_by_code) 주입. 실데이터 검증 OK. core→Reboot)_
 
 _갱신: 2026-06-16 (품절목록 cadence — 발주 날짜 기준 최근 1년 윈도우(months=12)·G열 입고횟수(1년) 추가. cadence_by_code(now,months) 윈도우 인자. 실데이터 재검증. core→Reboot)_
 
 _갱신: 2026-06-25 (물류팀 인쇄 가독성 — A/B/F 9pt·D 자동줄바꿈 해제. generate_result_xlsx ws 한정 후처리. core→Reboot)_
+
+_갱신: 2026-07-14 (합포 셀나누기 sentinel 파싱 — parse를 lxml로 교체해 중첩테이블 행 경계 보존, 코드끼리 붙고 대괄호·옵션1 없는 합포(카프리썬 24-49-04/01)도 분리. 골든4/4·실파일 diff 173행 동일. core→Reboot 1회)_
