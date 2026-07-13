@@ -60,6 +60,21 @@ WING 상품일괄등록 공식 가이드(PDF) 정독. 확정/교정:
 - 제조사 모르면 브랜드 입력(가이드 명시) → DOLE=DOLE 부합.
 - 기준출고일 1~20일 → 5 OK.
 
+## 등록경로 결정: API는 로컬실행 필요 (2026-07-08) ★★제약
+일괄등록(엑셀)이 WING에서 막혀 API 경로 검토. 쿠팡 OPEN API로 상품생성 가능하나 결정적 제약 발견:
+- **쿠팡 OPEN API = IP 화이트리스트 필수**. 미등록 IP는 403 "Your ip address X is not allowed". HMAC 서명/키(ACCESS/SECRET/VENDOR_ID A00083972/VENDOR_USER_ID td2684)는 정상(폐기 경로는 410로 서명 통과 확인).
+- **Anthropic 실행환경 IP는 동적**(호출마다 상이: 34.69.247.5·146.148.98.137…)이라 화이트리스트 불가 → **대화창에서 직접 API 호출 불가**.
+- **해결=로컬 실행**(nadl 수집기 패턴). 사용자 PC 고정 공인IP를 WING(판매자정보>추가판매정보>OPEN API 키)에 등록 후, AI가 만든 스크립트를 로컬(`C:\claudeworkautolocal\coupang\` 등)에서 실행.
+- **HMAC 서명 방식 확정**: dt=UTC `%y%m%dT%H%M%SZ`; msg=dt+method+path+query(‘?’제외); sig=HMAC_SHA256(secret,msg).hexdigest(); header `Authorization: CEA algorithm=HmacSHA256, access-key={A}, signed-date={dt}, signature={sig}`. HOST=https://api-gateway.coupang.com. gzip 응답 있음(decompress 필요).
+- **상품생성 API**: POST /v2/providers/seller_api/apps/api/v1/marketplace/seller-products. 엑셀 대비 추가필수=출고지코드(outboundShippingPlaceCode)·반품지코드(returnCenterCode)·택배사코드(deliveryCompanyCode)·vendorUserId·배송정보(무료=deliveryChargeType FREE). 출고지/반품지 코드는 로컬에서 조회API로 획득(반품지=v4 GET /openapi/apis/api/v4/vendors/{vid}/returnShippingCenters; 출고지 v4 GET outboundShippingCenters는 retired=410, 최신경로 재확인 필요). items[]에 옵션·이미지·notices(고시)·attributes·contents.
+- 이미지: API는 cdnPath 형태 가능성 → URL 직접 가능여부 상품등록가이드 확인 필요(로컬 1건 테스트로 판정).
+
+## 다음 한 수 (로컬 API 경로)
+1. 사용자: WING에 로컬PC 공인IP 화이트리스트 등록 + 택배사 지정.
+2. AI: 로컬 실행 스크립트 작성(서명+출고지/반품지 조회+v4 데이터→페이로드 빌더+상품생성). v4 xlsm 데이터/규칙 재활용(카테고리·옵션유형 통째로·값 단위·고시 가공식품/상세설명참조·판매가·A1/B1 URL).
+3. 로컬 1건(DOLE) 등록 테스트 → 이미지 URL 허용 판정 → 71건 확장.
+※ 엑셀 일괄등록 경로는 v4 완성본 보류(WING 일괄 막힘 해제되면 사용 가능).
+
 ## 다음 / 상태 (★검증 대기)
 - **사용자 쿠팡 WING 실업로드 테스트 대기** — 확인 3점: ① .xlsm 파싱/카테고리 인식 ② **이미지 URL 방식 통과 여부**(양식 원안내는 "[업로드]버튼 파일선택"이라 URL 텍스트가 막힐 위험·최우선) ③ 판매가/옵션/고시/과세 정상 ④ 이미지 png(대표) URL 허용 여부(DOLE=png). ※검색옵션/placeholder 이슈는 v3에서 검색옵션 생략으로 해소.
 - 통과 시 = 71건 확장(카테고리 매핑안→검수→값 자동채움, 브랜드=상품명·제조사 B1). 이미지 막히면 이미지 처리 재설계.
