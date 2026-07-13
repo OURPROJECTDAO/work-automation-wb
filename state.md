@@ -34,7 +34,7 @@
 | retail-insight-pricing (리테일앤인사이트 가격책정) | — | 운영중 (챗·1차 내부공유본·568건) | workflows/retail-insight-pricing.md |
 | ui-design (전 페이지 UI 디자인·횡단) | — | 진행중 (Phase A·랜딩·B-1 데일리) | workflows/ui-design.md |
 | coupang-rocketgrowth-settlement (쿠팡 로켓그로스 정산) | — | 운영중 (챗·매달 반복, 다음=8/1 7월분) | workflows/coupang-rocketgrowth-settlement.md |
-| coupang-register (쿠팡 상품 일괄등록) | — | 진행중 (파일럿 DOLE 1건 실업로드 검증대기) | logs/2026-07-08-coupang-register-pilot.md |
+| coupang-register (쿠팡 신규 상품 등록·로컬 API 배치) | — | 운영중 (로컬 coupang_batch.py로 70건 등록 성공, 상품명/옵션명 분리·requested=False 임시저장→WING 승인) | workflows/coupang-register.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -358,3 +358,5 @@ _세션 클로즈: 2026-07-13 (★★해결 확정 — 웹앱 세그폴트 = Clo
 _갱신: 2026-07-13 (logistics-order 챗네이티브 발주서 출력 — 앱 다운 중 급건 처리. 판매처상품매출통계.xls + 오늘 상품관리.xlsx → logistics_order run_phase1/2+generate_result_xlsx 로컬 실행. 171라인(음료111·식품58·선물세트2)·품절10·cadence 1168코드. ★GATE A 신규낱개 3건(PC004342/005071/005128) = 박스코드(11-89-20-01/224-240-10-01/204-134-50-01 전부 식품) 구분 상속해 해소(추측 아님). 산출 발주서_20260713.xlsx+아카이브. 미반영=분류표에 PC 3건 미커밋(사용자 확인 대기 — 커밋하면 앱 복구 후 자동통과). 코드변경0)
 
 _갱신: 2026-07-13 (신규 PC낱개 20건 스마트스토어 갭 일괄 등록 — reference unit_list+17·sub_list+16·spec_master+20(app repo, 커밋 2eb7ec85/0b51b498/71dfd01f). PC 낱개개수=1 불변식·원코드=product_master[4]·규격 파생규칙 확립. sub_list 전건 낱개개수1·원코드 PM정합 검증. 식품/음료 분류는 사용자 몫. 재사용 레시피=logs/2026-07-13-bulk-pc-registration-smartstore-gap.md·workflows/cheonnyeon-upload.md. 기존중복 관측(무해). 코드변경0·Reboot불요. 다음 한 수=변동 없음)_
+
+_갱신: 2026-07-08 (coupang-register 정식 워크플로우 채택 — 쿠팡 신규상품 로컬 API 배치 등록 확립. IP화이트리스트로 로컬실행(nadl 패턴)·HMAC서명·상품생성 apis경로·출고지23482844(한진2025)/반품지1002309412(2025한진)/HANJIN/무료배송·초도반품비5000·마진10%·박스·과세·재고9999·리드5·상품명(규격제거)/옵션명(규격)분리·attributes와notices는 카테고리메타 자동·이미지 gi.esmplus URL. 70건 임시저장 등록 성공. workflows/coupang-register.md)_
