@@ -36,6 +36,7 @@
 | coupang-rocketgrowth-settlement (쿠팡 로켓그로스 정산) | — | 운영중 (챗·매달 반복, 다음=8/1 7월분) | workflows/coupang-rocketgrowth-settlement.md |
 | coupang-register (쿠팡 신규 상품 등록·로컬 API 배치) | — | 운영중 (로컬 coupang_batch.py로 70건 등록 성공, 상품명/옵션명 분리·requested=False 임시저장→WING 승인) | workflows/coupang-register.md |
 | deposit-reconciliation (입금 대사·은행↔천년경영) | — | 운영중 (챗·매달 반복, F열 다수결 오분류 탐지) | workflows/deposit-reconciliation.md |
+| retail-purchase-reconciliation (리테일앤인사이트 매입일 대사) | — | 운영중 (챗·필요시, 출고일+관리코드 대조 등록누락 탐지) | workflows/retail-purchase-reconciliation.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
@@ -363,5 +364,7 @@ _갱신: 2026-07-13 (신규 PC낱개 20건 스마트스토어 갭 일괄 등록 
 _갱신: 2026-07-08 (coupang-register 정식 워크플로우 채택 — 쿠팡 신규상품 로컬 API 배치 등록 확립. IP화이트리스트로 로컬실행(nadl 패턴)·HMAC서명·상품생성 apis경로·출고지23482844(한진2025)/반품지1002309412(2025한진)/HANJIN/무료배송·초도반품비5000·마진10%·박스·과세·재고9999·리드5·상품명(규격제거)/옵션명(규격)분리·attributes와notices는 카테고리메타 자동·이미지 gi.esmplus URL. 70건 임시저장 등록 성공. workflows/coupang-register.md)_
 
 _갱신: 2026-07-14 (deposit-reconciliation 신규 워크플로우 — 은행 입금내역↔천년경영 ERP 입금전표 대사. 목적=총액 아닌 거래처 오분류 탐지. F열(거래내용) 기준+다수결(다수=정답·소수=오분류). 거래단위 (일자,금액) 매칭. 2026 1~6월: 은행1544건 27.67억 vs ERP1537건 27.65억 차이184만(0.067%)·15채널 차이0·오분류 확정1(F=주식회사지마켓(ESM)→마켓보로 3건 831만, 06-11/18/23 → 사용자 ERP 정정 예정). ★(주)더즌=ESM으로만·M열론 다채널 섞여보임(F열이 정답). 매크로파일(v1.xlsm)은 M열 기준이라 다채널 오분류 못잡음+시트 dimension 104만행 부풀어 44MB(openpyxl 크래시·lxml iterparse 필요). 코드변경0·앱미탑재. 정본 workflows/deposit-reconciliation.md·로그 2026-07-14-deposit-reconciliation-f-column)_
+
+_갱신: 2026-07-14 (retail-purchase-reconciliation 신규 워크플로우 — 리테일앤인사이트(B2B 공급처) 매입일 대사. 저쪽 "매입내역(출고일 기준)"↔우리 ERP 영업이익현황. 목적=우리 ERP 등록 누락/날짜오류 탐지. ★매칭키=출고일자(주문일 아님)+관리코드(저쪽엔 EAN-13만·주문서로 바코드→관리코드 해소). 7/1~10: 저쪽53라인 vs 우리44라인(택배비 제외). 7/2~10 날짜별 전액일치·**7/1 출고분 8건 471,420 전액 미등록**(6/30주문/7/1출고)+7/3 까스명수 49,090 = **누락 9건 520,510원** 사용자 ERP 등록예정. ★교훈=금액단독 매칭 금지(동일금액 다회출고 겹침→7/1누락을 "날짜밀림"으로 오판, 관리코드+출고건 개별소진으로 확정). 포카리(28-01) 7/1 2박스 vs ERP 7/10 1박스=별개출고 확인권장. 코드변경0·앱미탑재. 정본 workflows/retail-purchase-reconciliation.md·로그 2026-07-14-retail-purchase-reconciliation)_
 
 _갱신: 2026-07-14 (logistics-order 합포 셀나누기 버그픽스 — 코드끼리 붙고 대괄호·옵션1 없는 합포(카프리썬 24-49-04 사과맛+24-49-01 오렌지망고, 발주 54·55행)가 미분리되던 문제 해결. parse_sales_report를 lxml로 교체해 중첩테이블(tableGridA) 행 경계를 sentinel로 보존→split 1순위. 골든4/4 PASS·실파일 diff 173행 동일(카프리 1→2행만). ⚠️core→Reboot 1회. 커밋 app bda98ee2. 정본 workflows/logistics-order.md·로그 2026-07-14-logistics-multiproduct-sentinel-fix)_
