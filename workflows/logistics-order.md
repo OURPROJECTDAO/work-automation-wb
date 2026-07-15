@@ -46,6 +46,7 @@
 - 출처 = **매입현황(buyin) cadence** (`core/intelligence/purchases.cadence_by_code`): 실입고(합계액>0 & 수량>0)·입고일 distinct 기준, 관리코드별 {최근입고일, 평균주기=연속 입고일 간격 평균(일), 입고횟수}. 입고 1회면 평균주기 공백.
 - 주입: `1_파일처리.py` 발주서출력업무가 `_buyin_cadence()`(data repo `read_all` 캐시 ttl 30분)로 cadence를 받아 `generate_result_xlsx(p2_df, so_df, cadence=...)`에 전달. 매칭키=관리코드 NFC.
 - 검증(2026-06-16, 실데이터 65,999행·1년 윈도우 2025-06~2026-06): 0616 품절 5건 전부 OK — 31-03-05 평균3일·131회 · 31-04-02 5일·74회 · 31-03-02 9일·33회 · 39-91 24일·14회 · 39-91-01 24일·13회(최근 모두 ~2026-05).
+- **★ 낱개/소분 = 원코드 조회 (2026-07-15 버그픽스)**: 품절목록의 관리코드는 발주 `erp관리코드` 그대로(낱개 PC*·소분 BT10EA-* 포함)인데 **매입현황엔 낱개/소분 코드가 아예 없음**(최근 13개월 17,116행 중 `PC*` 0행) → 낱개 행 E/F/G가 **항상 공백**이었음(사용자 보고 0715). 같은 행 **현재고는 이미 원코드 기준**(reconcile_stock)이라 정합도 깨져 있었음. 해결 = `unit_origin_map(unit_df)`(unit_list.csv {낱개/소분코드: 원코드} NFC·자기자신 92건 제외 → **319건**, 그중 255건 cadence 보유) → `generate_result_xlsx(..., unit_df=None)`에서 `cadence.get(code) or cadence.get(원코드)` 폴백. **호출부 무수정**(unit_df 미지정 시 load_unit_list() 폴백 — 앱·챗 네이티브 모두 커버). 검증: PC002764→17-02(2026-03-16·81일·4회)·PC004739→306-33-30-01(2026-05-08·31일·4회), 박스 행 불변. 같은 픽스가 품절 알림판(stockout_board `code_map`)에도 적용 — workflows/daily-dashboard.md.
 - ⚠️ **최근입고일은 적재된 매입현황 기준**(현재 ~2026-05까지). 당월 입고는 그 달 매입현황 적재 후 반영. 1800개 관리코드 cadence 보유.
 - ⚠️ core(logistics_order.py·purchases.py) 수정 → **Reboot app 1회**.
 
@@ -91,3 +92,5 @@ _갱신: 2026-06-16 (품절목록 cadence — 발주 날짜 기준 최근 1년 �
 _갱신: 2026-06-25 (물류팀 인쇄 가독성 — A/B/F 9pt·D 자동줄바꿈 해제. generate_result_xlsx ws 한정 후처리. core→Reboot)_
 
 _갱신: 2026-07-14 (합포 셀나누기 sentinel 파싱 — parse를 lxml로 교체해 중첩테이블 행 경계 보존, 코드끼리 붙고 대괄호·옵션1 없는 합포(카프리썬 24-49-04/01)도 분리. 골든4/4·실파일 diff 173행 동일. core→Reboot 1회)_
+
+_갱신: 2026-07-15 (품절목록 E/F/G 낱개/소분 미연동 픽스 — unit_origin_map으로 원코드 치환 후 cadence 조회. 실데이터 0715 골든 대조(before=업로드파일 전건 일치·after 낱개 2건 채움). core→Reboot 1회. 로그 2026-07-15-stockout-cadence-unit-code-fix)_
