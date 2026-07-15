@@ -30,7 +30,8 @@
 - **수동 삭제**: 항목별 🗑 버튼 1클릭 제거(입고로그 안 남김·사용자 확정).
 - **★ 박스재고 = product_master '박스' 컬럼**(박스내품 아님). 품절목록 현재고 = 박스재고 − 발주수량(박스단위) — 즉 품절목록은 "오늘 발주 대비 부족"이라 절대 0 아님. 회복 신호는 박스재고 양수 전환.
 - **알림판 표시 컬럼(2026-06-16 추가)**: 관리코드·상품명·품절(MM월DD일부터 N일째)·현재박스재고에 더해 **최근입고일·평균매입주기·입고횟수(1년)** 표시(품절목록 E/F/G와 동일, 발주일 기준 1년·매입현황 cadence). 0b `_buyin_cadence()`(data repo 최근 13개월 파티션·`cadence_by_code(months=12)`·ttl30분) → `board_to_frame(..., cadence=...)`. 보기 편하게 한 화면에서 "이 품절건 마지막 입고·보통 며칠마다·1년간 몇 번" 확인.
-- core: `core/intelligence/stockout_board.py` (read/write_board·read/append_log·seed_from_stockout·reconcile·manual_remove·board_to_frame). 페이지: 0b 상단 섹션.
+- **★ 낱개/소분 코드 = 원코드(박스)로 치환해 조회 (2026-07-15 버그픽스)**: 알림판 키는 발주 품절목록의 `erp관리코드` 그대로라 **낱개(PC*)·소분(BT10EA-* 등) 코드로도 등록**됨. 그런데 **매입현황(cadence)·박스재고(product_master)는 전부 박스 관리코드 기준** → 치환 없이는 ① 최근입고/평균주기/입고횟수/현재박스재고 **전부 공백** ② `reconcile`의 박스재고 조회가 항상 None → **재입고 자동삭제가 영구 미작동**(실제로 유동골뱅이 소분 GB140G12EA-10-02가 원코드 10-02 박스재고 122로 이미 입고됐는데 5일째 박제). 해결 = `reconcile(..., code_map=)`·`board_to_frame(..., code_map=)`에 0b `_unit_origin_map()`(=`logistics_order.unit_origin_map()`, unit_list.csv {낱개코드:원코드} 319건) 주입 → 조회 시점에만 치환(**표시 코드는 발주 코드 그대로 유지**). code_map 미주입 시 기존 동작(하위호환). 상세 workflows/logistics-order.md 동일 섹션.
+- core: `core/intelligence/stockout_board.py` (read/write_board·read/append_log·seed_from_stockout·reconcile·manual_remove·board_to_frame·`_key`). 페이지: 0b 상단 섹션.
 
 ## 채널별 요약 + 가격 변동 알림 (확장판①, 2026-06-17)
 - **채널별 요약(당일)**: 당일 마진 점검 `ddf`를 채널 groupby → 매출(net)·원가·택배·마진·마진율(Σ마진÷Σ매출)·품목수. 메트릭 아래·이상치 표 위. page-only(daily_margin 재사용·새 의존 없음).
@@ -113,3 +114,5 @@ _갱신: 2026-06-22 (이상치 표 가독성 3건 — ① 금액 컬럼 콤마(N
 _갱신: 2026-06-22 (이상치 표 금액 컬럼 정수화 — 매출·원가·택배·마진이 실제 소수(택배 송장배분 등)라 localized가 소수 표시 → round(0).astype(Int64)로 정수만(콤마 유지). 마진율·기준%·박스는 소수 보존. 커밋 24be59e·page-only)_
 
 _갱신: 2026-06-22 (페이지 폭 — 지난 page-scoped override 제거. 이제 core/ui.py 전역 max-width:none로 전 페이지 풀폭(ui-design.md). 데일리도 전역 적용 받음. 커밋 0b f9141d4·ui 5e11c40·★Reboot 1회)_
+
+_갱신: 2026-07-15 (품절 알림판 낱개/소분 코드 원코드 치환 — E/F/G·현재박스재고 공백 + 재입고 자동삭제 영구 미작동 픽스. reconcile/board_to_frame code_map 인자·0b _unit_origin_map 주입. core→Reboot 1회. 로그 2026-07-15-stockout-cadence-unit-code-fix)_
