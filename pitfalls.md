@@ -12,6 +12,12 @@
 - 대용량 파일 업로드(예: 10551행 csv): curl 명령줄이 "Argument list too long" → Python urllib으로 업로드.
 - PAT은 비밀: repo·KB·로그에 절대 안 적음. 프로젝트 지식 파일에만. 만료 시 그 파일만 갱신. fine-grained(work-automation-wb + work-automation-app, contents 읽기·쓰기).
 
+## GitHub raw read-after-write 지연 → 앱 자동훅 중복쓰기 (data repo 영속 훅 공통)
+- **contents API `raw`(및 `?ref=main` GET)는 CDN 캐싱이라 방금 PUT 한 걸 몇 초~수십초 stale 하게 읽는다**(eventual consistency). Streamlit 앱은 위젯 상호작용마다 스크립트 전체 rerun 하므로, **"읽고→판정→쓰고" 훅이 페이지 로드마다 자동으로 도는 구조면** 방금 쓴 결과를 stale 하게 다시 읽어 **같은 건을 반복 판정 → 중복 기록 + 같은 파일 반복 PUT**이 된다. 반복 PUT 은 GitHub 가 **409(Conflict, 직전 커밋 처리 중) 또는 403(secondary rate limit, 짧은시간 쓰기 다발)**로 거부 → 앱에 `urllib.error.HTTPError`.
+- **관측(2026-07-20)**: 데일리 대시보드 품절 알림판 재입고 자동처리 — `restock_log.csv` 에 동일 2건이 각 2번 중복 기록(커밋 11초 간격 2회), "상품관리 다시 읽기"가 HTTPError. board 삭제는 정상 1회였는데 로그만 중복(read_board stale 로 지운 board 가 다시 읽힘).
+- **처방(이 계열 모든 data repo 영속 훅에 적용)**: ① **append 는 멱등**하게 — 커밋 직전 최신본 재확인해 자연키(예 `관리코드+입고일`) 중복분 skip·실제 추가분만 return. ② **PUT 은 재시도** — 409/422/403/429 시 **sha 재취득 + backoff** 최대 3~4회(`stockout_board._put_retry` 패턴). ③ 가능하면 **자동 rerun 훅을 버튼/1회성 트리거로 게이팅**해 race window 축소. 삭제/치환류 write 는 stale 여도 멱등이면(이미 지운 걸 또 지움) 무해.
+- 같은 계열 훅: `stock_history`(1b 재고 스냅샷)·`listing_history`(1d listing 스냅샷)·`decision_log`(두뇌④ 원장)·`stockout_board` — dedup 키가 이미 있으면 대체로 안전하나, **자동 rerun 경로에서 write 하는 곳**은 위 3종 처방 점검할 것.
+
 ## 인코딩
 - 한글은 UTF-8. base64 디코딩 시 Latin-1 금지(모지바케). raw 헤더로 받으면 디코딩 자체가 불필요.
 - 향후 커스텀 Worker 만들 때 atob() UTF-8 미디코딩 버그 주의.
@@ -112,3 +118,5 @@ _갱신: 2026-07-07 (Streamlit 위젯 경합/버전 함정 섹션 신설 — dat
 _갱신: 2026-07-13 (Community Cloud 네이티브 스택 자동 업그레이드 세그폴트 함정 신설 — pandas3.0+pyarrow25 arrow-string read_csv. 네이티브 3종 상한 캡 핀)_
 
 _갱신: 2026-07-13 (위 함정 정정 — 다운핀은 py3.14 wheel 부재로 hang. 해결책을 런타임 가드 pd.set_option mode.string_storage=python 으로 교체)_
+
+_갱신: 2026-07-20 (GitHub raw read-after-write 지연 → 앱 자동훅 중복쓰기 함정 신설 — 데일리 재입고 자동처리 HTTPError. 처방=append 멱등+PUT 재시도(sha재취득·backoff)+훅 게이팅. stockout_board._put_retry 패턴)_
