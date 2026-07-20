@@ -73,6 +73,7 @@
 - **인박스 휘발성**: 자동 인계는 *같은 세션* 한정. 사용자가 다른 기기/새 탭/리부트면 비어 있음 → 수동 업로더 안내. (영속 아님을 UI에 명시)
 - daily_margin은 `read_only=True` 금지(천년경영 dim 오독·전역 pitfalls). 인박스 bytes는 BytesIO로 파싱(parse 함수가 bytes/파일객체 모두 수용).
 - 새 core 모듈(daily_inbox) 첫 배포 → 안 보이면 Reboot app 1회(모듈캐시·pitfalls).
+- **★ 재입고 자동처리 = 멱등 + PUT 재시도 (2026-07-20 버그픽스)**: 데일리 대시보드는 위젯 상호작용마다 rerun 되고, `read_board`/`read_log`가 **GitHub raw(contents API raw)라 방금 write 한 걸 몇 초~수십초 stale 하게 읽음**(CDN read-after-write 지연). 그래서 같은 재입고 건이 rerun 사이 **반복 판정 → `restock_log` 중복 기록 + 같은 파일 반복 PUT → GitHub 409(Conflict)/403(secondary rate limit)로 "상품관리 다시 읽기"가 HTTPError**. (7/15 낱개/소분 reconcile 픽스로 자동삭제가 *실제로 작동*하기 시작하며 드러남. 실물: 7/20 restock_log 에 31-50·31-17-03 각 2번 중복, 커밋 11초 간격 2회.) 해결 = `append_log` **멱등화**(커밋 직전 최신 로그 재확인, `(관리코드, 입고일)` 중복분 skip·실제 추가분 return) + `_put_retry`(append_log·write_board 공용: 409/422/403/429 시 sha 재취득 + backoff 최대 4회). board 삭제 자체는 stale 여도 멱등(이미 지운 걸 또 지움=무해).
 
 ## 관련 로그 / 결정
 - decisions/0023-daily-dashboard-handoff.md (당일점검 승격 + 세션 인박스 자동 인계)
@@ -116,3 +117,5 @@ _갱신: 2026-06-22 (이상치 표 금액 컬럼 정수화 — 매출·원가·�
 _갱신: 2026-06-22 (페이지 폭 — 지난 page-scoped override 제거. 이제 core/ui.py 전역 max-width:none로 전 페이지 풀폭(ui-design.md). 데일리도 전역 적용 받음. 커밋 0b f9141d4·ui 5e11c40·★Reboot 1회)_
 
 _갱신: 2026-07-15 (품절 알림판 낱개/소분 코드 원코드 치환 — E/F/G·현재박스재고 공백 + 재입고 자동삭제 영구 미작동 픽스. reconcile/board_to_frame code_map 인자·0b _unit_origin_map 주입. core→Reboot 1회. 로그 2026-07-15-stockout-cadence-unit-code-fix)_
+
+_갱신: 2026-07-20 (재입고 자동처리 멱등화 + PUT 재시도 — 데일리 "상품관리 다시 읽기" HTTPError 픽스. 근본=GitHub raw read-after-write 지연으로 같은 재입고 건 반복 판정→restock_log 중복 기록+반복 PUT→409/403. core stockout_board.py: append_log 멱등(관리코드+입고일 중복 skip·실추가분 return)·_put_retry(append_log/write_board 공용 sha재취득+backoff). restock_log 중복 2행(31-50·31-17-03 7/20) 정리(117→115). ⚠️core→Reboot 1회. 커밋 app b5254b82·data f8a4c3ec. 로그 2026-07-20-stockout-append-log-idempotent-fix)_
