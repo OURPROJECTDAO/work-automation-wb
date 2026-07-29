@@ -120,3 +120,14 @@ _갱신: 2026-07-13 (Community Cloud 네이티브 스택 자동 업그레이드 
 _갱신: 2026-07-13 (위 함정 정정 — 다운핀은 py3.14 wheel 부재로 hang. 해결책을 런타임 가드 pd.set_option mode.string_storage=python 으로 교체)_
 
 _갱신: 2026-07-20 (GitHub raw read-after-write 지연 → 앱 자동훅 중복쓰기 함정 신설 — 데일리 재입고 자동처리 HTTPError. 처방=append 멱등+PUT 재시도(sha재취득·backoff)+훅 게이팅. stockout_board._put_retry 패턴)_
+
+## pandas 3.x — 숫자열 `astype(str)` 은 결측을 'nan' 문자열로 만들지 않는다
+`pd.to_numeric()` 으로 만든 float 열에 `.astype(str)` 을 걸면, pandas 3 에서는 결측이
+**'nan' 문자열이 아니라 NaN(float) 그대로 남는다**. 그래서 `.replace("nan","")` 이 안 먹고,
+이후 `len(v) for v in series` 같은 순회에서 `TypeError: object of type 'float' has no len()`.
+→ 문자열 순회가 필요하면 `.fillna("")` 을 먼저 걸거나, 원본 문자열 프레임 기준으로 계산할 것.
+(2026-07-29 SKU단가표 엑셀 다운로드 구현 중 적발)
+
+## 참조 CSV → 엑셀 변환 시 '코드' 열은 반드시 문자열 유지
+관리코드·원코드는 `45-21`·`23-18`·`01-17` 형태라 엑셀이 **날짜로 자동 변환**한다.
+숫자형 복원은 '코드'가 이름에 없는 열에만 적용할 것. (core 공통 규칙)
