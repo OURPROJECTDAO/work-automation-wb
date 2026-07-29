@@ -13,7 +13,7 @@
 | 워크플로우 (내부명) | Phase | 상태 | 상세 |
 |---|---|---|---|
 | openmarket-merge (오픈마켓합포도서산간확인V7) | 1 | 운영중 | workflows/openmarket-merge.md |
-| onnuri-order (온누리양식_발주서/제이티발주) | 3 | 운영중 | workflows/onnuri-order.md |
+| onnuri-order (온누리양식_발주서/제이티발주) | 3 | 운영중 (sku_list 120 SKU·운영 컬럼) | workflows/onnuri-order.md |
 | logistics-order (발주서출력업무) | 3 | 운영중 | workflows/logistics-order.md |
 | cheonnyeon-upload (천년경영업로드V15) | 3 | 운영중 | workflows/cheonnyeon-upload.md |
 | invoice-fill (송장처리) | 3 | 운영중 (4채널) | workflows/invoice-fill.md |
@@ -373,3 +373,5 @@ _갱신: 2026-07-15 (★ 품절목록 E/F/G + 품절 알림판 낱개/소분 코
 
 _갱신: 2026-07-20 (데일리 대시보드 재입고 자동처리 멱등화+PUT재시도 — "상품관리 다시 읽기" HTTPError 픽스. 근본=GitHub raw read-after-write 지연으로 같은 재입고 건 반복 판정→restock_log 중복 기록+반복 PUT→409/403(secondary rate limit/conflict). core stockout_board.py: append_log 멱등(관리코드+입고일 중복 skip·실추가분 return)·_put_retry(append_log/write_board 공용 sha재취득+backoff 최대4회)·import time. restock_log 완전동일 중복 2행(31-50·31-17-03 7/20) 정리 117→115. 7/15 낱개/소분 reconcile 픽스로 자동삭제가 실제 작동 시작하며 드러난 race. 현재 board 19건 재입고 대상 0건이라 즉시 재발X·다음 재입고부터 픽스 적용. ⚠️core→Reboot 1회. 전역 함정 pitfalls.md 신설(같은계열 훅 stock_history·listing_history·decision_log 점검대상). 커밋 app b5254b82·data f8a4c3ec·wb daily d6edd1c2·pitfalls 9606ec0c·log c4a821b1. 다음 한 수 불변)_
 - **sql-analytics** (app/analytics/): DuckDB SQL 분석 층 — 뷰4+쿼리8+러너, pandas 원단위 골든 일치. 상세=workflows/sql-analytics.md
+
+_갱신: 2026-07-29 (제이티유통 선물세트 대응 — 추석 시즌 연락 수신. 재고 있는 선물세트 22종 중 JT 단가표 미등재 11종(재고금액 1.22억·전체 54%, 최대재고 45-21 스팸8호 604박스 포함)을 공급가 책정해 sku_list.csv 추가(109→120행, 커밋 f55ad4f1). **마진 = 기본 6.5%(기존 등재분 실측 중앙값)·대량재고 3건 5.5%(회전 우선, 두뇌④ ②회전 markdown과 동형 판단)** — 이 11건 기준마진율 4.0~6.0%로 전부 6.5% 미만이라 상향 바인딩 없음. 근거=JT는 수수료0+배송비 별도청구라 온라인 채널 대비 구조적 유리. **`운영` 컬럼 신설**(O/X/`-`) — 단가표에 있어도 판매중지면 주문이 안 들어와서, 무엇을 재개시킬지 우리가 통보해야 함. 선물세트 32행만 채움(O23/X9), 소분·일반 88행은 `-`. onnuri_order.py는 컬럼명 참조라 무해(검증). ★JT=명절 전용 거래처 실증(2026-01·02에만 거래, 3~6월 0). 산출=제이티유통_선물세트_신규등록_판매재개_20260729.xlsx 3시트(원가/마진 미포함). 앱 코드 변경0·Reboot 불요(reference만). 잔여=사용자 전달 후 저쪽 등록/재개 확인·판매중지 9건 재입고 시 O 전환·sku_list 중복행(45-12-06·23-18) 정리. 정본 workflows/onnuri-order.md·로그 2026-07-29-jt-giftset-supply-price-and-reopen)_
