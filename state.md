@@ -30,7 +30,7 @@
 | daily-dashboard (데일리 대시보드) | — | 진행중 (당일점검+세션인계+품절알림판+채널요약+가격변동알림+이상치→가격변경시트) | workflows/daily-dashboard.md |
 | sikbom-event-planning (식봄 행사기획) | — | 운영중 (챗·1차 2026-07 기획전) | workflows/sikbom-event-planning.md |
 | margin-optimizer (기준마진율 최적화·두뇌④) | app/pages/13_기준마진율최적화.py | 운영중 (노브 전부+운영 UX — 베이스·4분면·측정루프·⑧·⑦·②회전·평어화·가격제한제외·KPI동적·항상적용) | workflows/margin-optimizer.md |
-| slow-moving-inventory (재고 회전 둔화상품) | — | 운영중 (챗·월2회·골든서식) | workflows/slow-moving-inventory.md |
+| slow-moving-inventory (재고 회전 둔화상품) | — | 운영중 (챗·월2회·골든서식, 최근 실행 2026-07-29) | workflows/slow-moving-inventory.md |
 | retail-insight-pricing (리테일앤인사이트 가격책정) | — | 운영중 (챗·1차 내부공유본·568건) | workflows/retail-insight-pricing.md |
 | ui-design (전 페이지 UI 디자인·횡단) | — | 진행중 (Phase A·랜딩·B-1 데일리) | workflows/ui-design.md |
 | coupang-rocketgrowth-settlement (쿠팡 로켓그로스 정산) | — | 운영중 (챗·매달 반복, 다음=8/1 7월분) | workflows/coupang-rocketgrowth-settlement.md |
@@ -375,3 +375,5 @@ _갱신: 2026-07-20 (데일리 대시보드 재입고 자동처리 멱등화+PUT
 - **sql-analytics** (app/analytics/): DuckDB SQL 분석 층 — 뷰4+쿼리8+러너, pandas 원단위 골든 일치. 상세=workflows/sql-analytics.md
 
 _갱신: 2026-07-29 (제이티유통 선물세트 대응 — 추석 시즌 연락 수신. 재고 있는 선물세트 22종 중 JT 단가표 미등재 11종(재고금액 1.22억·전체 54%, 최대재고 45-21 스팸8호 604박스 포함)을 공급가 책정해 sku_list.csv 추가(109→120행, 커밋 f55ad4f1). **마진 = 기본 6.5%(기존 등재분 실측 중앙값)·대량재고 3건 5.5%(회전 우선, 두뇌④ ②회전 markdown과 동형 판단)** — 이 11건 기준마진율 4.0~6.0%로 전부 6.5% 미만이라 상향 바인딩 없음. 근거=JT는 수수료0+배송비 별도청구라 온라인 채널 대비 구조적 유리. **`운영` 컬럼 신설**(O/X/`-`) — 단가표에 있어도 판매중지면 주문이 안 들어와서, 무엇을 재개시킬지 우리가 통보해야 함. 선물세트 32행만 채움(O23/X9), 소분·일반 88행은 `-`. onnuri_order.py는 컬럼명 참조라 무해(검증). ★JT=명절 전용 거래처 실증(2026-01·02에만 거래, 3~6월 0). 산출=제이티유통_선물세트_신규등록_판매재개_20260729.xlsx 3시트(원가/마진 미포함). 앱 코드 변경0·Reboot 불요(reference만). 잔여=사용자 전달 후 저쪽 등록/재개 확인·판매중지 9건 재입고 시 O 전환·sku_list 중복행(45-12-06·23-18) 정리. 정본 workflows/onnuri-order.md·로그 2026-07-29-jt-giftset-supply-price-and-reopen)_
+
+_갱신: 2026-07-29 (slow-moving-inventory 2회차 실행 — 20260729 3/6/12개월 3시트 산출(8·9·7건). 입력=7월 영업이익현황(07-01~28, 10,357행)+유형별매입현황(1,413행) **메모리 합산·parquet 미적재**·anchor 2026-07-28·입고경과일 기준 실행일. **검증=과거 anchor(06-23)로 6/24 골든 전건 재현**(월평균 3/6/12 8종목·증감·입고경과일·재고금액 산식) + 산출 서식 골든 셀 시그니처 대조 일치. ★신규 함정=**12개월 창 커버리지**(anchor−12월이 로드 파티션 시작보다 앞서면 창이 잘려 월평균 과소→거짓 둔화. 롯데칸타타 49.2→46.9, 2025-06 보충으로 해소 — anchor 직전 13개월 로드 필수). 신규 진입 3(천연사이다190 ₩26.7M·동화까스활75 ₩21.9M·미가사 파티니 ₩5.6M)·이탈 3(명진혼다시·미드봉후추·하인즈스파게티). 12개월 매출 전무 조건충족 0건(제외로 인한 누락 없음). 앱 코드 0·데이터 repo 0. 정본 workflows/slow-moving-inventory.md(실행 이력·검증 레시피)·로그 2026-07-29-slow-moving-inventory-run. 다음 한 수 불변)_
