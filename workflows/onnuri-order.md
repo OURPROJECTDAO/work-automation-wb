@@ -8,7 +8,7 @@
 - 원본 VBA 모듈: `OC_JT_FillG_And_SaveConfirm`. 사용자 내부 명칭: **제이티발주 업무**.
 
 ## 코드 / 데이터
-- `core/workflows/onnuri_order.py` (162줄)
+- `core/workflows/onnuri_order.py` (약 200줄)
 - 참조: `reference/sku_list.csv` (**120 SKU**, UTF-8-sig, LF, BOM. 2026-07-29 선물세트 11행 추가)
 - UI: 기준데이터관리 > **SKU단가표** 탭 (sku_list.csv 인라인 편집, key_col=관리코드, large=False — 기존 탭 렌더링 로직 재사용).
 
@@ -30,6 +30,20 @@
 - 우편번호는 입력 xlsx에 이미 문자열 `"08206"` 형태로 저장 → 별도 처리 불필요.
 - **★ openpyxl save 금지**: `_save`에서 openpyxl의 `Workbook.save()` 사용 시 sharedString → inlineStr 변환 발생. 합계 열 수정은 반드시 zipfile 직접 조작 방식 사용. (2026-06-04 확인)
 - **★ zipfile 패치는 빈 합계 셀을 못 잡는다 (값 누락·행손상)**: 합계 열 패치를 `<c r="G2">...</c>` 정규식으로만 하면, 신선한 템플릿의 **빈 합계 셀**(자체닫힘 `<c .../>` 또는 셀 자체 없음)을 처리 못 함. 자체닫힘이면 `.*?</c>`가 다음 행까지 과매칭해 데이터 손상, 셀 없으면 값 누락. `_patch_column_values`는 ① 값셀·자체닫힘 둘 다 템퍼드 정규식으로 매칭 치환, ② 셀 없으면 `_insert_cell_into_row`로 열 순서 지켜 삽입해야 함. 골든이 "이미 값 있는 파일"이면 이 회귀를 못 잡으니 **빈 G셀 fixture 필수**. (2026-06-05 픽스 — logs/2026-06-05-onnuri-empty-gcell-fix)
+
+- **★ SKU 일부만 미매칭이면 NaN 으로 전체 실행이 죽었다 (2026-08-04 픽스)**:
+  `_calc` 는 미매칭 행에 `None` 을 돌려주는데, 같은 컬럼에 정수가 하나라도 섞이면
+  pandas 가 float64 로 추론하며 **None → NaN**. `_patch_column_values` 가드가
+  `val is None` 만 봐서 NaN 이 통과 → `int(nan)` ValueError.
+  ★ **전건 미매칭이면 object dtype 이라 안 터진다** — "일부만 미매칭"일 때만 터지는 구멍이었음.
+  → 가드를 `val is None or (isinstance(val,float) and math.isnan(val))` 로. 미매칭 행은
+  합계 빈칸으로 남기고 나머지는 정상 출력한다.
+- **★ 관리코드 양쪽 정규화**: `LoadSKU`(SKU표) 와 `_calc`(발주서) 둘 다 `core.base.clean_cell`
+  적용. 참조 CSV 에 붙여넣기 개행이 섞여 들어와도 매칭되게 하는 방어층
+  (근본 처방은 저장측 `sanitize_ref_df` — pitfalls 참조).
+- **발주서 관리코드 단위 주의**: 낱개로 파는 건은 발주서에 **PC낱개 코드**로 와야 한다.
+  2026-08-04 밀리원 삼계탕이 박스코드 `94-38-01` 로 들어와 미매칭 → 사용자가 발주서를
+  `PC005982` 로 정정. SKU표는 PC코드가 관리코드, 박스코드는 `원코드` 열에 둔다.
 
 ## 선물세트 공급가 책정 규칙 (2026-07-29 확립)
 - **제이티유통 = 명절 전용 거래처.** 매출 발생이 명절 분기에만 있음(2026-01·02만, 3~6월 0).
@@ -65,3 +79,4 @@
 - logs/2026-06/2026-06-01-phase3-sku-tab.md (SKU단가표 탭)
 - logs/2026-06/2026-06-04-onnuri-sharedstring-fix.md (sharedString 버그픽스)
 - logs/2026-07/2026-07-29-jt-giftset-supply-price-and-reopen.md (선물세트 11건 공급가 책정·운영 컬럼 신설)
+- logs/2026-08/2026-08-04-onnuri-nan-crash-and-ref-csv-sanitize.md (NaN 가드 + 참조 CSV 위생 근본처방)
