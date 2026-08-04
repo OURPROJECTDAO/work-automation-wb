@@ -227,6 +227,15 @@ N        = 합포량(판매배수). 스마트스토어=판매자바코드(다운
 - ⚠️ **카페24 실업로드 미검증** — openpyxl 생성 xlsx 수용 여부 미확인
   (식봄·캐시노트·배민·올웨이즈·ESM 정상, 쿠팡만 거부 전례).
 
+## ★ raw 저장경로가 listing 경로와 충돌 — csv 채널 전용 함정 (2026-08-04)
+`_listing_path(key)` 는 채널 무관 **항상** `reference/listing_{key}.csv` 다.
+`_raw_path(key, ext)` 를 `listing_{key}.{ext}` 로 두면 **ext=="csv"(자사몰)에서 두 경로가 완전히 겹친다.**
+→ `_commit_raw` 가 파싱된 listing 을 원본(88열) CSV 로 덮어쓰고, 모니터는 그걸 listing 으로 읽어
+`코드` 열을 못 찾아 **관리코드 전건 빈값**이 된다. (xlsx 채널은 확장자가 달라 안 걸림 — csv 채널만.)
+- 증상: 마진모니터에서 관리코드가 안 잡힘. 저장 listing 의 md5 가 업로드 원본과 동일하면 확진.
+- 처방: `_raw_path` 가 ext=="csv" 일 때 **`listing_{key}_raw.csv`** 반환.
+- 새 csv 채널 추가 시 반드시 `_listing_path` vs `_raw_path` 충돌 여부부터 확인할 것.
+
 ## ★ 합포(N) 미등록이 역마진으로 오탐된다 (2026-08-04)
 `n_source: "ref"` 채널에서 `hapo_multiplier.csv` 에 상품번호가 없으면 **N=1 폴백** →
 선물세트처럼 박스에 여러 세트가 든 상품은 매입가가 배수로 부풀려져 **역마진으로 오탐**된다.
