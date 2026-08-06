@@ -73,6 +73,8 @@ for 상품코드행 in pm_by_prod  (박스[14] > 0):
   - **이미지 포함 CSV(2026-06-12, core+page → Reboot)**: 관리코드 기준 대표(A1)·상세(B1) 이미지 **실검사**(gi.esmplus.com/td680708/{관리코드}/{관리코드}_A1|B1.{ext}, jpg→png HEAD, A1/B1 독립). CSV에 6컬럼(대표/상세 × 유무·확장자·URL) 추가. 버튼식(네트워크I/O)·관리코드별 세션캐시·ThreadPool. 등록(smartstore/esm-register) 이미지 패턴 재사용 → L4 prefill 사전작업. ⚠️배포 egress 미검증(전부 '없음'이면 차단). `probe_images`·`IMG_COLS`.
   - **채널별 업로드제외(skip, 2026-06-12, core+page → Reboot)**: 새 상태 `업로드제외`(해당 채널 업로드x). `reference/upload_skip.csv`(상품코드,채널key 쌍) 라이브 read → `build_gap_table(skip_pairs=)` 오버라이드(셀이 `업로드필요`일 때만 → `업로드제외`, **우선**). **전채널(8) 제외 행은 기본 숨김**(토글 표시), 부분 제외는 표시 유지. 등록/해제 버튼(표 다중선택 상품코드 × 체크채널, append/diff 커밋·미리보기·cache clear). **해제=다시 업로드필요.** 예: 003601 전채널 제외(숨김)·001591 캐시노트만 제외. ST_SKIP_CH·parse/build_skip_text·_commit_skip.
 
+  - **파생코드 컬럼(소분·PC낱개, 2026-08-06, core+page → Reboot)**: 표·엑셀에 `소분코드`/`PC코드` 2열 추가(관리코드 바로 뒤). 신규 `derived_code_map(ref_dir, refs)` — **소분=sobun.csv(변환관리코드→원코드, resolve_identity 정본과 동일 소스)** / **PC낱개=unit_list.csv·sub_list.csv의 PC 행(원코드 키)**. 복수면 `, ` 결합·**미등록이면 빈칸**. ★소분 소스로 sub_list(구분=='소분', 106)를 쓰면 안 됨 — sobun.csv(136)가 더 넓고 정본(예 01-18 KL600G12EA-01-18은 sub_list에 없음). PC는 `PC`+상품코드 규칙상 코드 자체는 늘 만들 수 있으나 여기선 **등재 레지스트리 기준**(빈칸=신규 채번 대상). **판정(업로드필요/이상없음)에는 일절 미관여** — 표시 전용. 검색(hay)에도 두 코드 포함(PC코드·소분코드 붙여넣기로 조회 가능). 실데이터 1,024행 중 소분 93·PC 164행. `DERIVED_COLS`·`_pc_origin_rows`.
+
 ## 관련
 - decisions/0017-upload-monitor.md
 - logs/2026-06/2026-06-12-upload-monitor-design.md
@@ -93,3 +95,5 @@ _갱신: 2026-06-12 (이미지 포함 CSV — 대표/상세 A1·B1 실검사(jpg
 _갱신: 2026-06-12 (다운로드 CSV→XLSX — 상품코드/관리코드 텍스트 서식, 엑셀 자동변환 방지. page-only)_
 
 _갱신: 2026-06-15 (L4 등록 핸드오프 후순위 이동 — 일괄 업로드 가능 채널 프로세스 완비 후 재논의. 미장착 채널 多, 지금 만들 단계 아님. systemmap next→later)_
+
+_갱신: 2026-08-06 (파생코드 컬럼 — 소분코드/PC코드 2열(표·엑셀·검색). derived_code_map 신규·소분 정본=sobun.csv·미등록 빈칸·판정 무관. core+page → Reboot 1회. 커밋 core 3e37e5d7·page fd4b4f1c)_
