@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updated": "2026-08-11 (알리 가격 일괄변경 multi_filter 추가 — 9채널 모니터/9채널 가격변경. 저장 원본 다중시트 zip 수술·'전체 교체' 전용. Reboot 1회 필요·실업로드 미검증)",
+    "updated": "2026-08-11 (리테일앤인사이트 10번째 채널 — 바코드 code_map 축·N override·multi_filter 가격변경. Reboot 1회·N 검수 49건 미완·실업로드 미검증)",
     "source": "work-automation-wb",
     "schema": "ADR 0019",
     "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -120,6 +120,14 @@
         "sikbom-register"
       ],
       "note": "식봄 카테고리 1차/2차/3차 평탄표(266·사용자 큐레이션). 원본 양식 '상품 카테고리' 2축 블록 매트릭스 평탄화. B/C/D에 명 그대로"
+    },
+    {
+      "id": "retail_barcode_map",
+      "label": "retail_barcode_map",
+      "consumers": [
+        "channel-margin-monitor"
+      ],
+      "note": "리테일앤인사이트 바코드↔관리코드(+N override). 기준데이터관리에서 편집·조회시점 변환"
     }
   ],
   "clusters": [
@@ -428,7 +436,7 @@
       "cluster": "intelligence",
       "status": "live",
       "label": "채널 가격·마진 모니터",
-      "line": "9채널 리스팅 → 마진율·기준 이탈·권장가. **9채널 가격일괄변경**(append/filter/csv_filter/multi_filter — 알리 multi_filter 2026-08-11로 전 채널 커버) · 전월매출 2컬럼(이채널·전체·박스/낱개/소분 통일 canonical_code)",
+      "line": "10채널 리스팅 → 마진율·기준 이탈·권장가. **10채널 가격일괄변경**(append/filter/csv_filter/multi_filter) · 리테일앤인사이트=바코드 code_map 변환(조회시점)+N override · 전월매출 2컬럼(canonical_code)",
       "consumes": [
         "product_master",
         "baseline_margin",
