@@ -392,9 +392,10 @@
       "line": "카페24 엑셀 대량등록. 업로드 90열 ≠ 다운로드 88열(별개 양식)·실제로 채우는 건 13~15열·UTF-8 BOM+CRLF. ★공급사=배송조건 그룹(일반합포{박스내품} HC/HD/HE/HJ/HK/HL=2/3/4/5/6/8, HM=무료배송)→unit_list.박스내품으로 자동 배정. 최대주문수량=박스내품×10·공급가500000 고정더미·상세설명 HTML <img> 필수(URL만 넣으면 텍스트)·대표이미지A1은 CSV 불가(수동). 무료배송가=1세트가+3,000(마진 불변). ★다운로드는 검색조건 필터가 딸려옴(700/723/509행) — 전수 판정은 전체 export로. 1차 43건 등록 완료 (챗 네이티브)",
       "consumes": [
         "product_master",
+        "unit_list",
         "baseline_margin",
         "hapo_multiplier",
-        "listing_x8"
+        "listing_cafe24"
       ],
       "produces": [
         "자사몰 등록 CSV(90열)",
