@@ -19,7 +19,7 @@
 - logs/YYYY-MM/*.md — 작업 로그 (append-only, 1작업단위 1건)
 - decisions/NNNN-*.md — ADR (append-only)
 
-현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · cashnote-register · sikbom-register · **cafe24-register(자사몰 카페24 등록)** · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) · daily-dashboard(데일리 대시보드) · sikbom-event-planning(식봄 행사기획) · margin-optimizer(기준마진율 최적화·두뇌④) · ui-design(전 페이지 UI·횡단) · **giftset-season-ops(선물세트 시즌 운영·시즌 한정 트랙)** (state.md 인덱스 참조).
+현재 워크플로우: openmarket-merge · onnuri-order · logistics-order · cheonnyeon-upload · invoice-fill · dashboard · product-registration-common(공통) · smartstore-register · easyadmin-register · esm-register · cashnote-register · sikbom-register · **cafe24-register(자사몰 카페24 등록)** · channel-margin-monitor · upload-monitor · intelligence-layer(지능레이어) · daily-dashboard(데일리 대시보드) · sikbom-event-planning(식봄 행사기획) · margin-optimizer(기준마진율 최적화·두뇌④) · ui-design(전 페이지 UI·횡단) · **giftset-season-ops(선물세트 시즌 운영·시즌 한정 트랙)** · **hanjin-individual-shipping(한진택배 개별발송)** (state.md 인덱스 참조).
 
 ## 읽기 규칙 (세션 시작 — 한 번에)
 - PAT는 프로젝트 지식 파일에서 읽는다(절대 repo에 두지 않음).
@@ -69,3 +69,5 @@ _세션 클로즈 2026-06-19: margin-optimizer(두뇌④) 노브 완성 + 운영
 _갱신: 2026-08-12 (giftset-season-ops 워크플로우 추가 — 선물세트 시즌 운영. 매출 커밋 + 마진=인하재원. ADR 0030)_
 
 _갱신: 2026-08-20 (cafe24-register 워크플로우 추가 — 자사몰 카페24 상품 대량등록. 업로드 90열 양식·공급사=배송조건 그룹·무료배송 +3,000·다운로드 검색조건 필터 함정)_
+
+_갱신: 2026-08-25 (hanjin-individual-shipping 워크플로우 추가 — 한진 개별발송 접수양식 21열·1행=송장1장·ceil(세트÷박스내품) 행분할·주소검증 필수·회수 검증/정제본)_
