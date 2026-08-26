@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-25 (hanjin-individual-shipping 신설 — 한진 개별발송. 1행=송장1장·행수=ceil(세트÷박스내품)·약칭 자동추출 금지·주소/우편번호 검증 필수. 1차 23송장 end-to-end 검증 통과)",
+  "updated": "2026-08-25 (리테일 파서 헤더명 매핑 전환 `cols_by_header` — 양식 17열→9열 대응. ★listing 조용한 오염 사고 → Reboot+전체 교체 재파싱 미완. 데일리대시보드 검색창 추가)",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -474,7 +474,7 @@
    "cluster": "intelligence",
    "status": "live",
    "label": "채널 가격·마진 모니터",
-   "line": "10채널 리스팅 → 마진율·기준 이탈·권장가. **10채널 가격일괄변경**(append/filter/csv_filter/multi_filter) · 리테일앤인사이트=바코드 code_map 변환(조회시점)+N override · 전월매출 2컬럼(canonical_code)",
+   "line": "10채널 리스팅 → 마진율·기준 이탈·권장가. **10채널 가격일괄변경**(append/filter/csv_filter/multi_filter) · 리테일앤인사이트=바코드 code_map 변환(조회시점)+N override · 전월매출 2컬럼(canonical_code) ★리테일앤인사이트는 `cols_by_header`(헤더명→컬럼) 로 파싱 — 다운로드 양식이 17열→9열로 바뀌며 위치고정 파서가 상품명을 코드로 읽어 전건 미매칭+판매가 0 으로 listing 을 오염시킨 사고(2026-08-25). 판매가=[기본등급 할인가, 정상가] 폴백, 필수컬럼 미발견 시 즉시 ValueError, 서브헤더 행 방어. 타 채널은 위치고정 유지.",
    "consumes": [
     "product_master",
     "baseline_margin",
@@ -495,6 +495,11 @@
    ],
    "page": "app/pages/6_채널마진모니터.py",
    "roadmap": [
+    {
+     "tier": "now",
+     "title": "리테일 listing 재파싱(오염 복구)",
+     "detail": "Reboot 1회 후 상품관리 갱신·전체 교체. 안 하면 상품명을 코드로 읽은 331건이 그대로 남는다."
+    },
     {
      "tier": "planned",
      "title": "baseline↔product_master 조인 갭",
@@ -626,7 +631,7 @@
    "status": "partial",
    "star": true,
    "label": "데일리 대시보드",
-   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용·**이중검수**: listing마진+판정[구조적/일시적]). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중.",
+   "line": "매일 반복 업무 산출물(천년경영 output·송장출력·상품관리)로 당일 인사이트. v1=당일 마진 점검(구 마진침식 탭D 승격)+**세션 자동 인계**(파일처리 산출물→인박스, 재업로드 불요·수동 갱신 override). 상품관리=reference 라이브. **품절 알림판**(발주 품절목록 자동 등록·박스재고>0 재입고 시 입고로그+자동삭제·수동삭제·data repo 영속). **채널별 요약**(당일 매출·마진율) + **가격 변동 알림**(전체 상품 ±N% 매입가/판매가, 1b 스냅샷 연속 비교). **이상치→권장가(채널기준)+채널 가격변경 시트**(체크박스 단일채널 선택, cmm 빌더 재사용·**이중검수**: listing마진+판정[구조적/일시적]). **신규 업로드 대상**(최근 입고·신규등재 ∩ 8채널 전부 미등록 ∩ 재고>0 — 업로드감시 코어 재사용한 당일 트리거 서브셋). 확장판 추가 중. 당일마진 테이블에 검색창(관리코드·상품명·채널 / 공백=AND·쉼표=OR·regex 무해화). 상단 지표·XLSX 는 전체 기준 유지.",
    "consumes": [
     "product_master",
     "baseline_margin",
