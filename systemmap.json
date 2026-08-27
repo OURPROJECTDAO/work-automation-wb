@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-25 (리테일 파서 헤더명 매핑 전환 `cols_by_header` — 양식 17열→9열 대응. ★listing 조용한 오염 사고 → Reboot+전체 교체 재파싱 미완. 데일리대시보드 검색창 추가)",
+  "updated": "2026-08-27 (선물세트 시즌 라인업 정본 giftset_lineup_2026.csv 확립 · 신규 4종 4채널 30리스팅 전개 · pitfalls 3건: 미등재 판정은 주문이력으로/관리코드 날짜변환/외부문서 원가노출 금지)",
   "source": "work-automation-wb",
   "schema": "ADR 0019",
   "renderer": "outputs/system-map.html (휴대용) + app/pages/0_지도로드맵.py (인앱, systemmap.json 런타임 read)"
@@ -770,13 +770,14 @@
    "cluster": "intelligence",
    "status": "live",
    "label": "선물세트 시즌 운영",
-   "line": "명절 시즌 한정 트랙(D-31~D+15) — 매출 목표 커밋 + 마진을 인하 재원으로 운용. D-day 진도 밴드·4분면 판단·인하vs이월 3%p. 선물세트가 두뇌④ 시즌제외(⑧)라 자동 감시 밖이라서 그 대체",
+   "line": "명절 시즌 한정 트랙(D-31~D+15) — 매출 목표 커밋 + 마진을 인하 재원으로 운용. D-day 진도 밴드·4분면 판단·인하vs이월 3%p. 선물세트가 두뇌④ 시즌제외(⑧)라 자동 감시 밖이라서 그 대체 ★시즌 라인업 정본 = `reference/giftset_lineup_2026.csv`(매출처원장 40품목, 2026-08-27). product_attributes/unit_list 기반 유니버스는 3종을 누락하므로 쓰지 않는다. 정본 채널=스마트스토어, 전개 순서 ESM→쿠팡→캐시노트. 등재갭 판정은 listing + 3년 주문이력 병행(listing 은 판매중만 담김).",
    "consumes": [
     "product_master",
     "product_attributes",
     "unit_list",
     "baseline_margin",
-    "hapo_multiplier"
+    "hapo_multiplier",
+    "giftset_lineup_2026"
    ],
    "produces": [
     "채널별 시즌 목표(매출·마진·이익)",
@@ -787,6 +788,11 @@
    "feeds": [],
    "page": "(챗 네이티브 · channel-margin-monitor 가격변경 빌더 + 두뇌② 소진 재사용)",
    "roadmap": [
+    {
+     "tier": "now",
+     "title": "쿠팡 상품 병합 후 hapo 재커밋",
+     "detail": "행 단위 등록으로 상품이 쪼개짐. 병합 시 옵션ID 변경 → hapo 무효화되므로 재갱신·재커밋 필요."
+    },
     {
      "tier": "next",
      "title": "45-20-05 애경 마음14호 등록(재고 1,920세트 대기)",
