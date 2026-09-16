@@ -39,7 +39,7 @@
 | retail-purchase-reconciliation (리테일앤인사이트 매입일 대사) | — | 운영중 (챗·필요시, 출고일+관리코드 대조 등록누락 탐지) | workflows/retail-purchase-reconciliation.md |
 | cafe24-register (자사몰 카페24 등록) | — | 운영중 (챗·**브랜드 최소단가 맞춤 40리스팅 인상 완료** 2026-09-03) | workflows/cafe24-register.md |
 | giftset-season-ops (선물세트 시즌 운영) | app/pages/14_선물세트시즌.py | 운영중 (**D-14 진도 33.75%(9/10 확정) 🔴 · 블록 YoY 102.6%→82.3% 꺾임 2026-09-11**. 착지 전망 9.7~11.3억. 🔴9/12~13 주말이 작년 최대 이틀(3.16억)·🔴품절 4종 판매중지 미집행·🔴정렬 33건 마감 경과·🔴Reboot 미반영 core 2건) | workflows/giftset-season-ops.md |
-| hanjin-individual-shipping (한진택배 개별발송) | — | 운영중 (챗·**47차까지 1,517장·반려 0**·받는분 `님` 호칭·한글 파일명 · 🔴풍성한S호 재고 49세트 조달 회신대기 · 🟡연락처 배치단위 결측(근거표 갱신)·집하예정일 B열 미실증·파일명 구분자 미확정) | workflows/hanjin-individual-shipping.md |
+| hanjin-individual-shipping (한진택배 개별발송) | — | 운영중 (챗·**48차까지 1,524장·반려 0**·받는분 `님` 호칭·한글 파일명 · 🔴풍성한S호 재고 49세트 조달 회신대기 · 🟡연락처 배치단위 결측(근거표 갱신)·집하예정일 B열 미실증·파일명 구분자 미확정) | workflows/hanjin-individual-shipping.md |
 
 ## 완료된 Phase
 - Phase 0: 코드 repo 스캐폴딩. 2026-06-01.
