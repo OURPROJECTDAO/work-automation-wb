@@ -39,7 +39,7 @@
 | retail-purchase-reconciliation (리테일앤인사이트 매입일 대사) | — | 운영중 (챗·필요시, 출고일+관리코드 대조 등록누락 탐지) | workflows/retail-purchase-reconciliation.md |
 | cafe24-register (자사몰 카페24 등록) | — | 운영중 (챗·**브랜드 최소단가 맞춤 40리스팅 인상 완료** 2026-09-03) | workflows/cafe24-register.md |
 | giftset-season-ops (선물세트 시즌 운영) | app/pages/14_선물세트시즌.py | 운영중 (**D-9 진도 48.57% 🔴 · 블록 YoY 41.1%** 2026-09-16. **적재 미반영 = 캐시 키 밑줄 버그 픽스**(page-only) · 🔴Reboot 미반영 core 2건 이월) | workflows/giftset-season-ops.md |
-| hanjin-individual-shipping (한진택배 개별발송) | — | 운영중 (챗·**53차까지 1,602장·반려 0**·재고 경고 안 함·받는분 `님` 호칭·한글 파일명 · 🔴풍성한S호 재고 49세트 조달 회신대기 · 🟡연락처 배치단위 결측(근거표 갱신)·집하예정일 B열 미실증·파일명 구분자 미확정) | workflows/hanjin-individual-shipping.md |
+| hanjin-individual-shipping (한진택배 개별발송) | — | 운영중 (챗·**54차까지 1,638장·반려 0**·재고 경고 안 함·받는분 `님` 호칭·한글 파일명 · 🔴풍성한S호 재고 49세트 조달 회신대기 · 🟡연락처 배치단위 결측(근거표 갱신)·집하예정일 B열 미실증·파일명 구분자 미확정) | workflows/hanjin-individual-shipping.md |
 | easyadmin-cancel-alert (이지어드민 취소주문 알리미) | — | 진행중 (트레이 앱 v2·긴급 빨간팝업·처리함/재알림·설치 테스트 대기) | workflows/easyadmin-cancel-alert.md |
 
 ## 완료된 Phase
